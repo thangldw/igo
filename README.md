@@ -2,7 +2,15 @@
 
 Ứng dụng tiếng Việt học cờ vây từ đầu, chạy trên GitHub Pages, không cần backend.
 
-6 bài tương tác trên bàn 5×5: đặt quân, khí, bắt một quân, bắt nhóm, cứu quân và đất. Ván 9×9 với máy heuristic, lùi lượt và tiến độ lưu trong localStorage.
+18 bài trong ba lộ trình, mỗi lộ trình có tiến độ riêng:
+
+- Nhập môn: đặt quân, khí, bắt một quân, bắt nhóm, cứu quân và đất.
+- Trung cấp: nối/cắt, atari kép, hai mắt, khí chung và ko.
+- Nâng cao: biến snapback, chuyển hóa atari kép, đọc bẫy biên, đe dọa ko, seki và quan tử.
+
+Các bài đọc biến có nước trắng đáp tự động theo biến minh họa đã ghi. Chỉ kiểm tra những biến được cung cấp, không phải solver chứng minh tất cả đáp trả. Bài khái niệm seki và quan tử nêu giả định bằng chữ, không dùng bàn trống làm bằng chứng.
+
+Ván 9×9 với máy heuristic, lùi lượt và tiến độ lưu trong localStorage. Nhãn trình độ thuộc nội dung học, không phải rank của người chơi hay sức mạnh của máy. Tiến độ nhập môn cũ được chuyển sang ID bài ổn định khi đọc dữ liệu.
 
 ## Chạy
 
@@ -16,4 +24,4 @@ Tham khảo: https://www.britgo.org/intro/intro2.html và https://britgo.org/rul
 
 ## Triển khai
 
-Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub Actions. Workflow kiểm tra engine, đóng gói 4 file static và deploy. Asset dùng đường dẫn tương đối, chạy tại `/igo/`.
+Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub Actions. Workflow kiểm tra engine và tính hợp lệ các biến bài học, đóng gói 5 file static và deploy. Asset dùng đường dẫn tương đối, chạy tại `/igo/`.

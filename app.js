@@ -1,23 +1,302 @@
-import {empty,group,move,score,bot} from './engine.js';
-const $=id=>document.getElementById(id);
-const lessons=[
- {title:'Nước đi đầu tiên',heading:'Đặt quân trên giao điểm',description:'Bạn cầm quân đen. Chạm vào một giao điểm bất kỳ trên bàn. Quân nằm ở chỗ hai đường gặp nhau, không nằm trong ô vuông.',tip:'Đen đi trước. Hai bên luân phiên đặt một quân. Quân đã đặt không di chuyển.',kind:'place'},
- {title:'Đếm khí',heading:'Quân cờ cần có khí',description:'Quân đen ở giữa bàn. Chạm vào nó để thấy các khí, rồi chọn số khí của quân này.',tip:'Chỉ đếm giao điểm trống sát bên theo ngang và dọc. Đường chéo không phải là khí.',kind:'count',setup:[[12,1]],answer:4},
- {title:'Bắt một quân',heading:'Lấp khí cuối cùng',description:'Quân trắng chỉ còn một khí. Đặt quân đen vào khí cuối cùng để bắt quân trắng.',tip:'Khi không còn khí, quân hoặc cả nhóm quân bị nhấc khỏi bàn.',kind:'capture',setup:[[12,2],[7,1],[11,1],[13,1]],target:17},
- {title:'Bắt cả nhóm',heading:'Nối liền, cùng sống',description:'Hai quân trắng nối với nhau theo đường ngang. Tìm khí cuối cùng và bắt cả nhóm bằng một nước đen.',tip:'Các quân cùng màu nối ngang hoặc dọc dùng chung khí. Nối chéo chưa tạo thành nhóm.',kind:'capture',setup:[[11,2],[12,2],[6,1],[7,1],[10,1],[13,1],[16,1]],target:17},
- {title:'Cứu quân của bạn',heading:'Thoát khỏi atari',description:'Quân đen chỉ còn một khí — tình huống này gọi là atari. Nối thêm một quân vào khí cuối để nhóm có nhiều khí hơn.',tip:'Trước khi đi, hãy nhìn nhóm nào chỉ còn một khí. Bắt đối phương hoặc nối ra ngoài có thể cứu nhóm.',kind:'save',setup:[[12,1],[7,2],[11,2],[13,2]],target:17},
- {title:'Bao vây đất',heading:'Điểm đến từ đâu?',description:'Đen đã bao quanh vùng trống giữa bàn. Có bao nhiêu giao điểm trống thuộc vùng này? Chọn câu trả lời bên dưới.',tip:'Trong cách đếm diện tích, điểm = quân sống trên bàn + vùng trống chỉ giáp quân của mình. Trắng được cộng komi để bù việc đi sau.',kind:'territory',setup:[[6,1],[7,1],[8,1],[11,1],[13,1],[16,1],[17,1],[18,1],[0,2],[4,2],[20,2],[24,2]],answer:1}
-];
-let done;try{done=JSON.parse(localStorage.getItem('igo-progress')||'[]');if(!Array.isArray(done))done=[]}catch{done=[]}
-let lesson=0,n=5,board=[],history=[],snapshots=[],last=-1,mode='lesson',color=1,passes=0,ended=false,captures=[0,0],selected=-1,hinted=false,busy=false,epoch=0,solved=false;
-function message(text,type=''){$('feedback').textContent=text;$('feedback').className=type}
-function navigation(){$('lessons').replaceChildren();lessons.forEach((l,i)=>{const b=document.createElement('button');b.className=mode==='lesson'&&i===lesson?'active':'';b.innerHTML=`<span class="number">${done.includes(i)?'✓':String(i+1).padStart(2,'0')}</span>${l.title}`;b.onclick=()=>load(i);$('lessons').append(b)});$('progress-text').textContent=`${done.length} / ${lessons.length}`;$('progress-bar').style.width=`${done.length/lessons.length*100}%`}
-function draw(){const root=$('board');root.replaceChildren();root.style.gridTemplateColumns=`repeat(${n},1fr)`;const liberties=selected>=0&&board[selected]?group(board,selected,n).liberties:[];for(let i=0;i<board.length;i++){const b=document.createElement('button');b.className=[i%n===0?'left':'',i%n===n-1?'right':'',i<n?'top':'',i>=n*(n-1)?'bottom':'',hinted&&i===lessons[lesson].target?'hinted':''].join(' ');b.setAttribute('aria-label',`${'ABCDEFGHJ'[i%n]}${n-Math.floor(i/n)}: ${board[i]===1?'đen':board[i]===2?'trắng':'trống'}${liberties.includes(i)?', khí':''}`);if(board[i]){const s=document.createElement('span');s.className=`stone ${board[i]===1?'black':'white'} ${last===i?'last':''}`;b.append(s)}else if(liberties.includes(i)){const s=document.createElement('span');s.className='liberty';b.append(s)}b.onclick=()=>click(i);root.append(b)}$('turn').textContent=mode==='lesson'?'● Bạn đặt quân đen':ended?'Ván đã kết thúc':busy?'○ Máy đang đi…':'● Lượt của bạn';$('captured').textContent=mode==='lesson'?'Bàn học 5 × 5':`Đã bắt: đen ${captures[0]} · trắng ${captures[1]}`}
-function complete(text){solved=true;if(!done.includes(lesson)){done.push(lesson);try{localStorage.setItem('igo-progress',JSON.stringify(done))}catch{}}message(text,'success');$('next').hidden=false;$('next').textContent=lesson===5?'Chơi ván đầu tiên →':'Bài tiếp theo →';navigation()}
-function load(i){epoch++;busy=false;mode='lesson';lesson=i;n=5;board=empty(n);for(const [p,c] of lessons[i].setup||[])board[p]=c;history=[board.join('')];last=-1;selected=-1;hinted=false;solved=false;$('chapter').textContent=`BÀI ${String(i+1).padStart(2,'0')} / 06`;$('title').textContent=lessons[i].title;$('board-size').textContent='5 × 5';$('guide-title').textContent=lessons[i].heading;$('description').textContent=lessons[i].description;$('tip').textContent=lessons[i].tip;$('game-controls').hidden=true;$('next').hidden=true;$('hint').hidden=false;$('retry').hidden=false;$('answers').replaceChildren();if(lessons[i].answer!==undefined){for(const v of [1,2,3,4]){const b=document.createElement('button');b.textContent=`${v} ${i===5?'điểm':'khí'}`;b.onclick=()=>v===lessons[i].answer?complete(i===5?'Đúng! Vùng giữa có 1 điểm đất. Quân trên bàn cũng được tính khi đếm diện tích.':'Đúng! Quân giữa bàn có 4 khí.'):message('Chưa đúng. Đếm các giao điểm trống sát cạnh quân.','error');$('answers').append(b)}}message('Thử trực tiếp trên bàn cờ.');navigation();draw()}
-function click(i){if(board[i]){selected=mode==='lesson'||$('show-liberties').checked?i:-1;draw();if(mode==='lesson')message(`Nhóm này có ${group(board,i,n).liberties.length} khí.`);return}if(mode==='lesson'){const l=lessons[lesson];if(solved)return;if(l.answer!==undefined){message('Hãy chọn câu trả lời bên dưới.');return}const r=move(board,i,1,n,history);if(r.error){message(r.error,'error');return}if(l.kind!=='place'&&i!==l.target){message('Nước này chưa giải được bài. Hãy tìm khí cuối cùng của nhóm.','error');return}board=r.board;last=i;complete(l.kind==='place'?'Bạn vừa đi nước đầu tiên. Tiếp theo, học cách giữ quân sống.':l.kind==='save'?'Đúng! Nhóm đen đã nối ra ngoài và có 3 khí.':`Đúng! Bạn đã bắt ${r.captured} quân trắng.`);draw();return}if(busy||ended)return;const r=move(board,i,1,n,history);if(r.error){message(r.error,'error');return}snapshots.push({board:[...board],history:[...history],last,captures:[...captures],passes});apply(r,i,1);passes=0;message(r.captured?`Bạn bắt được ${r.captured} quân trắng.`:'Quan sát khí của các nhóm trước khi đi tiếp.');reply()}
-function apply(r,i,c){board=r.board;history.push(board.join(''));last=i;selected=-1;captures[c-1]+=r.captured;draw()}
-function reply(){busy=true;draw();const current=epoch;setTimeout(()=>{if(current!==epoch)return;const i=bot(board,n,history);if(i===null){passes++;message('Máy bỏ lượt.');if(passes>=2)finish()}else{apply(move(board,i,2,n,history),i,2);passes=0}busy=false;draw()},350)}
-function start(){epoch++;busy=false;mode='game';n=9;board=empty(n);history=[board.join('')];snapshots=[];last=-1;selected=-1;passes=0;ended=false;captures=[0,0];hinted=false;$('chapter').textContent='VÁN LUYỆN TẬP';$('title').textContent='Ván đầu tiên của bạn';$('board-size').textContent='9 × 9';$('guide-title').textContent='Bạn cầm đen';$('description').textContent='Máy cơ bản ưu tiên bắt quân và cứu nhóm bị đe dọa. Hãy luyện nhìn khí, nối quân và bao vây đất.';$('tip').textContent='Khi không còn nước có ích, bỏ lượt. Hai lượt bỏ liên tiếp kết thúc ván. Chơi tiếp để bắt hết quân chết trước khi kết thúc.';$('answers').replaceChildren();$('game-controls').hidden=false;$('next').hidden=true;$('hint').hidden=true;$('retry').hidden=true;message('Chạm một giao điểm để đi nước đầu.');navigation();draw()}
-function finish(){ended=true;const s=score(board,n);message(`Ước tính diện tích: đen ${s.black}, trắng ${s.white} (komi 6,5). ${s.black>s.white?'Đen':'Trắng'} dẫn ${Math.abs(s.black-s.white)} điểm. Chưa tự nhận diện quân chết hoặc seki; đây không phải kết quả phân xử chính thức.`)}
-$('practice').onclick=start;$('new-game').onclick=start;$('retry').onclick=()=>load(lesson);$('next').onclick=()=>lesson===5?start():load(lesson+1);$('hint').onclick=()=>{hinted=true;const l=lessons[lesson];if(l.kind==='count'){selected=12;message('Bốn điểm trống: trên, dưới, trái, phải.')}else if(l.kind==='territory')message('Vùng trống giữa vòng đen chỉ có một giao điểm.');else message(l.target!==undefined?'Điểm được tô sáng là khí cần tìm.':'Chạm một giao điểm trống bất kỳ.');draw()};$('pass').onclick=()=>{if(busy||ended)return;snapshots.push({board:[...board],history:[...history],last,captures:[...captures],passes});passes++;if(passes>=2){finish();draw()}else{message('Bạn bỏ lượt. Máy sẽ đi nếu còn nước hợp lệ.');reply()}};$('undo').onclick=()=>{if(busy||!snapshots.length)return;epoch++;const s=snapshots.pop();board=s.board;history=s.history;last=s.last;captures=s.captures;passes=s.passes;ended=false;selected=-1;message('Đã lùi cả lượt của bạn và máy.');draw()};$('show-liberties').onchange=()=>{if(!$('show-liberties').checked)selected=-1;draw()};load(0);
+import {empty, group, move, score, bot} from './engine.js';
+import {lessons, levels} from './lessons.js';
+
+const $ = id => document.getElementById(id);
+let done = [];
+try {
+  const stored = JSON.parse(localStorage.getItem('igo-progress') || '[]');
+  if (Array.isArray(stored)) done = [...new Set(stored.map(x => Number.isInteger(x) ? `beginner-${x}` : x).filter(x => lessons.some(l => l.id === x)))];
+} catch {}
+let lesson = 0, level = 'beginner', n = 5, board = [], history = [], snapshots = [];
+let last = -1, mode = 'lesson', passes = 0, ended = false, captures = [0, 0];
+let selected = -1, hinted = false, busy = false, epoch = 0, solved = false, lineStep = 0, candidates = [];
+const current = () => lessons[lesson];
+const currentLevel = () => levels.find(l => l.id === level);
+const levelLessons = () => lessons.filter(l => l.level === level);
+const targets = () => current().lines ? [...new Set(candidates.map(line => line[lineStep]))] : [current().target];
+
+function message(text, type = '') {
+  $('feedback').textContent = text;
+  $('feedback').className = type;
+}
+function navigation() {
+  $('levels').replaceChildren();
+  for (const l of levels) {
+    const button = document.createElement('button');
+    button.textContent = l.name;
+    button.setAttribute('aria-pressed', String(l.id === level));
+    button.onclick = () => load(lessons.findIndex(item => item.level === l.id));
+    $('levels').append(button);
+  }
+  $('level-summary').textContent = currentLevel().summary;
+  $('lessons').replaceChildren();
+  levelLessons().forEach((l, index) => {
+    const button = document.createElement('button');
+    button.className = mode === 'lesson' && l.id === current().id ? 'active' : '';
+    button.innerHTML = `<span class="number">${done.includes(l.id) ? '✓' : String(index + 1).padStart(2, '0')}</span>${l.title}`;
+    button.onclick = () => load(lessons.indexOf(l));
+    $('lessons').append(button);
+  });
+  const completed = levelLessons().filter(l => done.includes(l.id)).length;
+  $('progress-text').textContent = `${completed} / ${levelLessons().length}`;
+  $('progress-bar').style.width = `${completed / levelLessons().length * 100}%`;
+}
+function draw() {
+  const root = $('board');
+  root.replaceChildren();
+  root.style.gridTemplateColumns = `repeat(${n},1fr)`;
+  const liberties = selected >= 0 && board[selected] ? group(board, selected, n).liberties : [];
+  for (let i = 0; i < board.length; i++) {
+    const button = document.createElement('button');
+    button.className = [i % n === 0 ? 'left' : '', i % n === n - 1 ? 'right' : '', i < n ? 'top' : '', i >= n * (n - 1) ? 'bottom' : '', mode === 'lesson' && hinted && targets().includes(i) ? 'hinted' : ''].join(' ');
+    button.setAttribute('aria-label', `${'ABCDEFGHJ'[i % n]}${n - Math.floor(i / n)}: ${board[i] === 1 ? 'đen' : board[i] === 2 ? 'trắng' : 'trống'}${liberties.includes(i) ? ', khí' : ''}`);
+    if (board[i]) {
+      const stone = document.createElement('span');
+      stone.className = `stone ${board[i] === 1 ? 'black' : 'white'} ${last === i ? 'last' : ''}`;
+      button.append(stone);
+    } else if (liberties.includes(i)) {
+      const dot = document.createElement('span');
+      dot.className = 'liberty';
+      button.append(dot);
+    }
+    button.onclick = () => click(i);
+    if (i % n === 0) {
+      const label = document.createElement('span');
+      label.className = 'grid-label row-label';
+      label.textContent = n - Math.floor(i / n);
+      label.setAttribute('aria-hidden', 'true');
+      button.append(label);
+    }
+    if (i >= n * (n - 1)) {
+      const label = document.createElement('span');
+      label.className = 'grid-label column-label';
+      label.textContent = 'ABCDEFGHJ'[i % n];
+      label.setAttribute('aria-hidden', 'true');
+      button.append(label);
+    }
+    root.append(button);
+  }
+  $('turn').textContent = mode === 'lesson' ? current().kind === 'sequence' ? `● Đen đi · Nước ${Math.floor(lineStep / 2) + 1} / ${Math.ceil(current().lines[0].length / 2)}` : '● Bạn đặt quân đen' : ended ? 'Ván đã kết thúc' : busy ? '○ Máy đang đi…' : '● Lượt của bạn';
+  if (solved && mode === 'lesson') $('turn').textContent = '✓ Đã hoàn thành bài';
+  $('captured').textContent = mode === 'lesson' ? current().kind === 'sequence' ? 'Biến đáp đã định sẵn' : 'Bàn học 5 × 5' : `Đã bắt: đen ${captures[0]} · trắng ${captures[1]}`;
+}
+function complete(text) {
+  solved = true;
+  if (!done.includes(current().id)) {
+    done.push(current().id);
+    try { localStorage.setItem('igo-progress', JSON.stringify(done)); } catch {}
+  }
+  message(text, 'success');
+  $('next').hidden = false;
+  const next = lessons[lesson + 1];
+  $('next').textContent = !next ? 'Luyện với máy →' : next.level !== level ? `Sang ${levels.find(l => l.id === next.level).name.toLowerCase()} →` : 'Bài tiếp theo →';
+  navigation();
+}
+function load(i) {
+  epoch++;
+  busy = false;
+  mode = 'lesson';
+  lesson = i;
+  level = current().level;
+  n = 5;
+  board = empty(n);
+  for (const [p, c] of current().setup || []) board[p] = c;
+  history = [board.join('')];
+  last = selected = -1;
+  hinted = solved = false;
+  lineStep = 0;
+  candidates = current().lines || [];
+  const number = levelLessons().indexOf(current()) + 1;
+  $('chapter').textContent = `${currentLevel().name.toUpperCase()} · BÀI ${number} / ${levelLessons().length}`;
+  $('title').textContent = current().title;
+  $('board-size').textContent = '5 × 5';
+  $('guide-title').textContent = current().heading;
+  $('description').textContent = current().description;
+  $('tip').textContent = current().tip;
+  $('game-controls').hidden = true;
+  $('next').hidden = true;
+  $('hint').hidden = false;
+  $('retry').hidden = false;
+  $('answers').replaceChildren();
+  const conceptual = current().kind === 'quiz' && !current().setup.length;
+  $('description').hidden = conceptual;
+  $('play-surface').hidden = conceptual;
+  $('concept').hidden = !conceptual;
+  $('concept').textContent = conceptual ? current().description : '';
+  $('board-footer').hidden = conceptual;
+  $('board-size').hidden = conceptual;
+  if (current().answer !== undefined) {
+    const choices = current().choices || [1, 2, 3, 4].map(v => `${v} ${current().kind === 'territory' ? 'điểm' : 'khí'}`);
+    choices.forEach((label, index) => {
+      const button = document.createElement('button');
+      button.textContent = label;
+      button.onclick = () => {
+        if (solved) return;
+        const correct = current().choices ? index === current().answer : index + 1 === current().answer;
+        if (correct) complete(current().success || (current().kind === 'territory' ? 'Đúng! Vùng giữa có 1 điểm đất. Quân trên bàn cũng được tính khi đếm diện tích.' : 'Đúng! Quân giữa bàn có 4 khí.'));
+        else message('Chưa đúng. Kiểm tra lại khí hoặc các giả định của câu hỏi.', 'error');
+        draw();
+      };
+      $('answers').append(button);
+    });
+  }
+  message(current().kind === 'sequence' ? 'Đọc trước nước đáp rồi đặt quân đen. Trắng sẽ đáp theo biến minh họa.' : conceptual ? 'Chọn câu trả lời dựa trên giả định đã nêu.' : 'Thử trực tiếp trên bàn cờ.');
+  navigation();
+  draw();
+}
+function click(i) {
+  if (busy) return;
+  if (board[i]) {
+    selected = mode === 'lesson' || $('show-liberties').checked ? i : -1;
+    draw();
+    if (mode === 'lesson' && !solved) message(`Nhóm này có ${group(board, i, n).liberties.length} khí.`);
+    return;
+  }
+  if (mode === 'lesson') {
+    const l = current();
+    if (solved) return;
+    if (l.answer !== undefined) { message('Hãy chọn câu trả lời bên dưới.'); return; }
+    const result = move(board, i, 1, n, history);
+    if (result.error) { message(result.error, 'error'); return; }
+    if (l.kind !== 'place' && !targets().includes(i)) {
+      message('Nước hợp lệ nhưng chưa thuộc lời giải của bài này. Thử đọc lại mục tiêu hoặc xem gợi ý.', 'error');
+      return;
+    }
+    board = result.board;
+    history.push(board.join(''));
+    last = i;
+    selected = -1;
+    hinted = false;
+    if (l.kind === 'sequence') {
+      candidates = candidates.filter(line => line[lineStep] === i);
+      lineStep++;
+      if (lineStep === candidates[0].length) { complete(l.success); draw(); return; }
+      busy = true;
+      draw();
+      message('Trắng đang đáp theo biến minh họa…');
+      const currentEpoch = epoch;
+      setTimeout(() => {
+        if (currentEpoch !== epoch) return;
+        const replyPoint = candidates[0][lineStep];
+        const reply = move(board, replyPoint, 2, n, history);
+        busy = false;
+        if (reply.error) { message('Biến bài học không hợp lệ. Hãy làm lại bài.', 'error'); return; }
+        candidates = candidates.filter(line => line[lineStep] === replyPoint);
+        board = reply.board;
+        history.push(board.join(''));
+        last = replyPoint;
+        lineStep++;
+        message(reply.captured ? `Trắng vừa bắt ${reply.captured} quân. Tìm nước đen tiếp theo.` : 'Trắng đã đáp. Tìm nước đen tiếp theo.');
+        draw();
+      }, 400);
+      return;
+    }
+    complete(l.success || (l.kind === 'place' ? 'Bạn vừa đi nước đầu tiên. Tiếp theo, học cách giữ quân sống.' : l.kind === 'save' ? 'Đúng! Nhóm đen đã nối ra ngoài và có 3 khí.' : `Đúng! Bạn đã bắt ${result.captured} quân trắng.`));
+    draw();
+    return;
+  }
+  if (ended) return;
+  const result = move(board, i, 1, n, history);
+  if (result.error) { message(result.error, 'error'); return; }
+  saveTurn();
+  apply(result, i, 1);
+  passes = 0;
+  message(result.captured ? `Bạn bắt được ${result.captured} quân trắng.` : 'Quan sát khí của các nhóm trước khi đi tiếp.');
+  reply();
+}
+function saveTurn() { snapshots.push({board: [...board], history: [...history], last, captures: [...captures], passes}); }
+function apply(result, i, c) {
+  board = result.board;
+  history.push(board.join(''));
+  last = i;
+  selected = -1;
+  captures[c - 1] += result.captured;
+  draw();
+}
+function reply() {
+  busy = true;
+  draw();
+  const currentEpoch = epoch;
+  setTimeout(() => {
+    if (currentEpoch !== epoch) return;
+    const i = bot(board, n, history);
+    if (i === null) {
+      passes++;
+      message('Máy bỏ lượt.');
+      if (passes >= 2) finish();
+    } else {
+      apply(move(board, i, 2, n, history), i, 2);
+      passes = 0;
+    }
+    busy = false;
+    draw();
+  }, 350);
+}
+function start() {
+  epoch++;
+  busy = false;
+  mode = 'game';
+  n = 9;
+  board = empty(n);
+  history = [board.join('')];
+  snapshots = [];
+  last = selected = -1;
+  passes = 0;
+  ended = false;
+  captures = [0, 0];
+  hinted = solved = false;
+  $('chapter').textContent = 'VÁN LUYỆN TẬP · MÁY CƠ BẢN';
+  $('title').textContent = 'Luyện chơi 9×9';
+  $('board-size').textContent = '9 × 9';
+  $('board-size').hidden = false;
+  $('play-surface').hidden = false;
+  $('concept').hidden = true;
+  $('board-footer').hidden = false;
+  $('guide-title').textContent = 'Bạn cầm đen';
+  $('description').textContent = 'Máy cơ bản ưu tiên bắt quân và cứu nhóm bị đe dọa. Độ khó bài học không thay đổi sức mạnh máy; máy chưa có rank hoặc khả năng phân tích nâng cao.';
+  $('description').hidden = false;
+  $('tip').textContent = 'Khi không còn nước có ích, bỏ lượt. Hai lượt bỏ liên tiếp kết thúc ván. Chơi tiếp để bắt hết quân chết trước khi kết thúc.';
+  $('answers').replaceChildren();
+  $('game-controls').hidden = false;
+  $('next').hidden = true;
+  $('hint').hidden = true;
+  $('retry').hidden = true;
+  message('Chạm một giao điểm để đi nước đầu.');
+  navigation();
+  draw();
+}
+function finish() {
+  ended = true;
+  const s = score(board, n);
+  message(`Ước tính diện tích: đen ${s.black}, trắng ${s.white} (komi 6,5). ${s.black > s.white ? 'Đen' : 'Trắng'} dẫn ${Math.abs(s.black - s.white)} điểm. Chưa tự nhận diện quân chết hoặc seki; đây không phải kết quả phân xử chính thức.`);
+}
+$('practice').onclick = start;
+$('new-game').onclick = start;
+$('retry').onclick = () => load(lesson);
+$('next').onclick = () => lesson === lessons.length - 1 ? start() : load(lesson + 1);
+$('hint').onclick = () => {
+  hinted = true;
+  const l = current();
+  if (l.kind === 'count') { selected = 12; message('Bốn điểm trống: trên, dưới, trái, phải.'); }
+  else if (l.kind === 'territory') message('Vùng trống giữa vòng đen chỉ có một giao điểm.');
+  else message(l.hint || (l.target !== undefined ? 'Điểm được tô sáng là khí cần tìm.' : 'Chạm một giao điểm trống bất kỳ.'));
+  draw();
+};
+$('pass').onclick = () => {
+  if (busy || ended) return;
+  saveTurn();
+  passes++;
+  if (passes >= 2) { finish(); draw(); }
+  else { message('Bạn bỏ lượt. Máy sẽ đi nếu còn nước hợp lệ.'); reply(); }
+};
+$('undo').onclick = () => {
+  if (busy || !snapshots.length) return;
+  epoch++;
+  const s = snapshots.pop();
+  board = s.board; history = s.history; last = s.last; captures = s.captures; passes = s.passes;
+  ended = false; selected = -1;
+  message('Đã lùi cả lượt của bạn và máy.');
+  draw();
+};
+$('show-liberties').onchange = () => { if (!$('show-liberties').checked) selected = -1; draw(); };
+load(0);
