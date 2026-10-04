@@ -1,0 +1,11 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {empty,group,move,score,bot} from '../engine.js';
+test('liberties at center, edge, corner',()=>{for(const [p,count] of [[12,4],[2,3],[0,2]]){const b=empty(5);b[p]=1;assert.equal(group(b,p,5).liberties.length,count)}});
+test('capture a connected group',()=>{const b=empty(5);for(const i of [11,12])b[i]=2;for(const i of [6,7,10,13,16])b[i]=1;const r=move(b,17,1,5);assert.equal(r.captured,2);assert.equal(r.board[11],0);assert.equal(r.board[12],0)});
+test('reject suicide and occupied point',()=>{const b=empty(3);[1,3,5,7].forEach(i=>b[i]=2);assert.ok(move(b,4,1,3).error);assert.ok(move(b,1,1,3).error)});
+test('capture is allowed even when placement initially has no liberties',()=>{const b=[0,1,2,1,2,0,0,1,2];const r=move(b,5,1,3);assert.equal(r.error,undefined);assert.ok(r.captured>0)});
+test('positional repetition is rejected',()=>{const b=empty(5),r=move(b,12,1,5);assert.ok(move(b,12,1,5,[r.board.join('')]).error)});
+test('shared liberties are counted once',()=>{const b=empty(3);b[1]=b[3]=b[4]=1;assert.equal(group(b,1,3).liberties.length,5)});
+test('area scoring and neutral empty board',()=>{assert.deepEqual(score(empty(3),3),{black:0,white:6.5,neutral:9});const b=[1,1,1,1,0,1,1,1,1];assert.equal(score(b,3).black,9)});
+test('bot returns legal moves',()=>{let b=empty(9),h=[b.join('')];for(let t=0;t<50;t++){const i=bot(b,9,h);if(i===null)break;const r=move(b,i,2,9,h);assert.equal(r.error,undefined);b=r.board;h.push(b.join(''))}});
