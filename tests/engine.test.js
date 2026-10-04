@@ -9,3 +9,18 @@ test('positional repetition is rejected',()=>{const b=empty(5),r=move(b,12,1,5);
 test('shared liberties are counted once',()=>{const b=empty(3);b[1]=b[3]=b[4]=1;assert.equal(group(b,1,3).liberties.length,5)});
 test('area scoring and neutral empty board',()=>{assert.deepEqual(score(empty(3),3),{black:0,white:6.5,neutral:9});const b=[1,1,1,1,0,1,1,1,1];assert.equal(score(b,3).black,9)});
 test('bot returns legal moves',()=>{let b=empty(9),h=[b.join('')];for(let t=0;t<50;t++){const i=bot(b,9,h);if(i===null)break;const r=move(b,i,2,9,h);assert.equal(r.error,undefined);b=r.board;h.push(b.join(''))}});
+test('bot passes in settled territory instead of filling its own eyes',()=>{
+  const b=[2,2,2,2,0,2,2,2,2];
+  assert.equal(bot(b,3),null);
+});
+test('both bot levels capture instead of passing when a capture is available',()=>{
+  const b=[0,1,2,1,2,0,2,0,0];
+  for(const difficulty of ['easy','basic']) {
+    const i=bot(b,3,[],{difficulty,random:()=>0});
+    assert.notEqual(i,null);
+    assert.ok(move(b,i,2,3).captured>0);
+  }
+});
+test('bot opens on an empty board at either level',()=>{
+  for(const difficulty of ['easy','basic'])assert.notEqual(bot(empty(9),9,[],{difficulty}),null);
+});

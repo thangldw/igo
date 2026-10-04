@@ -123,6 +123,7 @@ function load(i) {
   const url=new URL(location.href);url.searchParams.delete('play');url.searchParams.set('lesson',current().id);window.history.replaceState(null,'',url);
   $('previous').disabled=i===0;$('previous').hidden=false;
   $('game-controls').hidden = true;
+  document.querySelector('.workflow-help p').textContent='1. Chọn bài bên trái. 2. Đọc yêu cầu. 3. Nhấn bàn cờ hoặc chọn đáp án. Làm xong thì bấm “Bài tiếp theo”.';
   $('next').hidden = true;
   $('hint').hidden = false;
   $('retry').hidden = false;
@@ -228,10 +229,10 @@ function reply() {
   const currentEpoch = epoch;
   setTimeout(() => {
     if (currentEpoch !== epoch) return;
-    const i = bot(board, n, history);
+    const i = bot(board, n, history, {difficulty: $('bot-level').value});
     if (i === null) {
       passes++;
-      message('Máy bỏ lượt.');
+      message('Máy bỏ lượt vì không tìm thấy nước có ích theo cách đánh giá cơ bản. Bạn có thể đi tiếp hoặc bỏ lượt để kết thúc ván.');
       if (passes >= 2) finish();
     } else {
       apply(move(board, i, 2, n, history), i, 2);
@@ -254,7 +255,7 @@ function start() {
   ended = false;
   captures = [0, 0];
   hinted = solved = false;
-  $('chapter').textContent = 'VÁN LUYỆN TẬP · MÁY CƠ BẢN';
+  $('chapter').textContent = 'VÁN LUYỆN TẬP · 9×9';
   $('title').textContent = 'Luyện chơi 9×9';
   $('board-size').textContent = '9 × 9';
   $('board-size').hidden = false;
@@ -262,13 +263,14 @@ function start() {
   $('concept').hidden = true;
   $('board-footer').hidden = false;
   $('guide-title').textContent = 'Bạn cầm đen';
-  $('description').textContent = 'Bạn cầm Đen, máy cầm Trắng. Máy ưu tiên bắt quân và cứu nhóm chỉ còn một khí. Máy này để tập luật, chưa có hạng thi đấu.';
+  $('description').textContent = 'Bạn cầm Đen, máy cầm Trắng. Chọn mức Dễ để tập luật, hoặc Cơ bản để máy ưu tiên bắt và cứu quân. Máy tránh đi thêm vào đất đã bao kín và có thể bỏ lượt; chưa có hạng thi đấu.';
   const url=new URL(location.href);url.searchParams.delete('lesson');url.searchParams.set('play','1');window.history.replaceState(null,'',url);$('previous').hidden=true;
   $('description').hidden = false;
   $('tip').textContent = 'Khi không còn nước có ích, bỏ lượt. Hai lượt bỏ liên tiếp kết thúc ván. Chơi tiếp để bắt hết quân chết trước khi kết thúc.';
   renderTerms($('terms'),$('description').textContent+' '+$('tip').textContent);
   $('answers').replaceChildren();
   $('game-controls').hidden = false;
+  document.querySelector('.workflow-help p').textContent='Chọn mức máy, rồi nhấn giao điểm để đặt quân đen. Máy đáp bằng quân trắng. Khi hết nước có ích, bấm “Bỏ lượt”; hai lượt bỏ liên tiếp kết thúc ván.';
   $('next').hidden = true;
   $('hint').hidden = true;
   $('retry').hidden = true;
@@ -314,3 +316,5 @@ $('lesson-select').onchange=()=>{load(lessons.findIndex(l=>l.id===$('lesson-sele
 $('previous').onclick=()=>{if(lesson>0){load(lesson-1);showLesson();}};
 const parameters=new URLSearchParams(location.search);const requestedLesson=lessons.findIndex(l=>l.id===parameters.get('lesson'));
 if(parameters.get('play')==='1')start();else load(requestedLesson<0?0:requestedLesson);
+
+$('bot-level').onchange=()=>message('Đã đổi mức máy. Mức mới áp dụng từ lượt máy tiếp theo.');
