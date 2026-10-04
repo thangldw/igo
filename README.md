@@ -24,4 +24,37 @@ Tham khảo: https://www.britgo.org/intro/intro2.html và https://britgo.org/rul
 
 ## Triển khai
 
-Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub Actions. Workflow kiểm tra engine và tính hợp lệ các biến bài học, đóng gói 5 file static và deploy. Asset dùng đường dẫn tương đối, chạy tại `/igo/`.
+Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub Actions. Workflow kiểm tra engine và tính hợp lệ các biến bài học, đóng gói các trang, module và ngân hàng bài static rồi deploy. Asset dùng đường dẫn tương đối, chạy tại `/igo/`.
+
+## Lộ trình hướng tới 1 dan
+
+`train.html` có **134 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
+
+| Mốc nội dung | Số bài |
+| --- | ---: |
+| 30–20 kyu | 16 |
+| 20–10 kyu | 24 |
+| 10–5 kyu | 29 |
+| 5–1 kyu | 31 |
+| Mục tiêu 1 dan | 34 |
+
+Các nhãn là mục tiêu học, **chưa được hiệu chuẩn theo rating**. Không có cam kết giải hết là đạt 1 dan.
+
+- 69 thế bắt quân và phá không gian mắt; 20 thế tạo hai mắt thật. Đây là các thế riêng được tạo tại dự án, không cộng biến xoay/lật vào số bài.
+- 45 câu phân tích về luật, khí, hình cờ, đọc biến, sống/chết, hướng chơi, tấn công, ko, quan tử và thực chiến. Những câu về chiến lược nêu giả định; sơ đồ 19×19 là minh họa, không phải đánh giá tối ưu của KataGo.
+- Bộ đọc minimax xét mọi nước đặt hợp lệ trên **toàn bàn bài tập**, với positional superko; lịch sử bắt đầu từ thế bài, trắng được bỏ lượt. Đen phải đặt quân để đạt mục tiêu: nếu đen bỏ lượt, trắng có thể bỏ lượt kết thúc bàn khi mục tiêu chưa đạt. Mục tiêu bắt hoặc tạo hai mắt phải đạt trong giới hạn 1–11 lượt cả hai bên. Mọi nước còn bảo đảm mục tiêu đều được chấp nhận, không chỉ một nước mẫu.
+- Hai mắt được kiểm tra bằng điều kiện đủ nghiêm ngặt: hai điểm trống riêng, mỗi điểm chỉ giáp quân của cùng nhóm đen. Đây không phải bộ nhận diện mọi dạng sống/seki.
+- Trắng chọn một biến đáp được bộ đọc kiểm tra. Chuỗi đã chơi có thể xem lại từng lượt. Bộ đọc có giới hạn 250.000 nút mỗi yêu cầu trong Web Worker; nếu không tính xong, trả trạng thái chưa chấm, không tự kết luận sai.
+- Luyện theo mốc, lọc chủ đề, ôn bài sai/đến hạn, kiểm tra 10 bài ngẫu nhiên không gợi ý. Bài sai vào hàng ôn ngay; lịch ôn thành công tăng 1/3/7/14/30 ngày.
+- Đếm riêng bài đã giải, tự giải và tự giải qua ít nhất hai ngày khác nhau mà không có lỗi xen giữa. Xem gợi ý/khí/lời giải được ghi có hỗ trợ. Xem đáp án rồi làm lại trong cùng ngày không tạo kết quả tự nhớ mới.
+- Nhật ký ván và lỗi do người dùng tự ghi tại máy; không gửi dữ liệu hay xác minh rating. Mỗi mốc có nhiệm vụ thực chiến. Máy heuristic của trang nhập môn vẫn là máy cơ bản.
+
+Tiến độ mới dùng khóa `igo-study-v1`, tách biệt `igo-progress` cũ. Dữ liệu không tương thích không bị ghi đè. ID bài đọc là fingerprint ổn định của thế/mục tiêu; ID câu hỏi được đặt theo nội dung.
+
+### Kiểm tra và tái tạo
+
+`npm test` kiểm tra luật, bài cũ, mọi thế mới và các nước đầu thắng, giới hạn tối thiểu đã tìm, toàn chuỗi worker, ôn tập và lưu tiến độ. Bộ đọc được đối chiếu với tìm kiếm vét cạn không cắt tỉa trên các thế 3×3.
+
+Để tái tạo ngân hàng deterministic: `node scripts/generate-reading.mjs`, sau đó `node scripts/generate-eyes.mjs`. Bộ sinh dùng seed cố định và loại các thế không được chứng minh trong ngân sách. Không chạy bộ sinh trong trình duyệt.
+
+Tham khảo khung chủ đề: [BGA Puzzle Sheets](https://britgo.org/covers/psmith/index.html), [BGA luật và sống/chết](https://www.britgo.org/intro/intro2.html), [BGA xếp hạng](https://www.britgo.org/about/rating). Không sao chép bài tập hoặc đáp án từ những nguồn này.
