@@ -26,9 +26,9 @@ Tham khảo: https://www.britgo.org/intro/intro2.html và https://britgo.org/rul
 
 Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub Actions. Workflow kiểm tra engine và tính hợp lệ các biến bài học, đóng gói các trang, module và ngân hàng bài static rồi deploy. Asset dùng đường dẫn tương đối, chạy tại `/igo/`.
 
-## Lộ trình hướng tới 1 dan
+## Lộ trình hướng tới 3 dan nghiệp dư
 
-`train.html` có **134 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
+`train.html` có **176 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
 
 | Mốc nội dung | Số bài |
 | --- | ---: |
@@ -37,11 +37,13 @@ Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub 
 | 10–5 kyu | 29 |
 | 5–1 kyu | 31 |
 | Mục tiêu 1 dan | 34 |
+| Mục tiêu 2 dan | 18 |
+| Mục tiêu 3 dan nghiệp dư | 24 |
 
-Các nhãn là mục tiêu học, **chưa được hiệu chuẩn theo rating**. Không có cam kết giải hết là đạt 1 dan.
+Các nhãn là mục tiêu học, **chưa được hiệu chuẩn theo rating**. Không có cam kết giải hết là đạt 3 dan.
 
 - 69 thế bắt quân và phá không gian mắt; 20 thế tạo hai mắt thật. Đây là các thế riêng được tạo tại dự án, không cộng biến xoay/lật vào số bài.
-- 45 câu phân tích về luật, khí, hình cờ, đọc biến, sống/chết, hướng chơi, tấn công, ko, quan tử và thực chiến. Những câu về chiến lược nêu giả định; sơ đồ 19×19 là minh họa, không phải đánh giá tối ưu của KataGo.
+- 87 câu phân tích về luật, khí, hình cờ, đọc biến, sống/chết, hướng chơi, tấn công, ko, quan tử và thực chiến. Những câu về chiến lược nêu giả định; sơ đồ 19×19 là minh họa, không phải đánh giá tối ưu của KataGo.
 - Bộ đọc minimax xét mọi nước đặt hợp lệ trên **toàn bàn bài tập**, với positional superko; lịch sử bắt đầu từ thế bài, trắng được bỏ lượt. Đen phải đặt quân để đạt mục tiêu: nếu đen bỏ lượt, trắng có thể bỏ lượt kết thúc bàn khi mục tiêu chưa đạt. Mục tiêu bắt hoặc tạo hai mắt phải đạt trong giới hạn 1–11 lượt cả hai bên. Mọi nước còn bảo đảm mục tiêu đều được chấp nhận, không chỉ một nước mẫu.
 - Hai mắt được kiểm tra bằng điều kiện đủ nghiêm ngặt: hai điểm trống riêng, mỗi điểm chỉ giáp quân của cùng nhóm đen. Đây không phải bộ nhận diện mọi dạng sống/seki.
 - Trắng chọn một biến đáp được bộ đọc kiểm tra. Chuỗi đã chơi có thể xem lại từng lượt. Bộ đọc có giới hạn 250.000 nút mỗi yêu cầu trong Web Worker; nếu không tính xong, trả trạng thái chưa chấm, không tự kết luận sai.
@@ -58,3 +60,15 @@ Tiến độ mới dùng khóa `igo-study-v1`, tách biệt `igo-progress` cũ. 
 Để tái tạo ngân hàng deterministic: `node scripts/generate-reading.mjs`, sau đó `node scripts/generate-eyes.mjs`. Bộ sinh dùng seed cố định và loại các thế không được chứng minh trong ngân sách. Không chạy bộ sinh trong trình duyệt.
 
 Tham khảo khung chủ đề: [BGA Puzzle Sheets](https://britgo.org/covers/psmith/index.html), [BGA luật và sống/chết](https://www.britgo.org/intro/intro2.html), [BGA xếp hạng](https://www.britgo.org/about/rating). Không sao chép bài tập hoặc đáp án từ những nguồn này.
+
+## Phòng xem ván SGF
+
+`review.html` nhập file SGF UTF-8 tối đa 1 MB, bàn 9/13/19, một ván mỗi file. Hỗ trợ cây biến FF[4], setup AB/AW/AE (cả vùng nén), PL, nước bỏ lượt và lời bình. Kiểm tra toàn bộ cây trước khi thay ván đang mở. Không gửi file lên máy chủ.
+
+Điều hướng từng nút hoặc cuối nhánh, chọn nhánh trong SGF, nhấn bàn thử biến riêng, bỏ lượt, lùi và trở về ván gốc. Bộ xem kiểm tra bắt quân, cấm tự sát và ko trực tiếp; chưa phân xử superko theo RU, quân chết, điểm cuối ván hoặc nước tối ưu. Vì vậy file sử dụng luật cho phép tự sát có thể bị từ chối.
+
+Ghi ứng viên, phản bác và kết luận đối chiếu tại từng nút; lưu một ván cùng ghi chú bằng khóa riêng `igo-sgf-review-v1`. File lỗi không thay ván đang mở; bản lưu lạ không bị ghi đè. Xuất Markdown gồm ghi chú đã lưu và SGF gốc; nước thử chưa lưu không được xuất.
+
+Hai mốc mới có 42 câu tính/đọc theo giả định, gồm quan tử hai vùng, ngân sách ko, ván sát điểm và phản bác kế hoạch. Các dạng số được lặp với tham số để luyện, không phải 42 kỹ năng khác nhau. Không có engine mạnh, kiểm duyệt bởi kỳ thủ dan hay dữ liệu hiệu chuẩn độ khó; các nhãn chỉ là mục tiêu học. Mục tiêu 3 dan phải được đánh giá bằng thực chiến trong cùng hệ rating.
+
+Tham chiếu định dạng: [SGF FF[4]](https://www.red-bean.com/sgf/sgf4.html) và [tọa độ/nước đi cờ vây](https://www.red-bean.com/sgf/go.html).
