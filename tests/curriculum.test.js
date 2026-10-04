@@ -14,11 +14,11 @@ test('finite endgame exercise answers match two-outcome arithmetic',()=>{
   const sente=questions.find(q=>q.id==='q-reverse-sente-model');assert.equal(sente.choices[sente.answer],8-12>2-8?'Đen A trước':'Đen B trước');
 });
 test('ko answers match alternating independent threat expenditure',()=>{
-  for(const q of questions.filter(q=>q.id.startsWith('q-ko-budget-'))){const m=q.prompt.match(/Trắng có (\d+).*Đen có (\d+)/);let white=Number(m[1]),black=Number(m[2]),holder='Đen';
+  for(const q of questions.filter(q=>q.id.startsWith('q-ko-budget-'))){const m=q.prompt.match(/Trắng có (\d+)[\s\S]*Đen có (\d+)/);let white=Number(m[1]),black=Number(m[2]),holder='Đen';
     while(true){const challenger=holder==='Đen'?'Trắng':'Đen';if(challenger==='Trắng'){if(!white)break;white--;}else{if(!black)break;black--;}holder=challenger;}
     assert.equal(q.choices[q.answer],holder);
   }
 });
 test('close-game answers apply komi-adjusted margin exactly once',()=>{
-  for(const q of questions.filter(q=>q.id.startsWith('q-safe-yose-'))){const m=q.prompt.match(/hơn (\d+) điểm.*giảm (\d+)/);assert.equal(q.choices[q.answer],String(Number(m[1])-Number(m[2])));}
+  for(const q of questions.filter(q=>q.id.startsWith('q-safe-yose-'))){const m=q.prompt.match(/hơn (\d+) điểm[\s\S]*giảm (\d+)/);assert.equal(q.choices[q.answer],String(Number(m[1])-Number(m[2])));}
 });

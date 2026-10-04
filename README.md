@@ -72,3 +72,11 @@ Ghi ứng viên, phản bác và kết luận đối chiếu tại từng nút; 
 Hai mốc mới có 42 câu tính/đọc theo giả định, gồm quan tử hai vùng, ngân sách ko, ván sát điểm và phản bác kế hoạch. Các dạng số được lặp với tham số để luyện, không phải 42 kỹ năng khác nhau. Không có engine mạnh, kiểm duyệt bởi kỳ thủ dan hay dữ liệu hiệu chuẩn độ khó; các nhãn chỉ là mục tiêu học. Mục tiêu 3 dan phải được đánh giá bằng thực chiến trong cùng hệ rating.
 
 Tham chiếu định dạng: [SGF FF[4]](https://www.red-bean.com/sgf/sgf4.html) và [tọa độ/nước đi cờ vây](https://www.red-bean.com/sgf/go.html).
+
+## Điều hướng và cách diễn đạt
+
+Ba trang dùng chung menu luôn hiện: **Học cách chơi → Luyện bài tập → Xem lại ván**. Mục đang mở được đánh dấu bằng `aria-current`; có liên kết bỏ qua menu cho bàn phím. Bài/chặng trên điện thoại dùng hộp chọn thay cho danh sách cuộn ngang. Khi chọn bài/chặng hoặc đi trước/sau, trang đưa tiêu điểm tới nội dung mới.
+
+Địa chỉ lưu bài đang mở (`lesson`, hoặc `stage` + `problem`) nên tải lại/mở liên kết trở về đúng bài. Chế độ chơi máy có `play=1`. Các khóa tiến độ cũ giữ nguyên.
+
+Nội dung dùng tên kỹ năng, câu ngắn và phép tính từng bước. “Ngân sách ko có điều kiện” đổi thành “Đếm đe dọa ko”: đề tự giải thích ko, đe dọa, các điều kiện; đáp án trình bày từng lượt. `terms.js` cung cấp giải nghĩa theo bài, đặt cạnh đề và không hiện trong kiểm tra. Không đổi thế cờ, đáp án đúng hoặc hạng mục tiêu.

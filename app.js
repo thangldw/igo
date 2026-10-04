@@ -1,5 +1,6 @@
 import {empty, group, move, score, bot} from './engine.js';
 import {lessons, levels} from './lessons.js';
+import {renderTerms} from './terms.js';
 
 const $ = id => document.getElementById(id);
 let done = [];
@@ -13,6 +14,7 @@ let selected = -1, hinted = false, busy = false, epoch = 0, solved = false, line
 const current = () => lessons[lesson];
 const currentLevel = () => levels.find(l => l.id === level);
 const levelLessons = () => lessons.filter(l => l.level === level);
+function showLesson(){const heading=$('title');heading.tabIndex=-1;heading.focus({preventScroll:true});heading.scrollIntoView({block:'start'});}
 const targets = () => current().lines ? [...new Set(candidates.map(line => line[lineStep]))] : [current().target];
 
 function message(text, type = '') {
@@ -25,18 +27,22 @@ function navigation() {
     const button = document.createElement('button');
     button.textContent = l.name;
     button.setAttribute('aria-pressed', String(l.id === level));
-    button.onclick = () => load(lessons.findIndex(item => item.level === l.id));
+    button.onclick = () => {load(lessons.findIndex(item => item.level === l.id));showLesson();};
     $('levels').append(button);
   }
   $('level-summary').textContent = currentLevel().summary;
-  $('lessons').replaceChildren();
+  $('lessons').replaceChildren();$('lesson-select').replaceChildren();
   levelLessons().forEach((l, index) => {
     const button = document.createElement('button');
+    button.setAttribute('aria-current',mode==='lesson'&&l.id===current().id?'step':'false');
+    const option=document.createElement('option');option.value=l.id;option.textContent=`${index+1}. ${l.title}`;$('lesson-select').append(option);
     button.className = mode === 'lesson' && l.id === current().id ? 'active' : '';
     button.innerHTML = `<span class="number">${done.includes(l.id) ? '✓' : String(index + 1).padStart(2, '0')}</span>${l.title}`;
-    button.onclick = () => load(lessons.indexOf(l));
+    button.onclick = () => {load(lessons.indexOf(l));showLesson();};
     $('lessons').append(button);
   });
+  $('lesson-select').value=current().id;
+  const active=$('lessons').querySelector('.active');if(active)$('lessons').scrollLeft=Math.max(0,active.offsetLeft-$('lessons').offsetLeft);
   const completed = levelLessons().filter(l => done.includes(l.id)).length;
   $('progress-text').textContent = `${completed} / ${levelLessons().length}`;
   $('progress-bar').style.width = `${completed / levelLessons().length * 100}%`;
@@ -78,7 +84,7 @@ function draw() {
   }
   $('turn').textContent = mode === 'lesson' ? current().kind === 'sequence' ? `● Đen đi · Nước ${Math.floor(lineStep / 2) + 1} / ${Math.ceil(current().lines[0].length / 2)}` : '● Bạn đặt quân đen' : ended ? 'Ván đã kết thúc' : busy ? '○ Máy đang đi…' : '● Lượt của bạn';
   if (solved && mode === 'lesson') $('turn').textContent = '✓ Đã hoàn thành bài';
-  $('captured').textContent = mode === 'lesson' ? current().kind === 'sequence' ? 'Biến đáp đã định sẵn' : 'Bàn học 5 × 5' : `Đã bắt: đen ${captures[0]} · trắng ${captures[1]}`;
+  $('captured').textContent = mode === 'lesson' ? current().kind === 'sequence' ? 'Trắng đáp theo chuỗi mẫu' : 'Bàn học 5 × 5' : `Đã bắt: đen ${captures[0]} · trắng ${captures[1]}`;
 }
 function complete(text) {
   solved = true;
@@ -113,6 +119,9 @@ function load(i) {
   $('guide-title').textContent = current().heading;
   $('description').textContent = current().description;
   $('tip').textContent = current().tip;
+  renderTerms($('terms'),[current().title,current().description,current().tip].join(' '));
+  const url=new URL(location.href);url.searchParams.delete('play');url.searchParams.set('lesson',current().id);window.history.replaceState(null,'',url);
+  $('previous').disabled=i===0;$('previous').hidden=false;
   $('game-controls').hidden = true;
   $('next').hidden = true;
   $('hint').hidden = false;
@@ -134,13 +143,13 @@ function load(i) {
         if (solved) return;
         const correct = current().choices ? index === current().answer : index + 1 === current().answer;
         if (correct) complete(current().success || (current().kind === 'territory' ? 'Đúng! Vùng giữa có 1 điểm đất. Quân trên bàn cũng được tính khi đếm diện tích.' : 'Đúng! Quân giữa bàn có 4 khí.'));
-        else message('Chưa đúng. Kiểm tra lại khí hoặc các giả định của câu hỏi.', 'error');
+        else message('Chưa đúng. Kiểm tra lại khí hoặc điều kiện trong đề.', 'error');
         draw();
       };
       $('answers').append(button);
     });
   }
-  message(current().kind === 'sequence' ? 'Đọc trước nước đáp rồi đặt quân đen. Trắng sẽ đáp theo biến minh họa.' : conceptual ? 'Chọn câu trả lời dựa trên giả định đã nêu.' : 'Thử trực tiếp trên bàn cờ.');
+  message(current().kind === 'sequence' ? 'Nghĩ trước cách Trắng đáp rồi đặt quân Đen. Trong bài này, Trắng đi theo chuỗi mẫu.' : conceptual ? 'Chọn đáp án theo tình huống trong đề.' : 'Thử trực tiếp trên bàn cờ.');
   navigation();
   draw();
 }
@@ -253,9 +262,11 @@ function start() {
   $('concept').hidden = true;
   $('board-footer').hidden = false;
   $('guide-title').textContent = 'Bạn cầm đen';
-  $('description').textContent = 'Máy cơ bản ưu tiên bắt quân và cứu nhóm bị đe dọa. Độ khó bài học không thay đổi sức mạnh máy; máy chưa có rank hoặc khả năng phân tích nâng cao.';
+  $('description').textContent = 'Bạn cầm Đen, máy cầm Trắng. Máy ưu tiên bắt quân và cứu nhóm chỉ còn một khí. Máy này để tập luật, chưa có hạng thi đấu.';
+  const url=new URL(location.href);url.searchParams.delete('lesson');url.searchParams.set('play','1');window.history.replaceState(null,'',url);$('previous').hidden=true;
   $('description').hidden = false;
   $('tip').textContent = 'Khi không còn nước có ích, bỏ lượt. Hai lượt bỏ liên tiếp kết thúc ván. Chơi tiếp để bắt hết quân chết trước khi kết thúc.';
+  renderTerms($('terms'),$('description').textContent+' '+$('tip').textContent);
   $('answers').replaceChildren();
   $('game-controls').hidden = false;
   $('next').hidden = true;
@@ -273,7 +284,7 @@ function finish() {
 $('practice').onclick = start;
 $('new-game').onclick = start;
 $('retry').onclick = () => load(lesson);
-$('next').onclick = () => lesson === lessons.length - 1 ? start() : load(lesson + 1);
+$('next').onclick = () => {lesson === lessons.length - 1 ? start() : load(lesson + 1);showLesson();};
 $('hint').onclick = () => {
   hinted = true;
   const l = current();
@@ -299,4 +310,7 @@ $('undo').onclick = () => {
   draw();
 };
 $('show-liberties').onchange = () => { if (!$('show-liberties').checked) selected = -1; draw(); };
-load(0);
+$('lesson-select').onchange=()=>{load(lessons.findIndex(l=>l.id===$('lesson-select').value));showLesson();};
+$('previous').onclick=()=>{if(lesson>0){load(lesson-1);showLesson();}};
+const parameters=new URLSearchParams(location.search);const requestedLesson=lessons.findIndex(l=>l.id===parameters.get('lesson'));
+if(parameters.get('play')==='1')start();else load(requestedLesson<0?0:requestedLesson);
