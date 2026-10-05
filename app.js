@@ -1,5 +1,6 @@
 import {empty, group, move, score, bot} from './engine.js';
 import {lessons, levels} from './lessons.js';
+import {GAME_KEY,REVIEW_GAME_KEY,replayRecord,recordSgf} from './game-record.js';
 import {renderTerms} from './terms.js';
 
 const $ = id => document.getElementById(id);
@@ -11,6 +12,10 @@ try {
 let lesson = 0, level = 'beginner', n = 5, board = [], history = [], snapshots = [];
 let last = -1, mode = 'lesson', passes = 0, ended = false, captures = [0, 0];
 let selected = -1, hinted = false, busy = false, epoch = 0, solved = false, lineStep = 0, candidates = [];
+let gameMoves=[];
+function record(){return {version:1,size:n,difficulty:$('bot-level').value,moves:gameMoves};}
+function persist(){if(mode!=='game')return;try{localStorage.setItem(GAME_KEY,JSON.stringify(record()));$('game-save-status').textContent=`Đã lưu tại máy · ${gameMoves.length} nước`; $('resume-game').hidden=false;}catch{$('game-save-status').textContent='Không lưu được. Hãy tải SGF để giữ ván.';}}
+function resume(){try{const saved=JSON.parse(localStorage.getItem(GAME_KEY));const state=replayRecord(saved);$('game-size').value=String(saved.size);start(false);gameMoves=saved.moves;board=state.board;history=state.history;last=state.last;captures=state.captures;passes=state.passes;snapshots=state.snapshots;ended=state.ended;$('bot-level').value=['easy','basic'].includes(saved.difficulty)?saved.difficulty:'easy';draw();persist();message('Đã tiếp tục ván đã lưu.');if(ended)finish();else if(state.next===2)reply();}catch{message('Không đọc được ván lưu. Dữ liệu cũ được giữ nguyên; hãy bắt đầu ván mới.','error');}}
 const current = () => lessons[lesson];
 const currentLevel = () => levels.find(l => l.id === level);
 const levelLessons = () => lessons.filter(l => l.level === level);
@@ -217,8 +222,9 @@ function click(i) {
   message(result.captured ? `Bạn bắt được ${result.captured} quân trắng.` : 'Quan sát khí của các nhóm trước khi đi tiếp.');
   reply();
 }
-function saveTurn() { snapshots.push({board: [...board], history: [...history], last, captures: [...captures], passes}); }
+function saveTurn() { snapshots.push({board: [...board], history: [...history], last, captures: [...captures], passes,moveCount:gameMoves.length}); }
 function apply(result, i, c) {
+  gameMoves.push({color:c,point:i});
   board = result.board;
   history.push(board.join(''));
   last = i;
@@ -227,6 +233,7 @@ function apply(result, i, c) {
   draw();
 }
 function reply() {
+  persist();
   busy = true;
   draw();
   const currentEpoch = epoch;
@@ -234,6 +241,7 @@ function reply() {
     if (currentEpoch !== epoch) return;
     const i = bot(board, n, history, {difficulty: $('bot-level').value});
     if (i === null) {
+      gameMoves.push({color:2,point:-1});
       passes++;
       message('Máy bỏ lượt vì không tìm thấy nước có ích theo cách đánh giá cơ bản. Bạn có thể đi tiếp hoặc bỏ lượt để kết thúc ván.');
       if (passes >= 2) finish();
@@ -242,15 +250,17 @@ function reply() {
       passes = 0;
     }
     busy = false;
+    persist();
     draw();
   }, 350);
 }
-function start() {
+function start(save=true) {
   epoch++;
   busy = false;
   mode = 'game';
   n = Number($('game-size').value);
   board = empty(n);
+  gameMoves=[];
   history = [board.join('')];
   snapshots = [];
   last = selected = -1;
@@ -282,14 +292,15 @@ function start() {
   message('Chạm một giao điểm để đi nước đầu.');
   navigation();
   draw();
+  if(save)persist();
 }
 function finish() {
   ended = true;
   const s = score(board, n);
   message(`Ước tính diện tích: đen ${s.black}, trắng ${s.white} (komi 6,5). ${s.black > s.white ? 'Đen' : 'Trắng'} dẫn ${Math.abs(s.black - s.white)} điểm. Chưa tự nhận diện quân chết hoặc seki; đây không phải kết quả phân xử chính thức.`);
 }
-$('practice').onclick = start;
-$('new-game').onclick = start;
+$('practice').onclick = () => {if(localStorage.getItem(GAME_KEY))resume();else start();};
+$('new-game').onclick = () => start();
 $('retry').onclick = () => load(lesson);
 $('next').onclick = () => {lesson === lessons.length - 1 ? start() : load(lesson + 1);showLesson();};
 $('hint').onclick = () => {
@@ -303,15 +314,16 @@ $('hint').onclick = () => {
 $('pass').onclick = () => {
   if (busy || ended) return;
   saveTurn();
+  gameMoves.push({color:1,point:-1});
   passes++;
-  if (passes >= 2) { finish(); draw(); }
+  if (passes >= 2) { finish(); persist(); draw(); }
   else { message('Bạn bỏ lượt. Máy sẽ đi nếu còn nước hợp lệ.'); reply(); }
 };
 $('undo').onclick = () => {
   if (busy || !snapshots.length) return;
   epoch++;
   const s = snapshots.pop();
-  board = s.board; history = s.history; last = s.last; captures = s.captures; passes = s.passes;
+  board = s.board; history = s.history; last = s.last; captures = s.captures; passes = s.passes;gameMoves=gameMoves.slice(0,s.moveCount);persist();
   ended = false; selected = -1;
   message('Đã lùi cả lượt của bạn và máy.');
   draw();
@@ -321,8 +333,12 @@ $('lesson-select').onchange=()=>{load(lessons.findIndex(l=>l.id===$('lesson-sele
 $('previous').onclick=()=>{if(lesson>0){load(lesson-1);showLesson();}};
 const parameters=new URLSearchParams(location.search);const requestedLesson=lessons.findIndex(l=>l.id===parameters.get('lesson'));
 $('game-size').value=['9','13','19'].includes(parameters.get('size'))?parameters.get('size'):'9';
-if(parameters.get('play')==='1')start();else load(requestedLesson<0?0:requestedLesson);
+if(parameters.get('play')==='1'){if(localStorage.getItem(GAME_KEY)&&(!parameters.has('size')||String(JSON.parse(localStorage.getItem(GAME_KEY)).size)===parameters.get('size')))resume();else start();}else load(requestedLesson<0?0:requestedLesson);
 
 $('bot-level').onchange=()=>message('Đã đổi mức máy. Mức mới áp dụng từ lượt máy tiếp theo.');
 
 $('game-size').onchange=()=>{$('size-help').textContent=`Đã chọn ${$('game-size').value}×${$('game-size').value} cho ván tiếp theo. Bấm “Ván mới” để bắt đầu; ván hiện tại vẫn giữ nguyên.`;};
+
+$('resume-game').hidden=!localStorage.getItem(GAME_KEY);$('resume-game').onclick=resume;
+$('export-game').onclick=()=>{if(busy)return;const url=URL.createObjectURL(new Blob([recordSgf(record())],{type:'application/x-go-sgf;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`igo-${n}x${n}.sgf`;a.click();URL.revokeObjectURL(url);};
+$('review-game').onclick=()=>{if(busy){message('Đợi máy đi xong rồi mở ván.');return;}try{localStorage.setItem(REVIEW_GAME_KEY,recordSgf(record()));location.href='./review.html?game=latest';}catch{message('Không chuyển được ván. Hãy tải SGF và mở ở Xem lại ván.','error');}};
