@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {areaScore} from '../area-score.js';
+test('dead stones are removed before counting area, without adding prisoners twice',()=>{const b=[1,1,1,1,2,1,1,1,1];const s=areaScore(b,3,[4]);assert.equal(s.blackStones,8);assert.equal(s.blackLand,1);assert.equal(s.black,9);assert.equal(s.white,6.5);assert.equal(b[4],2);});
+test('mixed-border regions stay neutral and every point is accounted for',()=>{const s=areaScore([1,0,2,0,0,0,0,0,0],3);assert.equal(s.neutral,7);assert.equal(s.blackStones+s.whiteStones+s.blackLand+s.whiteLand+s.neutral,9);});

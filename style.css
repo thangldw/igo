@@ -21,3 +21,7 @@
 .workspace{min-width:0}.board-scroll{max-width:100%;overflow-x:auto;padding-bottom:4px}#game-controls{margin-bottom:12px}#game-controls select{max-width:100%;font:inherit;padding:8px;border:1px solid #d9ded4;border-radius:6px;background:#fff;color:inherit}.size-help{font-size:13px;line-height:1.7;color:#687762;margin:0 0 16px}#game-controls label{flex-wrap:wrap}
 
 input,select,textarea{font:inherit}h1{line-height:1.35;letter-spacing:-.025em}
+
+.star-point{position:absolute;width:6px;height:6px;border-radius:50%;background:#795e3c}.pending-point{outline:3px solid #28704a;outline-offset:-3px}.dead-stone .stone{opacity:.35}.black-area{background:#263b3266!important}.white-area{background:#fff9!important}#scoring-panel{background:#edf0e6;border:1px solid #dce0d5;border-radius:9px;padding:16px;margin:16px 0;font-size:14px;line-height:1.8}#scoring-panel h3{margin-top:0}#game-save-status{font-size:12px;color:#63775b}#resume-game{margin-top:10px}
+
+#analysis-panel{margin:18px 0;padding:16px;background:#edf0e6;font-size:14px;line-height:1.8}#analysis-output{white-space:pre-line}

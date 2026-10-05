@@ -80,3 +80,9 @@ Ba trang dùng chung menu luôn hiện: **Học cách chơi → Luyện bài t�
 Địa chỉ lưu bài đang mở (`lesson`, hoặc `stage` + `problem`) nên tải lại/mở liên kết trở về đúng bài. Chế độ chơi máy có `play=1`. Các khóa tiến độ cũ giữ nguyên.
 
 Nội dung dùng tên kỹ năng, câu ngắn và phép tính từng bước. “Ngân sách ko có điều kiện” đổi thành “Đếm đe dọa ko”: đề tự giải thích ko, đe dọa, các điều kiện; đáp án trình bày từng lượt. `terms.js` cung cấp giải nghĩa theo bài, đặt cạnh đề và không hiện trong kiểm tra. Không đổi thế cờ, đáp án đúng hoặc hạng mục tiêu.
+
+## Ván luyện với máy
+
+Ván tự lưu ở `igo-game-v1`; tải lại tiếp tục lượt đang chờ của máy. Có tải SGF và chuyển sang phòng xem ván, không ghi đè ghi chú cũ. Đếm diện tích sau hai lượt bỏ: người chơi tự đánh dấu nhóm chết; quân đã bắt không cộng lại. Bàn có phóng to, chấm sao và xác nhận nước đi trên màn hình nhỏ.
+
+Engine Tìm kiếm chạy trong Web Worker, xét tối đa 6 nước mỗi bên ở độ sâu 2 lượt. Phân tích sau ván dùng cùng đánh giá gần đúng (diện tích và nguy cơ nhóm thiếu khí); các đơn vị đánh giá không phải điểm cuối ván hay xác suất thắng. Không có chứng cứ hiệu chuẩn kyu/dan; đây chưa phải KataGo hoặc engine ở sức chơi dan.
