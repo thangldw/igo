@@ -2,7 +2,7 @@
 
 Ứng dụng tiếng Việt học cờ vây từ đầu, chạy trên GitHub Pages, không cần backend.
 
-18 bài trong ba lộ trình, mỗi lộ trình có tiến độ riêng:
+18 bài học trong ba lộ trình, mỗi lộ trình có tiến độ riêng:
 
 - Nhập môn: đặt quân, khí, bắt một quân, bắt nhóm, cứu quân và đất.
 - Trung cấp: nối/cắt, atari kép, hai mắt, khí chung và ko.
@@ -10,11 +10,11 @@
 
 Các bài đọc biến có nước trắng đáp tự động theo biến minh họa đã ghi. Chỉ kiểm tra những biến được cung cấp, không phải solver chứng minh tất cả đáp trả. Bài khái niệm seki và quan tử nêu giả định bằng chữ, không dùng bàn trống làm bằng chứng.
 
-Ván 9×9 với máy heuristic, lùi lượt và tiến độ lưu trong localStorage. Nhãn trình độ thuộc nội dung học, không phải rank của người chơi hay sức mạnh của máy. Tiến độ nhập môn cũ được chuyển sang ID bài ổn định khi đọc dữ liệu.
+Ván với máy trên bàn 9×9, 13×13 hoặc 19×19; có hai mức cơ bản và mức tìm kiếm giới hạn. Ván có thể lưu, tiếp tục, tải SGF và mở lại trong phòng xem ván. Nhãn trình độ thuộc nội dung học, không phải rank của người chơi hay sức mạnh của máy. Tiến độ nhập môn cũ được chuyển sang ID bài ổn định khi đọc dữ liệu.
 
 ## Chạy
 
-`npm start` → http://localhost:4173. `npm test` kiểm tra luật.
+`npm start` → http://localhost:4173. `npm test` kiểm tra luật, ngân hàng bài, lưu ván, tính điểm và engine tìm kiếm.
 
 ## Luật và giới hạn
 
