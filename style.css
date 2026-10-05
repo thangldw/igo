@@ -14,3 +14,5 @@
 .site-header{position:sticky;top:0;z-index:10;background:#f7f7f0}.workspace h2{scroll-margin-top:115px}.mobile-picker~nav{scroll-margin-top:115px}@media(max-width:700px){.workspace h2{scroll-margin-top:145px}.mode-help{margin-top:0}}
 
 .workspace>.term-help{margin:12px 0 18px;padding:12px 15px;border:1px solid #dce0d5;border-radius:8px;background:#f0f2e9}.workspace>.term-help[hidden]{display:none}.workspace>#test-result{scroll-margin-top:145px}
+
+.workspace{min-width:0}.board-scroll{max-width:100%;overflow-x:auto;padding-bottom:4px}#game-controls{margin-bottom:12px}#game-controls select{max-width:100%;font:inherit;padding:8px;border:1px solid #d9ded4;border-radius:6px;background:#fff;color:inherit}.size-help{font-size:13px;line-height:1.7;color:#687762;margin:0 0 16px}#game-controls label{flex-wrap:wrap}

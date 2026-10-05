@@ -49,13 +49,15 @@ function navigation() {
 }
 function draw() {
   const root = $('board');
+  root.style.minWidth = mode === 'game' && n > 9 ? `${n * 28}px` : '';
+  $('play-surface').style.minWidth = mode === 'game' && n > 9 ? `${n * 28 + 48}px` : '';
   root.replaceChildren();
   root.style.gridTemplateColumns = `repeat(${n},1fr)`;
   const liberties = selected >= 0 && board[selected] ? group(board, selected, n).liberties : [];
   for (let i = 0; i < board.length; i++) {
     const button = document.createElement('button');
     button.className = [i % n === 0 ? 'left' : '', i % n === n - 1 ? 'right' : '', i < n ? 'top' : '', i >= n * (n - 1) ? 'bottom' : '', mode === 'lesson' && hinted && targets().includes(i) ? 'hinted' : ''].join(' ');
-    button.setAttribute('aria-label', `${'ABCDEFGHJ'[i % n]}${n - Math.floor(i / n)}: ${board[i] === 1 ? 'đen' : board[i] === 2 ? 'trắng' : 'trống'}${liberties.includes(i) ? ', khí' : ''}`);
+    button.setAttribute('aria-label', `${'ABCDEFGHJKLMNOPQRST'[i % n]}${n - Math.floor(i / n)}: ${board[i] === 1 ? 'đen' : board[i] === 2 ? 'trắng' : 'trống'}${liberties.includes(i) ? ', khí' : ''}`);
     if (board[i]) {
       const stone = document.createElement('span');
       stone.className = `stone ${board[i] === 1 ? 'black' : 'white'} ${last === i ? 'last' : ''}`;
@@ -76,7 +78,7 @@ function draw() {
     if (i >= n * (n - 1)) {
       const label = document.createElement('span');
       label.className = 'grid-label column-label';
-      label.textContent = 'ABCDEFGHJ'[i % n];
+      label.textContent = 'ABCDEFGHJKLMNOPQRST'[i % n];
       label.setAttribute('aria-hidden', 'true');
       button.append(label);
     }
@@ -123,6 +125,7 @@ function load(i) {
   const url=new URL(location.href);url.searchParams.delete('play');url.searchParams.set('lesson',current().id);window.history.replaceState(null,'',url);
   $('previous').disabled=i===0;$('previous').hidden=false;
   $('game-controls').hidden = true;
+  $('size-help').hidden = true;
   document.querySelector('.workflow-help p').textContent='1. Chọn bài bên trái. 2. Đọc yêu cầu. 3. Nhấn bàn cờ hoặc chọn đáp án. Làm xong thì bấm “Bài tiếp theo”.';
   $('next').hidden = true;
   $('hint').hidden = false;
@@ -246,7 +249,7 @@ function start() {
   epoch++;
   busy = false;
   mode = 'game';
-  n = 9;
+  n = Number($('game-size').value);
   board = empty(n);
   history = [board.join('')];
   snapshots = [];
@@ -255,21 +258,23 @@ function start() {
   ended = false;
   captures = [0, 0];
   hinted = solved = false;
-  $('chapter').textContent = 'VÁN LUYỆN TẬP · 9×9';
-  $('title').textContent = 'Luyện chơi 9×9';
-  $('board-size').textContent = '9 × 9';
+  $('chapter').textContent = `VÁN LUYỆN TẬP · ${n}×${n}`;
+  $('title').textContent = `Luyện chơi ${n}×${n}`;
+  $('board-size').textContent = `${n} × ${n}`;
   $('board-size').hidden = false;
   $('play-surface').hidden = false;
   $('concept').hidden = true;
   $('board-footer').hidden = false;
   $('guide-title').textContent = 'Bạn cầm đen';
   $('description').textContent = 'Bạn cầm Đen, máy cầm Trắng. Chọn mức Dễ để tập luật, hoặc Cơ bản để máy ưu tiên bắt và cứu quân. Máy tránh đi thêm vào đất đã bao kín và có thể bỏ lượt; chưa có hạng thi đấu.';
-  const url=new URL(location.href);url.searchParams.delete('lesson');url.searchParams.set('play','1');window.history.replaceState(null,'',url);$('previous').hidden=true;
+  const url=new URL(location.href);url.searchParams.delete('lesson');url.searchParams.set('play','1');url.searchParams.set('size',String(n));window.history.replaceState(null,'',url);$('previous').hidden=true;
   $('description').hidden = false;
   $('tip').textContent = 'Khi không còn nước có ích, bỏ lượt. Hai lượt bỏ liên tiếp kết thúc ván. Chơi tiếp để bắt hết quân chết trước khi kết thúc.';
   renderTerms($('terms'),$('description').textContent+' '+$('tip').textContent);
   $('answers').replaceChildren();
   $('game-controls').hidden = false;
+  $('size-help').hidden = false;
+  $('size-help').textContent = n === 9 ? '9×9: tập luật và bắt quân. Đổi kích thước rồi bấm “Ván mới” để bắt đầu bàn khác.' : `${n}×${n}: ${n === 13 ? 'tập quản lý nhiều nhóm' : 'tập chiến lược toàn bàn'}. Trên màn hình nhỏ, vuốt ngang bàn để xem các cột còn lại. Đổi kích thước chỉ áp dụng khi bấm “Ván mới”. Máy vẫn ở mức luyện cơ bản.`;
   document.querySelector('.workflow-help p').textContent='Chọn mức máy, rồi nhấn giao điểm để đặt quân đen. Máy đáp bằng quân trắng. Khi hết nước có ích, bấm “Bỏ lượt”; hai lượt bỏ liên tiếp kết thúc ván.';
   $('next').hidden = true;
   $('hint').hidden = true;
@@ -315,6 +320,9 @@ $('show-liberties').onchange = () => { if (!$('show-liberties').checked) selecte
 $('lesson-select').onchange=()=>{load(lessons.findIndex(l=>l.id===$('lesson-select').value));showLesson();};
 $('previous').onclick=()=>{if(lesson>0){load(lesson-1);showLesson();}};
 const parameters=new URLSearchParams(location.search);const requestedLesson=lessons.findIndex(l=>l.id===parameters.get('lesson'));
+$('game-size').value=['9','13','19'].includes(parameters.get('size'))?parameters.get('size'):'9';
 if(parameters.get('play')==='1')start();else load(requestedLesson<0?0:requestedLesson);
 
 $('bot-level').onchange=()=>message('Đã đổi mức máy. Mức mới áp dụng từ lượt máy tiếp theo.');
+
+$('game-size').onchange=()=>{$('size-help').textContent=`Đã chọn ${$('game-size').value}×${$('game-size').value} cho ván tiếp theo. Bấm “Ván mới” để bắt đầu; ván hiện tại vẫn giữ nguyên.`;};
