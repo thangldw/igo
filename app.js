@@ -1,4 +1,4 @@
-import {empty, group, move, score, bot} from './engine.js';
+import {empty, group, move, bot} from './engine.js';
 import {lessons, levels} from './lessons.js';
 import {areaScore} from './area-score.js';
 import {GAME_KEY,REVIEW_GAME_KEY,replayRecord,recordSgf} from './game-record.js';
@@ -303,8 +303,7 @@ function start(save=true) {
 }
 function finish() {
   ended = true;pendingPoint=-1;
-  const s = score(board, n);
-  message(`Ước tính diện tích: đen ${s.black}, trắng ${s.white} (komi 6,5). ${s.black > s.white ? 'Đen' : 'Trắng'} dẫn ${Math.abs(s.black - s.white)} điểm. Chưa tự nhận diện quân chết hoặc seki; đây không phải kết quả phân xử chính thức.`);
+  message('Hai bên đã bỏ lượt liên tiếp. Kiểm tra điểm ở phần bên trái: nhấn nhóm trên bàn để đánh dấu quân chết, hoặc chọn chơi tiếp nếu còn tranh chấp.');
 }
 $('practice').onclick = () => {if(localStorage.getItem(GAME_KEY))resume();else start();};
 $('new-game').onclick = () => start();
