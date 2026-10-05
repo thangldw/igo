@@ -138,7 +138,7 @@ function load(i) {
   $('description').textContent = current().description;
   $('tip').textContent = current().tip;
   renderTerms($('terms'),[current().title,current().description,current().tip].join(' '));
-  const url=new URL(location.href);url.searchParams.delete('play');url.searchParams.set('lesson',current().id);window.history.replaceState(null,'',url);
+  const url=new URL(location.href);url.searchParams.delete('play');url.searchParams.delete('lesson');url.searchParams.delete('size');try{localStorage.setItem('igo-current-lesson-v1',current().id);}catch{}window.history.replaceState(null,'',url);
   $('previous').disabled=i===0;$('previous').hidden=false;
   $('game-controls').hidden = true;
   $('size-help').hidden = true;
@@ -339,7 +339,8 @@ $('lesson-select').onchange=()=>{load(lessons.findIndex(l=>l.id===$('lesson-sele
 $('previous').onclick=()=>{if(lesson>0){load(lesson-1);showLesson();}};
 $('confirm-move').checked=window.matchMedia('(max-width:700px)').matches;
 function savedSizeMatches(size){try{return String(JSON.parse(localStorage.getItem(GAME_KEY)).size)===size;}catch{return true;}}
-const parameters=new URLSearchParams(location.search);const requestedLesson=lessons.findIndex(l=>l.id===parameters.get('lesson'));
+const parameters=new URLSearchParams(location.search);let savedLesson;try{savedLesson=localStorage.getItem('igo-current-lesson-v1');}catch{}
+const requestedLesson=lessons.findIndex(l=>l.id===(parameters.get('lesson')||savedLesson));
 $('game-size').value=['9','13','19'].includes(parameters.get('size'))?parameters.get('size'):'9';
 if(parameters.get('play')==='1'){if(localStorage.getItem(GAME_KEY)&&(!parameters.has('size')||savedSizeMatches(parameters.get('size'))))resume();else start();}else load(requestedLesson<0?0:requestedLesson);
 
