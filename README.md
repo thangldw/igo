@@ -12,6 +12,10 @@ Các bài đọc biến có nước trắng đáp tự động theo biến minh 
 
 Ván với máy trên bàn 9×9, 13×13 hoặc 19×19; có hai mức cơ bản và mức tìm kiếm giới hạn. Ván có thể lưu, tiếp tục, tải SGF và mở lại trong phòng xem ván. Nhãn trình độ thuộc nội dung học, không phải rank của người chơi hay sức mạnh của máy. Tiến độ nhập môn cũ được chuyển sang ID bài ổn định khi đọc dữ liệu.
 
+## Mở ứng dụng
+
+[Học cách chơi](https://thangldw.github.io/igo/) · [Luyện bài tập](https://thangldw.github.io/igo/train.html) · [Xem lại ván SGF](https://thangldw.github.io/igo/review.html). Tiến độ và ghi chú nằm trong browser storage; không đồng bộ tài khoản.
+
 ## Chạy
 
 `npm start` → http://localhost:4173. `npm test` kiểm tra luật, ngân hàng bài, lưu ván, tính điểm và engine tìm kiếm.
