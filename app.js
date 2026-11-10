@@ -18,6 +18,13 @@ const pointName=i=>`${'ABCDEFGHJKLMNOPQRST'[i%n]}${n-Math.floor(i/n)}`;
 function scoreDetails(){const s=areaScore(board,n,[...deadStones],komi),komiText=String(komi).replace('.',',');$('score-detail').textContent=`Đen: ${s.blackStones} quân sống + ${s.blackLand} đất = ${s.black}. Trắng: ${s.whiteStones} quân sống + ${s.whiteLand} đất + ${komiText} komi = ${s.white}. Trung lập: ${s.neutral}. Theo dấu quân chết bạn chọn, ${s.black>s.white?'Đen':'Trắng'} hơn ${Math.abs(s.black-s.white)} điểm.`;return s;}
 function record(){return {version:1,size:n,difficulty:$('bot-level').value,...(handicap?{handicap}:{}),komi,moves:gameMoves};}
 function persist(){if(mode!=='game')return;try{localStorage.setItem(GAME_KEY,JSON.stringify(record()));$('game-save-status').textContent=`Đã lưu tại máy · ${gameMoves.length} nước`; $('resume-game').hidden=false;}catch{$('game-save-status').textContent='Không lưu được. Hãy tải SGF để giữ ván.';}}
+function syncNav(){
+  const title=document.querySelector('.page-title');if(title)title.textContent=mode==='game'?'Chơi với máy':'Học cách chơi';
+  for(const link of document.querySelectorAll('.site-nav a[data-nav]')){
+    const on=link.dataset.nav===(mode==='game'?'play':'learn');
+    if(link.dataset.nav==='learn'||link.dataset.nav==='play')on?link.setAttribute('aria-current','page'):link.removeAttribute('aria-current');
+  }
+}
 function resume(){try{const saved=JSON.parse(localStorage.getItem(GAME_KEY));const state=replayRecord(saved);$('game-size').value=String(saved.size);$('game-handicap').value=String(saved.handicap||0);start(false);handicap=saved.handicap||0;komi=recordKomi(saved);gameMoves=saved.moves;board=state.board;history=state.history;last=state.last;captures=state.captures;passes=state.passes;snapshots=state.snapshots;ended=state.ended;$('bot-level').value=['easy','basic','search'].includes(saved.difficulty)?saved.difficulty:'easy';draw();persist();message('Đã tiếp tục ván đã lưu.');if(ended)finish();else if(state.next===2)reply();}catch{if(mode==='lesson')load(0);message('Không đọc được ván lưu. Dữ liệu cũ được giữ nguyên; hãy bắt đầu ván mới.','error');}}
 const current = () => lessons[lesson];
 const currentLevel = () => levels.find(l => l.id === level);
@@ -119,7 +126,7 @@ function load(i) {
   searchWorker?.terminate();searchWorker=null;pendingPoint=-1;
   epoch++;
   busy = false;
-  mode = 'lesson';
+  mode = 'lesson';syncNav();
   lesson = i;
   level = current().level;
   n = 5;
@@ -264,7 +271,7 @@ function start(save=true) {
   searchWorker?.terminate();searchWorker=null;
   epoch++;
   busy = false;
-  mode = 'game';
+  mode = 'game';syncNav();
   n = Number($('game-size').value);
   handicap=Number($('game-handicap').value)||0;komi=Number($('game-komi').value);if(!Number.isFinite(komi))komi=6.5;
   board = empty(n);for(const p of handicapPoints(n,handicap))board[p]=1;
@@ -320,6 +327,9 @@ setInterval(()=>{
   if(clockLeft===0&&!clockWarned&&!ended){clockWarned=true;message('Hết giờ do bạn đặt. Ván tập vẫn tiếp tục; đây chỉ là nhắc nhịp suy nghĩ.');}
 },1000);
 $('clock-limit').onchange=()=>{clockLeft=Number($('clock-limit').value)||0;clockWarned=false;};
+function savedLessonIndex(){let id=null;try{id=localStorage.getItem('igo-current-lesson-v1');}catch{}const i=lessons.findIndex(l=>l.id===id);return i<0?0:i;}
+document.querySelector('.site-nav a[data-nav="play"]')?.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.button)return;event.preventDefault();if(mode!=='game')$('practice').click();});
+document.querySelector('.site-nav a[data-nav="learn"]')?.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.button||mode!=='game')return;event.preventDefault();load(savedLessonIndex());});
 $('practice').onclick = () => {if(localStorage.getItem(GAME_KEY))resume();else start();};
 $('new-game').onclick = () => start();
 $('retry').onclick = () => load(lesson);

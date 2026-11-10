@@ -119,3 +119,10 @@ body>.support-floating-trigger{position:static;display:flex;width:fit-content;ma
 .ogs-form{margin:12px 0}.ogs-form label{display:block;font-size:13px;margin-bottom:6px}
 .ogs-form div{display:flex;gap:8px;flex-wrap:wrap}.ogs-form input{flex:1 1 260px;min-height:44px;padding:0 12px;border:1px solid var(--color-border,#d1d7c9);border-radius:8px;font:inherit}
 .ogs-form button{min-height:44px;padding:0 16px}
+
+/* Four-step navigation: equal columns with the step number above the label on narrow screens. */
+@media(max-width:560px){
+  .site-nav{display:grid;grid-template-columns:repeat(4,1fr);width:100%;gap:0}
+  .site-nav a{flex-direction:column;gap:3px;padding:6px 2px;min-height:56px;font-size:12px;line-height:1.25;text-align:center}
+}
+@media(max-width:560px){.site-nav .step-num{flex:none;width:22px;height:22px;min-width:22px;font-size:11px}}
