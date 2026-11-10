@@ -16,7 +16,7 @@
 
 .site-header{position:sticky;top:0;z-index:10;background:var(--color-canvas,#ffffff)}.workspace h2{scroll-margin-top:115px}.mobile-picker~nav{scroll-margin-top:115px}@media(max-width:700px){.workspace h2{scroll-margin-top:145px}.mode-help{margin-top:0}}
 
-.workspace>.term-help{margin:12px 0 18px;padding:12px 15px;border:1px solid var(--color-border,#d1d7c9);border-radius:8px;background:var(--color-surface-subtle,#e9ede3)}.workspace>.term-help[hidden]{display:none}.workspace>#test-result{scroll-margin-top:145px}
+.stage-panel>.term-help{margin:12px 0 18px;padding:12px 15px;border:1px solid var(--color-border,#d1d7c9);border-radius:8px;background:var(--color-surface-subtle,#e9ede3)}.stage-panel>.term-help[hidden]{display:none}.stage-panel>#test-result{scroll-margin-top:145px}
 
 .workspace{min-width:0}.board-scroll{max-width:100%;overflow-x:auto;padding-bottom:4px}#game-controls{margin-bottom:12px}#game-controls select{max-width:100%;font:inherit;padding:8px;border:1px solid var(--color-border,#d1d7c9);border-radius:6px;background:#fff;color:inherit}.size-help{font-size:13px;line-height:1.7;color:var(--color-text-body,#535e4b);margin:0 0 16px}#game-controls label{flex-wrap:wrap}
 
@@ -47,9 +47,7 @@ main h1.page-title,.path h1.page-title,.review-main h1.page-title{font-size:28px
 main{--board-max:520px}
 .train-main{--board-max:600px}
 .review-main{--board-max:760px}
-.workspace .board-scroll,.workspace>.play-surface,.workspace>.board-footer,.workspace>#feedback,.workspace>#answers,.workspace>.board-actions,.workspace>#attempt-status,.workspace>#explanation-wrap,.workspace>.reading-controls,.workspace>#variation{width:100%;max-width:var(--board-max);margin-inline:auto}
-.workspace:has(#game-controls:not([hidden])) .board-scroll,.workspace:has(#game-controls:not([hidden]))>.board-footer{max-width:none}
-.workspace>#feedback{min-height:0;margin-top:4px;margin-bottom:0}
+.stage-panel>#feedback{min-height:0;margin-top:4px;margin-bottom:0}
 .board-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
 .board-actions button{min-height:44px;padding:0 16px;font-size:14px}
 .board-actions #next{width:auto;margin:0 0 0 auto}
@@ -62,8 +60,8 @@ main{--board-max:520px}
   .workspace h2#title{font-size:21px}
   .site-nav a{padding:0 4px;font-size:12px;gap:6px}
   /* Reserve room for the pinned board controls below the page footer. */
-  .workspace>.board-actions{position:fixed;left:0;right:0;bottom:0;z-index:5;max-width:none;margin:0;flex-wrap:nowrap;overflow-x:auto;gap:6px;background:var(--color-canvas,#ffffff);border-top:1px solid var(--color-border,#d1d7c9);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
-  body:has(.workspace>.board-actions){padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .stage-panel>.board-actions{position:fixed;left:0;right:0;bottom:0;z-index:5;max-width:none;margin:0;flex-wrap:nowrap;overflow-x:auto;gap:6px;background:var(--color-canvas,#ffffff);border-top:1px solid var(--color-border,#d1d7c9);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+  body:has(.stage-panel>.board-actions){padding-bottom:calc(84px + env(safe-area-inset-bottom))}
   body > .support-floating-trigger {
     position: static;
     display: flex;

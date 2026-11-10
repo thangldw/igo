@@ -1,7 +1,9 @@
 import {analyzePosition} from './search-engine.js';
+import {suggestDead} from './dead-stones.js';
 import {empty,move} from './engine.js';
 self.onmessage=({data})=>{try{
- if(data.type==='move')self.postMessage({result:analyzePosition(data.board,data.size,2,data.history)});
+ if(data.type==='dead')self.postMessage({dead:suggestDead(data.board,data.size)});
+ else if(data.type==='move')self.postMessage({result:analyzePosition(data.board,data.size,2,data.history)});
  else{
   const {record}=data;let board=empty(record.size),history=[board.join('')];const findings=[];
   for(let k=0;k<record.moves.length;k++){const m=record.moves[k];if(m.color===1){const r=analyzePosition(board,record.size,1,history,m.point);if(r.actual&&r.best.point!==m.point)findings.push({move:k+1,played:m.point,...r.best,gap:r.best.value-r.actual.value});self.postMessage({progress:k+1,total:record.moves.length});}
