@@ -77,7 +77,7 @@ test('uncertain computation is separate from a losing result',()=>{
   assert.equal(result.win,undefined);
 });
 test('exercise ids, dimensions and choices are valid across all seven stages',()=>{
-  assert.equal(bank.length,176);assert.equal(questions.length,87);
+  assert.equal(bank.length,179);assert.equal(questions.length,90);
   assert.equal(new Set(bank.map(p=>p.id)).size,bank.length);
   for(const stage of stages)assert.ok(bank.filter(p=>p.stage===stage.id).length>=10);
   for(const p of bank){
