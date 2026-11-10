@@ -22,7 +22,7 @@ Ván với máy trên bàn 9×9, 13×13 hoặc 19×19; có hai mức cơ bản v
 
 ## Luật và giới hạn
 
-Đen đi trước; bắt nhóm hết khí; cấm tự sát; positional superko (không lặp lại thế bàn, bỏ lượt được phép). Hai lượt bỏ liên tiếp kết thúc. Đếm diện tích với komi 6,5. Điểm cuối chỉ là ước tính vì chưa có phân xử quân chết/seki. Chơi tiếp và bắt hết quân chết trước khi bỏ lượt. Máy heuristic không có mức rank, không dùng KataGo. Không phải triển khai đầy đủ bộ luật AGA hay Nhật.
+Đen đi trước; bắt nhóm hết khí; cấm tự sát; positional superko (không lặp lại thế bàn, bỏ lượt được phép). Hai lượt bỏ liên tiếp kết thúc. Đếm diện tích; komi mặc định 6,5 (0,5 khi chấp, chỉnh được). Điểm cuối chỉ là ước tính vì chưa có phân xử quân chết/seki. Chơi tiếp và bắt hết quân chết trước khi bỏ lượt. Máy heuristic không có mức rank, không dùng KataGo. Không phải triển khai đầy đủ bộ luật AGA hay Nhật.
 
 Tham khảo: https://www.britgo.org/intro/intro2.html và https://britgo.org/rules/agashort.html. Bài tập và mã nguồn tự viết.
 
@@ -30,9 +30,26 @@ Tham khảo: https://www.britgo.org/intro/intro2.html và https://britgo.org/rul
 
 Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub Actions. Workflow kiểm tra engine và tính hợp lệ các biến bài học, đóng gói các trang, module và ngân hàng bài static rồi deploy. Asset dùng đường dẫn tương đối, chạy tại `/igo/`.
 
+## Giao diện làm việc và tính năng mới (2026-11)
+
+- **Bố cục hai cột**: bàn cờ cỡ theo chiều cao màn hình, bên cạnh là đề, phản hồi và thao tác; trên mobile thanh thao tác cố định phía dưới. Nút “Bài tiếp theo” chỉ nổi bật khi bài đã xong. Nút tài trợ dùng chung không còn che nội dung.
+- **Hôm nay** (`train.html`): kế hoạch gồm bài đến hạn ôn trước, rồi bài mới theo lộ trình, mục tiêu 5 bài/ngày, chuỗi ngày và 7 ngày gần nhất. Dữ liệu `activity` và `goal` nằm trong `igo-study-v1` (cùng version 1; bản lưu cũ vẫn đọc được).
+- **Bốn trạng thái bài** trong danh sách chọn bài: mới, ✓ đã giải, ★ nhớ qua nhiều ngày, ↻ cần ôn. **Chủ đề mạnh/yếu** tính từ số lần sai và số bài đến hạn; bấm một chủ đề để luyện ngay.
+- **Gợi ý 3 mức** cho bài đọc: số khí của nhóm mục tiêu, rồi hàng chứa nước đúng, rồi nước cụ thể. Mọi mức đều tính là có hỗ trợ.
+- **Phát lại nước phản bác**: đi sai thì bàn hiện nước của bạn và nước Trắng đáp trả (engine đọc), rồi “Trở lại thế hiện tại”.
+- **Góc nhìn khác**: từ lần làm lại thứ hai, bài đọc được xoay/lật ngẫu nhiên trong 8 phép đối xứng. Luật cờ đối xứng nên lời giải còn nguyên (có test so sánh tập nước thắng). Chế độ kiểm tra luôn dùng hướng gốc.
+- **Sao lưu tiến độ**: xuất/nhập file JSON (`igo-backup`). Nhập chỉ giữ bài còn tồn tại, bản cũ được giữ ở khóa `igo-study-v1-before-import`.
+- **Offline (PWA)**: `manifest.webmanifest`, `sw.js` (precache + network-first), icon. Chỉ cache cùng origin; mở lại trang không cần mạng sau lần tải đầu. Khi thêm file mới phải thêm vào `pages.yml` và `CORE` của `sw.js`; test `deploy-manifest` kiểm tra điều này.
+- **Gợi ý quân chết** khi chấm điểm: mô phỏng ngẫu nhiên (có ưu tiên bắt/cứu atari) trong Web Worker. Chỉ là gợi ý để kiểm tra, không chứng minh; không nhận ra seki.
+- **Chấp, komi và đồng hồ** ở ván với máy: chấp 2–9 quân trên điểm sao (máy cầm Trắng đi trước), komi chọn được, SGF xuất `HA`/`AB`/`KM`. Đồng hồ chỉ nhắc nhịp suy nghĩ của bạn, không xử thua. Bản ghi cũ không có `handicap`/`komi` vẫn chạy như trước.
+- **Nhập ván từ OGS** (`review.html`): dán link hoặc số ván; app tải SGF công khai từ `online-go.com` ngay trên trình duyệt (OGS cho phép CORS). Không có tài khoản, không gửi dữ liệu đi đâu.
+- **Nội dung thêm**: 3 câu có đáp án kiểm chứng bằng engine trong test (bắt hai quân ở góc, điểm sao, điểm trung lập trong diện tích). Chế độ kiểm tra 10 bài hiện thêm thời gian trung bình mỗi bài.
+
+Chủ ý chưa làm: đặt tên máy theo sức chơi (chưa có hiệu chỉnh hạng), engine mạnh hơn, tài khoản/bảng xếp hạng, ước lượng hạng, đa ngôn ngữ.
+
 ## Lộ trình hướng tới 3 dan nghiệp dư
 
-`train.html` có **176 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
+`train.html` có **179 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
 
 | Mốc nội dung | Số bài |
 | --- | ---: |

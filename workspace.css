@@ -1,0 +1,121 @@
+/* Two-pane workspace (2026-11).
+   The board sits beside its prompt, feedback and actions, and is sized from the
+   viewport height so the whole attempt loop fits on one screen. Colors, fonts and
+   the header come from /css/tokens.css and style.css; this file only adds layout. */
+
+main{--board-w:clamp(300px,calc(100vh - 280px),var(--board-max,520px))}
+@supports (height:100dvh){main{--board-w:clamp(300px,calc(100dvh - 280px),var(--board-max,520px))}}
+
+/* The guide moved into the panel, so the page needs only lesson list + workspace. */
+.learn-main,.train-main{grid-template-columns:240px minmax(0,1fr);gap:40px;max-width:1440px;margin-top:28px}
+.train-main>.practice-plan{grid-column:2}
+@media(max-width:1000px){.learn-main,.train-main{grid-template-columns:200px minmax(0,1fr);gap:24px}}
+@media(max-width:700px){.train-main>.practice-plan{grid-column:auto}}
+
+.workspace .board-heading{min-height:0;margin:0 0 14px}
+.stage{display:grid;grid-template-columns:minmax(280px,var(--board-w)) minmax(0,1fr);gap:32px;align-items:start}
+.stage-board{position:sticky;top:88px;min-width:0}
+.stage-board .board-scroll{max-width:100%;overflow-x:auto}
+.stage-board .board-footer{padding:14px 2px 0}
+.stage-panel{min-width:0;display:flex;flex-direction:column;gap:12px}
+.stage-panel>*{margin-top:0;margin-bottom:0}
+.stage-panel>.term-help{margin:0}
+
+/* Prompts without a board (concept questions): one readable column, no empty left pane. */
+.stage:has(#play-surface[hidden]){grid-template-columns:minmax(0,720px)}
+.stage:has(#play-surface[hidden]) .stage-board{display:none}
+.stage-panel .concept{min-height:0;padding:28px}
+
+/* Vs. computer: the board takes the free width, controls stay in a fixed column. */
+.learn-main .workspace:has(#game-controls:not([hidden])) .stage{grid-template-columns:minmax(0,1fr) minmax(300px,360px)}
+.learn-main .workspace:has(#game-controls:not([hidden])) .stage-board{max-width:none}
+#game-controls{margin-bottom:0}
+
+@media(max-width:960px){
+  .stage,.learn-main .workspace:has(#game-controls:not([hidden])) .stage{grid-template-columns:minmax(0,1fr);gap:16px}
+  .stage-board{position:static;width:min(100%,var(--board-w));margin-inline:auto}
+  .learn-main .workspace:has(#game-controls:not([hidden])) .stage-board{width:100%}
+}
+
+/* The guide is part of the panel now. */
+.stage-panel .guide{border:0;border-top:1px solid var(--color-border,#d1d7c9);padding:18px 0 0;margin-top:8px}
+.stage-panel .guide h3{font-size:18px;margin:8px 0}
+.stage-panel .guide .note{margin:12px 0}
+.stage-panel .guide .glossary{margin-top:14px;padding-top:14px}
+.stage-panel .guide .workflow-help{margin:12px 0}
+#terms:empty{display:none}
+
+/* One primary action at a time: "next" is quiet until the problem is finished. */
+.board-actions #next:not(.primary){background:transparent;border-color:var(--color-border,#d1d7c9);color:var(--color-text,#23291f)}
+.board-actions #next:not(.primary):hover{background:var(--color-surface-subtle,#e9ede3)}
+.board-actions #next.primary{box-shadow:0 0 0 3px color-mix(in srgb,var(--color-accent,#965025) 22%,transparent)}
+
+/* Sidebar actions share one size; "play" switches this page to a game, so no external-link arrow. */
+.learn-main aside #practice,.learn-main aside #resume-game{width:100%;min-height:44px;font-size:14px;text-align:left}
+.learn-main aside #resume-game{margin-top:8px}
+
+/* Shared "Fuel my next build" trigger: keep it below the content, like the shared stylesheet does for practice pages. */
+body>.support-floating-trigger{position:static;display:flex;width:fit-content;margin:24px auto max(16px,env(safe-area-inset-bottom))}
+
+/* Today card, topic mastery, backup (train page). */
+.today-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center;padding:16px 18px;margin:0 0 16px;border:1px solid var(--color-border,#d1d7c9);border-radius:10px;background:var(--color-surface-subtle,#e9ede3)}
+.today-card[hidden]{display:none}
+.today-card h2{font-size:16px;margin:0;font-weight:600}
+.today-card p{margin:0;font-size:13px;line-height:1.6;color:var(--color-text-body,#535e4b);grid-column:1}
+.today-card .today-action{grid-column:2;grid-row:1/span 2;margin:0;width:auto;min-height:44px;padding:0 18px}
+.week-dots{display:flex;gap:5px;margin-top:4px}
+.week-dots i{width:10px;height:10px;border-radius:50%;background:var(--color-border,#d1d7c9)}
+.week-dots i.on{background:var(--color-accent,#965025)}
+.week-dots i.today{outline:2px solid var(--color-text,#23291f);outline-offset:1px}
+@media(max-width:700px){.today-card{grid-template-columns:1fr}.today-card .today-action{grid-column:1;grid-row:auto;width:100%}}
+
+.topic-panel,.backup-panel{font-size:12px;line-height:1.7;margin-top:14px}
+.topic-panel summary,.backup-panel summary{cursor:pointer;font-weight:600;min-height:24px}
+.topic-panel summary,.backup-panel summary,.rank-note summary{font-size:12px}
+#topic-stats{display:grid;gap:6px;margin-top:8px}
+.topic-row{display:grid;gap:4px;width:100%;padding:7px 8px;text-align:left;border:0;border-radius:6px;font-size:12px;background:transparent}
+.topic-row:hover{background:var(--color-surface-subtle,#e9ede3)}
+.topic-row.weak b:after{content:' · nên luyện';font-weight:500;color:var(--color-accent,#965025)}
+.topic-row span{display:flex;justify-content:space-between;gap:8px}
+.topic-bar{height:4px;background:var(--color-border,#d1d7c9);border-radius:4px;overflow:hidden}
+.topic-bar i{display:block;height:100%;background:var(--color-accent,#965025)}
+.backup-panel p{margin:8px 0;color:var(--color-text-body,#535e4b)}
+.backup-actions{display:flex;gap:8px;flex-wrap:wrap}
+.backup-actions button,.file-button{min-height:44px;padding:0 14px;font-size:13px}
+.file-button{position:relative;display:inline-flex;align-items:center;border:1px solid var(--color-border,#d1d7c9);border-radius:8px;cursor:pointer}
+.file-button:hover{background:var(--color-surface-subtle,#e9ede3)}
+.file-button input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.file-button:has(input:focus-visible){outline:3px solid var(--color-accent,#965025);outline-offset:3px}
+
+/* Problem status marks in the problem picker legend and stage cards. */
+.status-legend{font-size:12px;color:var(--color-text-body,#535e4b);margin:4px 0 0}
+
+/* Review page: board sized to the viewport; empty state is one centered column. */
+.review-main{--board-w:clamp(320px,calc(100vh - 340px),var(--board-max,760px))}
+@supports (height:100dvh){.review-main{--board-w:clamp(320px,calc(100dvh - 340px),var(--board-max,760px))}}
+.review-main #review-surface{width:min(100%,var(--board-w));margin-inline:auto}
+.review-main:has(#review-surface[hidden]){grid-template-columns:minmax(0,760px);justify-content:center;gap:24px}
+.review-main:has(#review-surface[hidden]) .review-guide{border-left:0;padding-left:0;border-top:1px solid var(--color-border,#d1d7c9);padding-top:24px}
+@media(max-width:700px){.review-main{--board-w:100%}}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* Train page: mode switch, picker and heading sit above the board, so reserve more height for them. */
+.train-main{--board-w:clamp(300px,calc(100vh - 400px),var(--board-max,600px))}
+@supports (height:100dvh){.train-main{--board-w:clamp(300px,calc(100dvh - 400px),var(--board-max,600px))}}
+.train-main .mode-help{margin:8px 0 10px;min-height:0}
+.train-main .problem-tools{margin:0 0 12px;gap:12px}
+.train-main .problem-tools label{font-size:12px}
+.train-main .problem-tools select{min-height:40px}
+.train-main .board-heading{margin-bottom:10px}
+.train-main .board-heading h2{font-size:22px}
+.stage-panel .board-actions{flex-wrap:wrap}
+.stage-panel .board-actions #next{flex:1 1 100%;order:9}
+.train-main .today-card{padding:10px 14px;margin:0 0 12px}
+.train-main .today-card p{font-size:12px}
+.today-card{position:relative}.today-card .week-dots{position:absolute;right:14px;top:50%;translate:0 -50%;margin:0}
+#game-clock{font-variant-numeric:tabular-nums;margin-left:auto}
+#game-clock.clock-low{color:var(--color-danger,#b3261e);font-weight:600}
+.ogs-form{margin:12px 0}.ogs-form label{display:block;font-size:13px;margin-bottom:6px}
+.ogs-form div{display:flex;gap:8px;flex-wrap:wrap}.ogs-form input{flex:1 1 260px;min-height:44px;padding:0 12px;border:1px solid var(--color-border,#d1d7c9);border-radius:8px;font:inherit}
+.ogs-form button{min-height:44px;padding:0 16px}

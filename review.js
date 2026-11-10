@@ -1,4 +1,5 @@
 import {parseSgf,replaySgf,validateSgf,trialMove} from './sgf.js';
+import {parseOgsGameId,fetchOgsSgf} from './ogs.js';
 import {group} from './engine.js';
 import {renderTerms} from './terms.js';
 renderTerms(document.getElementById('terms'),'SGF, đọc biến, ko, superko, komi, phản bác');
@@ -47,6 +48,13 @@ function navigate(n){if(!game||trials.length)return;rememberDraft();cursor=Math.
 function play(point){if(!game)return;try{trials.push(trialMove(current(),point,game.size));inspected=[];$('liberty-status').textContent='';render();}catch(e){$('trial-status').textContent=e.message;}}
 $('first').onclick=()=>navigate(0);$('prev').onclick=()=>navigate(cursor-1);$('next').onclick=()=>navigate(cursor+1);$('last').onclick=()=>navigate(frames.length-1);$('seek').oninput=()=>navigate(Number($('seek').value));
 $('pass').onclick=()=>play(-1);$('undo').onclick=()=>{trials.pop();inspected=[];render();};$('reset').onclick=()=>{trials=[];inspected=[];render();};$('liberties').onchange=()=>{inspected=[];$('liberty-status').textContent='';render();};
+$('ogs-form').onsubmit=async event=>{
+  event.preventDefault();const id=parseOgsGameId($('ogs-url').value);
+  if(!id){$('status').textContent='Dùng link dạng https://online-go.com/game/12345 hoặc chỉ số ván.';return;}
+  $('status').textContent='Đang tải ván từ OGS…';
+  try{open(await fetchOgsSgf(id),`OGS ${id}`);}
+  catch(e){$('status').textContent=`Không nhập được từ OGS: ${e.message==='Failed to fetch'?'không kết nối được (mạng hoặc OGS chặn).':e.message} Bạn có thể tải SGF trên OGS rồi chọn file. Ván đang mở được giữ nguyên.`;}
+};
 $('sample').onclick=()=>{try{open(sample,'Ván minh họa tự tạo');}catch(e){$('status').textContent=e.message;}};
 $('file').onchange=async()=>{const file=$('file').files[0];if(!file)return;if(file.size>1000000){$('status').textContent='File vượt 1 MB; ván đang mở được giữ nguyên.';return;}try{open(await file.text(),file.name);}catch(e){$('status').textContent=`Không mở được: ${e.message} Ván đang mở được giữ nguyên.`;}};
 $('note-form').onsubmit=e=>{e.preventDefault();if(!game)return;const note={move:base().count,path:choices.slice(0,cursor)};for(const id of ['candidates','refutation','conclusion'])note[id]=$(id).value.trim();notes[noteKey()]=note;
