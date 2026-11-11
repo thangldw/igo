@@ -22,7 +22,7 @@ Ván với máy trên bàn 9×9, 13×13 hoặc 19×19; có hai mức cơ bản v
 
 ## Luật và giới hạn
 
-Đen đi trước; bắt nhóm hết khí; cấm tự sát; positional superko (không lặp lại thế bàn, bỏ lượt được phép). Hai lượt bỏ liên tiếp kết thúc. Đếm diện tích; komi mặc định 6,5 (0,5 khi chấp, chỉnh được). Điểm cuối chỉ là ước tính vì chưa có phân xử quân chết/seki. Chơi tiếp và bắt hết quân chết trước khi bỏ lượt. Máy heuristic không có mức rank, không dùng KataGo. Không phải triển khai đầy đủ bộ luật AGA hay Nhật.
+Đen đi trước; bắt nhóm hết khí; cấm tự sát; positional superko (không lặp lại thế bàn, bỏ lượt được phép). Hai lượt bỏ liên tiếp kết thúc. Đếm diện tích; komi mặc định 6,5 (0,5 khi chấp, chỉnh được). Điểm cuối chỉ là ước tính: người chơi tự đánh dấu quân chết (có gợi ý, xem bên dưới) và chưa có phân xử seki phức tạp. Chơi tiếp và bắt hết quân chết trước khi bỏ lượt. Máy heuristic không có mức rank, không dùng KataGo. Không phải triển khai đầy đủ bộ luật AGA hay Nhật.
 
 Tham khảo: https://www.britgo.org/intro/intro2.html và https://britgo.org/rules/agashort.html. Bài tập và mã nguồn tự viết.
 
@@ -32,7 +32,7 @@ Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub 
 
 ## Giao diện làm việc và tính năng mới (2026-11)
 
-- **Bố cục hai cột**: bàn cờ cỡ theo chiều cao màn hình, bên cạnh là đề, phản hồi và thao tác; trên mobile thanh thao tác cố định phía dưới. Nút “Bài tiếp theo” chỉ nổi bật khi bài đã xong. Nút tài trợ dùng chung không còn che nội dung.
+- **Bố cục hai cột**: bàn cờ cỡ theo chiều cao màn hình, bên cạnh là đề, phản hồi và thao tác; trên mobile thanh thao tác cố định phía dưới. Nút “Bài tiếp theo” chỉ nổi bật khi bài đã xong. Nút tài trợ dùng chung nằm trên đầu trang, cùng hàng với logo.
 - **Hôm nay** (`train.html`): kế hoạch gồm bài đến hạn ôn trước, rồi bài mới theo lộ trình, mục tiêu 5 bài/ngày, chuỗi ngày và 7 ngày gần nhất. Dữ liệu `activity` và `goal` nằm trong `igo-study-v1` (cùng version 1; bản lưu cũ vẫn đọc được).
 - **Bốn trạng thái bài** trong danh sách chọn bài: mới, ✓ đã giải, ★ nhớ qua nhiều ngày, ↻ cần ôn. **Chủ đề mạnh/yếu** tính từ số lần sai và số bài đến hạn; bấm một chủ đề để luyện ngay.
 - **Gợi ý 3 mức** cho bài đọc: số khí của nhóm mục tiêu, rồi hàng chứa nước đúng, rồi nước cụ thể. Mọi mức đều tính là có hỗ trợ.
@@ -43,7 +43,7 @@ Repository `thangldw/igo`, branch `main`. Settings → Pages → Source: GitHub 
 - **Gợi ý quân chết** khi chấm điểm: mô phỏng ngẫu nhiên (có ưu tiên bắt/cứu atari) trong Web Worker. Chỉ là gợi ý để kiểm tra, không chứng minh; chỉ nhận seki đơn giản (mọi khí của nhóm là điểm cả hai bên đều tự atari); seki có ko hoặc khí ngoài vẫn có thể bị gợi ý nhầm, hãy kiểm tra tay.
 - **Chấp, komi và đồng hồ** ở ván với máy: chấp 2–9 quân trên điểm sao (máy cầm Trắng đi trước), komi chọn được, SGF xuất `HA`/`AB`/`KM`. Đồng hồ chỉ nhắc nhịp suy nghĩ của bạn, không xử thua. Bản ghi cũ không có `handicap`/`komi` vẫn chạy như trước.
 - **Nhập ván từ OGS** (`review.html`): dán link hoặc số ván; app tải SGF công khai từ `online-go.com` ngay trên trình duyệt (OGS cho phép CORS). Không có tài khoản, không gửi dữ liệu đi đâu.
-- **Nội dung thêm**: 3 câu có đáp án kiểm chứng bằng engine trong test (bắt hai quân ở góc, điểm sao, điểm trung lập trong diện tích). Chế độ kiểm tra 10 bài hiện thêm thời gian trung bình mỗi bài.
+- **Nội dung thêm**: 3 câu kiểm chứng (bắt hai quân ở góc, điểm sao, điểm trung lập), 20 bài tesuji ở biên 6×6 (engine chứng minh đúng một nước thắng, là nước hy sinh), 10 bài đếm diện tích yose (đáp án đối chiếu `area-score.js` trong test) và 1 câu khai cuộc (đường 3/4, chỉ nêu xu hướng, không do engine kiểm). Khai cuộc là mảng còn mỏng. Chế độ kiểm tra 10 bài hiện thêm thời gian trung bình mỗi bài.
 
 Chủ ý chưa làm: đặt tên máy theo sức chơi (chưa có hiệu chỉnh hạng), engine mạnh hơn, tài khoản/bảng xếp hạng, ước lượng hạng, đa ngôn ngữ.
 
@@ -54,9 +54,9 @@ Chủ ý chưa làm: đặt tên máy theo sức chơi (chưa có hiệu chỉnh
 | Mốc nội dung | Số bài |
 | --- | ---: |
 | 30–20 kyu | 16 |
-| 20–10 kyu | 24 |
-| 10–5 kyu | 29 |
-| 5–1 kyu | 31 |
+| 20–10 kyu | 40 |
+| 10–5 kyu | 46 |
+| 5–1 kyu | 32 |
 | Mục tiêu 1 dan | 34 |
 | Mục tiêu 2 dan | 18 |
 | Mục tiêu 3 dan nghiệp dư | 24 |
@@ -64,7 +64,7 @@ Chủ ý chưa làm: đặt tên máy theo sức chơi (chưa có hiệu chỉnh
 Các nhãn là mục tiêu học, **chưa được hiệu chuẩn theo rating**. Không có cam kết giải hết là đạt 3 dan.
 
 - 69 thế bắt quân và phá không gian mắt; 20 thế tạo hai mắt thật. Đây là các thế riêng được tạo tại dự án, không cộng biến xoay/lật vào số bài.
-- 87 câu phân tích về luật, khí, hình cờ, đọc biến, sống/chết, hướng chơi, tấn công, ko, quan tử và thực chiến. Những câu về chiến lược nêu giả định; sơ đồ 19×19 là minh họa, không phải đánh giá tối ưu của KataGo.
+- 121 câu về luật, khí, hình cờ, đọc biến, sống/chết, hướng chơi, tấn công, ko, quan tử và thực chiến. Những câu về chiến lược nêu giả định; sơ đồ 19×19 là minh họa, không phải đánh giá tối ưu của KataGo.
 - Bộ đọc minimax xét mọi nước đặt hợp lệ trên **toàn bàn bài tập**, với positional superko; lịch sử bắt đầu từ thế bài, trắng được bỏ lượt. Đen phải đặt quân để đạt mục tiêu: nếu đen bỏ lượt, trắng có thể bỏ lượt kết thúc bàn khi mục tiêu chưa đạt. Mục tiêu bắt hoặc tạo hai mắt phải đạt trong giới hạn 1–11 lượt cả hai bên. Mọi nước còn bảo đảm mục tiêu đều được chấp nhận, không chỉ một nước mẫu.
 - Hai mắt được kiểm tra bằng điều kiện đủ nghiêm ngặt: hai điểm trống riêng, mỗi điểm chỉ giáp quân của cùng nhóm đen. Đây không phải bộ nhận diện mọi dạng sống/seki.
 - Trắng chọn một biến đáp được bộ đọc kiểm tra. Chuỗi đã chơi có thể xem lại từng lượt. Bộ đọc có giới hạn 250.000 nút mỗi yêu cầu trong Web Worker; nếu không tính xong, trả trạng thái chưa chấm, không tự kết luận sai.
@@ -96,7 +96,7 @@ Tham chiếu định dạng: [SGF FF[4]](https://www.red-bean.com/sgf/sgf4.html)
 
 ## Điều hướng và cách diễn đạt
 
-Ba trang dùng chung menu luôn hiện: **Học cách chơi → Luyện bài tập → Xem lại ván**. Mục đang mở được đánh dấu bằng `aria-current`; có liên kết bỏ qua menu cho bàn phím. Bài/chặng trên điện thoại dùng hộp chọn thay cho danh sách cuộn ngang. Khi chọn bài/chặng hoặc đi trước/sau, trang đưa tiêu điểm tới nội dung mới.
+Ba trang dùng chung menu bốn bước luôn hiện: **1 Học cách chơi → 2 Luyện bài tập → 3 Chơi với máy → 4 Xem lại ván**. Mục đang mở được đánh dấu bằng `aria-current`; có liên kết bỏ qua menu cho bàn phím. Bài/chặng trên điện thoại dùng hộp chọn thay cho danh sách cuộn ngang. Khi chọn bài/chặng hoặc đi trước/sau, trang đưa tiêu điểm tới nội dung mới.
 
 Địa chỉ lưu bài đang mở (`lesson`, hoặc `stage` + `problem`) nên tải lại/mở liên kết trở về đúng bài. Chế độ chơi máy có `play=1` và là bước 3 của thanh điều hướng; vào lại sẽ tự mở ván đã lưu (không còn nút “Chơi với máy”/“Tiếp tục ván đã lưu” riêng). Các khóa tiến độ cũ giữ nguyên.
 
