@@ -18,3 +18,11 @@ test('each page marks exactly its own item as current',()=>{
   assert.deepEqual(current('train.html'),['train']);
   assert.deepEqual(current('review.html'),['review']);
 });
+
+test('support button slot sits in the header between the brand and navigation on every page',()=>{
+  for(const f of ['index.html','train.html','review.html']){
+    const html=readFileSync(new URL(`../${f}`,import.meta.url),'utf8');
+    assert.match(html,/<\/div><div id="supportSlot" class="support-slot"><\/div><nav class="site-nav"/,f);
+    assert.equal((html.match(/id="supportSlot"/g)||[]).length,1,f);
+  }
+});
