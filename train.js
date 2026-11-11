@@ -17,7 +17,7 @@ function showPuzzle(){const heading=$('test-result').hidden?$('title'):$('test-r
 const stageInfo=()=>stages.find(s=>s.id===stage);
 const coordinate=(point,size)=>point===-1?'bỏ lượt':`${letters[point%size]}${size-Math.floor(point/size)}`;
 function feedback(text,type=''){$('feedback').textContent=text;$('feedback').className=type;}
-function save(){if(storageWritable){try{localStorage.setItem(KEY,JSON.stringify(study));}catch{storageAvailable=false;}}$('storage-status').textContent=!storageWritable?'Tiến độ cũ không tương thích; chưa ghi đè. Phiên này chỉ lưu trong bộ nhớ.':storageAvailable?'Tiến độ lưu trên trình duyệt này.':'Không lưu được tiến độ tại máy. Giữ tab mở để tiếp tục phiên này.';}
+function save(){if(storageWritable){try{localStorage.setItem(KEY,JSON.stringify(study));}catch{storageAvailable=false;}}$('storage-status').textContent=!storageWritable?'Tiến độ cũ không tương thích; chưa ghi đè. Phiên này chỉ lưu trong bộ nhớ.':storageAvailable?'Lưu trên trình duyệt này.':'Không lưu được tiến độ tại máy. Giữ tab mở để tiếp tục phiên này.';}
 function shuffle(items){const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;}
 function renderProgress(){
   $('stages').replaceChildren();$('stage-select').replaceChildren();
@@ -27,7 +27,7 @@ function renderProgress(){
     const rank=document.createElement('span');rank.textContent=s.name;
     const option=document.createElement('option');option.value=s.id;option.textContent=`${stages.indexOf(s)+1}. ${stageLabels[s.id]} · ${s.name}`;$('stage-select').append(option);
     const name=document.createElement('strong');name.textContent=`${stages.indexOf(s)+1}. ${stageLabels[s.id]}`;
-    const count=document.createElement('span');count.textContent=`${stats.clean}/${stats.total} tự giải · ${stats.due} cần ôn`;
+    const count=document.createElement('span');count.textContent=`${stats.clean}/${stats.total}${stats.due?` · ${stats.due} cần ôn`:''}`;count.title=`${stats.clean}/${stats.total} bài tự giải`;
     button.append(name,rank,count);button.onclick=()=>{stage=s.id;topic='all';rebuild();showPuzzle();};$('stages').append(button);
   }
   $('stage-select').value=stage;
@@ -104,7 +104,7 @@ function load(){
   $('hint').disabled=mode==='test';$('solution').disabled=mode==='test';$('retry').disabled=mode==='test';
   $('reading-controls').hidden=false;
   $('previous').disabled=mode==='test'||index===0;
-  $('mode-help').textContent=mode==='today'?'Kế hoạch hôm nay: bài đến hạn ôn trước, rồi bài mới theo thứ tự lộ trình. Không cần chọn chặng.':mode==='practice'?'Chọn chặng luyện, rồi chọn chủ đề và bài. Bài sai sẽ được đưa vào “Ôn bài cần nhớ”.':mode==='review'?'Chỉ hiện bài sai hoặc bài đã tới lịch ôn của chặng đang chọn. Chưa có bài thì đổi chặng hoặc chọn “Làm bài mới”.':'10 bài ngẫu nhiên trong chặng đang chọn. Chấm lần thử đầu; không có gợi ý, xem khí hay giải thích thuật ngữ.';
+  $('mode-help').textContent=mode==='today'?'Kế hoạch hôm nay: bài đến hạn ôn trước, rồi bài mới theo thứ tự lộ trình. Không cần chọn chặng.':mode==='practice'?'Chọn chủ đề và bài. Bài sai chuyển sang “Ôn bài cần nhớ”.':mode==='review'?'Chỉ hiện bài sai hoặc bài đã tới lịch ôn của chặng đang chọn. Chưa có bài thì đổi chặng hoặc chọn “Làm bài mới”.':'10 bài ngẫu nhiên trong chặng đang chọn. Chấm lần thử đầu; không có gợi ý, xem khí hay giải thích thuật ngữ.';
   if(!queue.length){
     renderTerms($('terms'),'');puzzle=null;$('title').textContent=mode==='review'?'Chưa có bài cần ôn ở mốc này':mode==='today'?'Hôm nay đã xong kế hoạch':'Chưa có bài theo bộ lọc';
     $('chapter').textContent=stageInfo().name;$('objective').textContent='';$('play-surface').hidden=true;
@@ -138,7 +138,7 @@ function load(){
     });
   }
   $('next').disabled=mode==='test';$('next').classList.toggle('primary',false);
-  feedback(mode==='test'?'Lần thử đầu quyết định điểm. Gợi ý đã tắt.':'Đọc trước khi đi. Gợi ý hoặc xem khí sẽ được ghi là có hỗ trợ.');
+  feedback(mode==='test'?'Lần thử đầu quyết định điểm. Gợi ý đã tắt.':'Đọc trước khi đi.');
   draw();
 }
 function draw(){
@@ -168,7 +168,7 @@ function draw(){
   $('depth').textContent=puzzle.kind==='reading'?`Còn ${Math.max(viewStep>=0?puzzle.depth-viewStep:remaining,0)} lượt cả hai bên`:puzzle.size?'Sơ đồ minh họa':'';
   $('puzzle-pass').disabled=busy||finished;
   $('hint').textContent=puzzle.kind==='reading'&&hintLevel?`Gợi ý ${Math.min(hintLevel+1,3)}/3`:'Gợi ý';
-  $('attempt-status').textContent=`${wrong?`${wrong} lần sai · `:''}${assisted?'Đã dùng hỗ trợ':mode==='test'?'Kiểm tra không gợi ý':'Chưa dùng hỗ trợ'}`;
+  $('attempt-status').textContent=`${wrong?`${wrong} lần sai · `:''}${assisted?'Đã dùng gợi ý':mode==='test'?'Kiểm tra không gợi ý':'Chưa dùng gợi ý'}`;
 }
 function startAttempt(){if(!attemptStarted){beginAttempt(study,puzzle.id);attemptStarted=true;save();}}
 function markAssisted(){startAttempt();assisted=true;reveal(study,puzzle.id);save();}
