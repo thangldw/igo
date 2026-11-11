@@ -119,3 +119,27 @@ body>.support-floating-trigger{position:static;display:flex;width:fit-content;ma
 .ogs-form{margin:12px 0}.ogs-form label{display:block;font-size:13px;margin-bottom:6px}
 .ogs-form div{display:flex;gap:8px;flex-wrap:wrap}.ogs-form input{flex:1 1 260px;min-height:44px;padding:0 12px;border:1px solid var(--color-border,#d1d7c9);border-radius:8px;font:inherit}
 .ogs-form button{min-height:44px;padding:0 16px}
+
+/* Four-step navigation: equal columns with the step number above the label on narrow screens. */
+@media(max-width:560px){
+  .site-nav{display:grid;grid-template-columns:repeat(4,1fr);width:100%;gap:0}
+  .site-nav a{flex-direction:column;gap:3px;padding:6px 2px;min-height:56px;font-size:12px;line-height:1.25;text-align:center}
+}
+@media(max-width:560px){.site-nav .step-num{flex:none;width:22px;height:22px;min-width:22px;font-size:11px}}
+
+/* Shared "support" button lives in the header, just before step 1 of the navigation (via the shared #supportSlot hook). */
+.site-header .support-slot{display:flex;align-items:center;flex:none}
+.site-header .support-slot .support-floating-trigger{position:static;z-index:auto;min-height:40px;padding:0 14px;border-radius:10px;font-size:13px;white-space:nowrap}
+@media(max-width:900px){.site-header .site-nav{order:3;flex:1 0 100%}.site-header .support-slot{margin-left:auto}}
+@media(max-width:560px){
+  .site-header{flex-wrap:wrap}
+  .site-header .app-owner-group{flex:0 1 auto;min-width:0}
+  .site-header .support-slot{flex:0 1 auto;min-width:0}
+  .site-header .support-slot .support-floating-trigger{min-height:40px;max-width:112px;padding:4px 10px;font-size:12px;line-height:1.2;white-space:normal;text-align:center}
+}
+/* Very narrow phones (≤359px): drop the kanji subtitle and tighten the nav so brand + support button + four steps still fit. */
+@media(max-width:359px){
+  .site-header .app-owner-title span{display:none}
+  .site-header .support-slot .support-floating-trigger{max-width:100px;font-size:11px;padding:4px 8px}
+  .site-nav a{font-size:11px;padding:6px 0}
+}
