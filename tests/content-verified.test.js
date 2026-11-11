@@ -36,7 +36,7 @@ test('dame-area: playing a neutral point gains exactly one area point',()=>{
 import {captureReader} from '../reading.js';
 import {group} from '../engine.js';
 test('tesuji-edge: exactly one keyed move captures, the others do not, and the keyed move is a sacrifice',()=>{
-  const list=questions.filter(q=>q.id.startsWith('q-tesuji-edge-'));assert.equal(list.length,6);
+  const list=questions.filter(q=>q.id.startsWith('q-tesuji-edge-'));assert.equal(list.length,20);
   for(const q of list){
     const b=boardOf(q),n=q.size,target=point(q.prompt.match(/chứa ([A-T]\d+)/)[1],n);
     assert.equal(b[target],2,q.id);
@@ -54,4 +54,16 @@ test('yose-count: scores in the explanation match the area scorer',()=>{
   assert.deepEqual([sa.black,sa.white],[16,29]);assert.equal(a.choices[a.answer],'Trắng hơn 13');
   const c=byId('yose-count-2'),sc=areaScore(boardOf(c),c.size,[],6.5);
   assert.deepEqual([sc.black,sc.white],[15,35.5]);assert.equal(c.choices[c.answer],'Trắng hơn 20,5');
+});
+test('yose-count-gen: every answer matches the area scorer, ignoring-komi and mirrored answers are distractors',()=>{
+  const list=questions.filter(q=>q.id.startsWith('q-yose-count-gen-'));assert.equal(list.length,8);
+  const fmt=v=>v===0?'Hòa':(v>0?'Đen hơn ':'Trắng hơn ')+String(Math.abs(v)).replace('.',',');
+  for(const q of list){
+    const komi=Number(q.prompt.match(/komi ([\d,]+)/)[1].replace(',','.')),b=boardOf(q);
+    const s=areaScore(b,q.size,[],komi),s0=areaScore(b,q.size,[],0);
+    assert.equal(q.choices[q.answer],fmt(s.black-s.white),q.id);
+    assert.ok(q.choices.includes(fmt(s0.black-s0.white)),`${q.id}: komi-less distractor`);
+    assert.equal(new Set(q.choices).size,3,q.id);
+    assert.ok(q.explanation.includes(`Đen: ${s.black} điểm`),q.id);
+  }
 });
