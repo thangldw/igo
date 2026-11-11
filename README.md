@@ -49,7 +49,7 @@ Chủ ý chưa làm: đặt tên máy theo sức chơi (chưa có hiệu chỉnh
 
 ## Lộ trình hướng tới 3 dan nghiệp dư
 
-`train.html` có **179 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
+`train.html` có **188 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
 
 | Mốc nội dung | Số bài |
 | --- | ---: |
