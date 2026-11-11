@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {questions,stages} from '../curriculum.js';
 test('new stages add 42 exercises without replacing old question ids',()=>{
   assert.equal(stages.length,7);assert.equal(questions.filter(q=>q.stage==='dan2').length,18);assert.equal(questions.filter(q=>q.stage==='dan3').length,24);
-  assert.ok(questions.some(q=>q.id==='q-rank-proof'&&q.stage==='dan'));assert.equal(new Set(questions.map(q=>q.id)).size,99);
+  assert.ok(questions.some(q=>q.id==='q-rank-proof'&&q.stage==='dan'));assert.equal(new Set(questions.map(q=>q.id)).size,121);
 });
 test('finite endgame exercise answers match two-outcome arithmetic',()=>{
   const family=questions.filter(q=>q.id.startsWith('q-yose-independent-'));
