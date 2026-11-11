@@ -32,3 +32,26 @@ test('dame-area: playing a neutral point gains exactly one area point',()=>{
   assert.equal(after.black-base.black,1);assert.equal(after.white,base.white);
   assert.equal(q.choices[q.answer].startsWith('Tăng 1'),true);
 });
+
+import {captureReader} from '../reading.js';
+import {group} from '../engine.js';
+test('tesuji-edge: exactly one keyed move captures, the others do not, and the keyed move is a sacrifice',()=>{
+  const list=questions.filter(q=>q.id.startsWith('q-tesuji-edge-'));assert.equal(list.length,6);
+  for(const q of list){
+    const b=boardOf(q),n=q.size,target=point(q.prompt.match(/chứa ([A-T]\d+)/)[1],n);
+    assert.equal(b[target],2,q.id);
+    assert.equal(group(b,target,n).liberties.length,2,q.id);
+    const depth=Number(q.explanation.match(/đủ (\d+) lượt/)[1]);
+    const reader=captureReader(b,n,target,depth,undefined,300000);
+    const wins=reader.winningMoves();assert.equal(wins.certain,true,q.id);
+    const keyed=point(q.choices[q.answer],n);
+    assert.deepEqual(wins.moves,[keyed],`${q.id}: unique winning move`);
+    assert.equal(group(move(b,keyed,1,n).board,keyed,n).liberties.length,1,`${q.id}: keyed stone is in atari`);
+  }
+});
+test('yose-count: scores in the explanation match the area scorer',()=>{
+  const a=byId('yose-count-1'),sa=areaScore(boardOf(a),a.size,[],0);
+  assert.deepEqual([sa.black,sa.white],[16,29]);assert.equal(a.choices[a.answer],'Trắng hơn 13');
+  const c=byId('yose-count-2'),sc=areaScore(boardOf(c),c.size,[],6.5);
+  assert.deepEqual([sc.black,sc.white],[15,35.5]);assert.equal(c.choices[c.answer],'Trắng hơn 20,5');
+});
