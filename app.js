@@ -17,8 +17,9 @@ let gameMoves=[],deadStones=new Set(),pendingPoint=-1,searchWorker=null,handicap
 const pointName=i=>`${'ABCDEFGHJKLMNOPQRST'[i%n]}${n-Math.floor(i/n)}`;
 function scoreDetails(){const s=areaScore(board,n,[...deadStones],komi),komiText=String(komi).replace('.',',');$('score-detail').textContent=`Đen: ${s.blackStones} quân sống + ${s.blackLand} đất = ${s.black}. Trắng: ${s.whiteStones} quân sống + ${s.whiteLand} đất + ${komiText} komi = ${s.white}. Trung lập: ${s.neutral}. Theo dấu quân chết bạn chọn, ${s.black>s.white?'Đen':'Trắng'} hơn ${Math.abs(s.black-s.white)} điểm.`;return s;}
 function record(){return {version:1,size:n,difficulty:$('bot-level').value,...(handicap?{handicap}:{}),komi,moves:gameMoves};}
-function persist(){if(mode!=='game')return;try{localStorage.setItem(GAME_KEY,JSON.stringify(record()));$('game-save-status').textContent=`Đã lưu tại máy · ${gameMoves.length} nước`; $('resume-game').hidden=false;}catch{$('game-save-status').textContent='Không lưu được. Hãy tải SGF để giữ ván.';}}
+function persist(){if(mode!=='game')return;try{localStorage.setItem(GAME_KEY,JSON.stringify(record()));$('game-save-status').textContent=`Đã lưu tại máy · ${gameMoves.length} nước`;}catch{$('game-save-status').textContent='Không lưu được. Hãy tải SGF để giữ ván.';}}
 function syncNav(){
+  document.body.dataset.mode=mode;
   const title=document.querySelector('.page-title');if(title)title.textContent=mode==='game'?'Chơi với máy':'Học cách chơi';
   for(const link of document.querySelectorAll('.site-nav a[data-nav]')){
     const on=link.dataset.nav===(mode==='game'?'play':'learn');
@@ -108,7 +109,7 @@ function draw() {
   }
   $('turn').textContent = mode === 'lesson' ? current().kind === 'sequence' ? `● Đen đi · Nước ${Math.floor(lineStep / 2) + 1} / ${Math.ceil(current().lines[0].length / 2)}` : '● Bạn đặt quân đen' : ended ? 'Ván đã kết thúc' : busy ? '○ Máy đang đi…' : '● Lượt của bạn';
   if (solved && mode === 'lesson') $('turn').textContent = '✓ Đã hoàn thành bài';
-  $('captured').textContent = mode === 'lesson' ? current().kind === 'sequence' ? 'Trắng đáp theo chuỗi mẫu' : 'Bàn học 5 × 5' : `Đã bắt: đen ${captures[0]} · trắng ${captures[1]}`;
+  $('captured').textContent = mode === 'lesson' ? current().kind === 'sequence' ? 'Trắng đáp theo chuỗi mẫu' : '' : `Đã bắt: đen ${captures[0]} · trắng ${captures[1]}`;
 }
 function complete(text) {
   solved = true;
@@ -284,23 +285,23 @@ function start(save=true) {
   ended = false;
   captures = [0, 0];
   hinted = solved = false;
-  $('chapter').textContent = `VÁN LUYỆN TẬP · ${n}×${n}`;
+  $('chapter').textContent = `VÁN LUYỆN TẬP${handicap?` · CHẤP ${handicap}`:''}`;
   $('title').textContent = `Luyện chơi ${n}×${n}`;
   $('board-size').textContent = `${n} × ${n}`;
   $('board-size').hidden = false;
   $('play-surface').hidden = false;
   $('concept').hidden = true;
   $('board-footer').hidden = false;
-  $('guide-title').textContent = handicap?`Bạn cầm đen · chấp ${handicap} quân`:'Bạn cầm đen';
-  $('description').textContent = 'Bạn cầm Đen, máy cầm Trắng. Chọn mức Dễ để tập luật, hoặc Cơ bản để máy ưu tiên bắt và cứu quân. Mức Tìm kiếm xét thêm cách đối thủ đáp. Máy có thể bỏ lượt; các mức chưa có hạng thi đấu.';
+  $('guide-title').textContent = 'Kết thúc ván';
+  $('description').textContent = 'Dễ: tập luật. Cơ bản: máy ưu tiên bắt và cứu quân. Tìm kiếm: máy xét cả cách đối thủ đáp. Máy có thể bỏ lượt; các mức chưa có hạng thi đấu.';
   const url=new URL(location.href);url.searchParams.delete('lesson');url.searchParams.set('play','1');url.searchParams.set('size',String(n));window.history.replaceState(null,'',url);$('previous').hidden=true;
   $('description').hidden = false;
-  $('tip').textContent = 'Khi không còn nước có ích, bỏ lượt. Hai lượt bỏ liên tiếp kết thúc ván. Chơi tiếp để bắt hết quân chết trước khi kết thúc.';
+  $('tip').textContent = 'Hai lượt bỏ liên tiếp kết thúc ván. Trước đó hãy chơi tiếp để bắt hết quân chết.';
   renderTerms($('terms'),$('description').textContent+' '+$('tip').textContent);
   $('answers').replaceChildren();
   $('game-controls').hidden = false;
   $('size-help').hidden = false;
-  $('size-help').textContent = n === 9 ? '9×9: tập luật và bắt quân. Đổi kích thước rồi bấm “Ván mới” để bắt đầu bàn khác.' : `${n}×${n}: ${n === 13 ? 'tập quản lý nhiều nhóm' : 'tập chiến lược toàn bàn'}. Trên màn hình nhỏ, vuốt ngang bàn để xem các cột còn lại. Đổi kích thước chỉ áp dụng khi bấm “Ván mới”. Máy vẫn ở mức luyện cơ bản.`;
+  $('size-help').textContent = n === 9 ? '9×9: tập luật và bắt quân.' : `${n}×${n}: ${n === 13 ? 'tập quản lý nhiều nhóm' : 'tập chiến lược toàn bàn'}. Trên màn hình nhỏ, vuốt ngang bàn để xem các cột còn lại. Đổi kích thước chỉ áp dụng khi bấm “Ván mới”. Máy vẫn ở mức luyện cơ bản.`;
   document.querySelector('.workflow-help p').textContent='Chọn mức máy, rồi nhấn giao điểm để đặt quân đen. Máy đáp bằng quân trắng. Khi hết nước có ích, bấm “Bỏ lượt”; hai lượt bỏ liên tiếp kết thúc ván.';
   $('next').hidden = true;
   $('hint').hidden = true;
@@ -328,9 +329,9 @@ setInterval(()=>{
 },1000);
 $('clock-limit').onchange=()=>{clockLeft=Number($('clock-limit').value)||0;clockWarned=false;};
 function savedLessonIndex(){let id=null;try{id=localStorage.getItem('igo-current-lesson-v1');}catch{}const i=lessons.findIndex(l=>l.id===id);return i<0?0:i;}
-document.querySelector('.site-nav a[data-nav="play"]')?.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.button)return;event.preventDefault();if(mode!=='game')$('practice').click();});
+document.querySelector('.site-nav a[data-nav="play"]')?.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.button)return;event.preventDefault();if(mode!=='game')enterPlay();});
 document.querySelector('.site-nav a[data-nav="learn"]')?.addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.button||mode!=='game')return;event.preventDefault();load(savedLessonIndex());});
-$('practice').onclick = () => {if(localStorage.getItem(GAME_KEY))resume();else start();};
+function enterPlay(){if(localStorage.getItem(GAME_KEY))resume();else start();}
 $('new-game').onclick = () => start();
 $('retry').onclick = () => load(lesson);
 $('next').onclick = () => {lesson === lessons.length - 1 ? start() : load(lesson + 1);showLesson();};
@@ -371,9 +372,8 @@ if(parameters.get('play')==='1'){if(localStorage.getItem(GAME_KEY)&&(!parameters
 
 $('bot-level').onchange=()=>message('Đã đổi mức máy. Mức mới áp dụng từ lượt máy tiếp theo.');
 
-$('game-size').onchange=()=>{$('size-help').textContent=`Đã chọn ${$('game-size').value}×${$('game-size').value} cho ván tiếp theo. Bấm “Ván mới” để bắt đầu; ván hiện tại vẫn giữ nguyên.`;};
+$('game-size').onchange=()=>{$('size-help').textContent=`Đã chọn ${$('game-size').value}×${$('game-size').value}. Bấm “Ván mới” để áp dụng; ván hiện tại giữ nguyên.`;};
 
-$('resume-game').hidden=!localStorage.getItem(GAME_KEY);$('resume-game').onclick=resume;
 $('export-game').onclick=()=>{if(busy)return;const url=URL.createObjectURL(new Blob([recordSgf(record())],{type:'application/x-go-sgf;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`igo-${n}x${n}.sgf`;a.click();URL.revokeObjectURL(url);};
 $('review-game').onclick=()=>{if(busy){message('Đợi máy đi xong rồi mở ván.');return;}try{localStorage.setItem(REVIEW_GAME_KEY,recordSgf(record()));location.href='./review.html?game=latest';}catch{message('Không chuyển được ván. Hãy tải SGF và mở ở Xem lại ván.','error');}};
 
