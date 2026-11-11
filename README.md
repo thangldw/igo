@@ -98,7 +98,7 @@ Tham chiếu định dạng: [SGF FF[4]](https://www.red-bean.com/sgf/sgf4.html)
 
 Ba trang dùng chung menu luôn hiện: **Học cách chơi → Luyện bài tập → Xem lại ván**. Mục đang mở được đánh dấu bằng `aria-current`; có liên kết bỏ qua menu cho bàn phím. Bài/chặng trên điện thoại dùng hộp chọn thay cho danh sách cuộn ngang. Khi chọn bài/chặng hoặc đi trước/sau, trang đưa tiêu điểm tới nội dung mới.
 
-Địa chỉ lưu bài đang mở (`lesson`, hoặc `stage` + `problem`) nên tải lại/mở liên kết trở về đúng bài. Chế độ chơi máy có `play=1`. Các khóa tiến độ cũ giữ nguyên.
+Địa chỉ lưu bài đang mở (`lesson`, hoặc `stage` + `problem`) nên tải lại/mở liên kết trở về đúng bài. Chế độ chơi máy có `play=1` và là bước 3 của thanh điều hướng; vào lại sẽ tự mở ván đã lưu (không còn nút “Chơi với máy”/“Tiếp tục ván đã lưu” riêng). Các khóa tiến độ cũ giữ nguyên.
 
 Nội dung dùng tên kỹ năng, câu ngắn và phép tính từng bước. “Ngân sách ko có điều kiện” đổi thành “Đếm đe dọa ko”: đề tự giải thích ko, đe dọa, các điều kiện; đáp án trình bày từng lượt. `terms.js` cung cấp giải nghĩa theo bài, đặt cạnh đề và không hiện trong kiểm tra. Không đổi thế cờ, đáp án đúng hoặc hạng mục tiêu.
 
