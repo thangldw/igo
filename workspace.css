@@ -131,4 +131,15 @@ body>.support-floating-trigger{position:static;display:flex;width:fit-content;ma
 .site-header .support-slot{display:flex;align-items:center;flex:none}
 .site-header .support-slot .support-floating-trigger{position:static;z-index:auto;min-height:40px;padding:0 14px;border-radius:10px;font-size:13px;white-space:nowrap}
 @media(max-width:900px){.site-header .site-nav{order:3;flex:1 0 100%}.site-header .support-slot{margin-left:auto}}
-@media(max-width:560px){.site-header .support-slot .support-floating-trigger{min-height:36px;padding:0 10px;font-size:12px}}
+@media(max-width:560px){
+  .site-header{flex-wrap:wrap}
+  .site-header .app-owner-group{flex:0 1 auto;min-width:0}
+  .site-header .support-slot{flex:0 1 auto;min-width:0}
+  .site-header .support-slot .support-floating-trigger{min-height:40px;max-width:112px;padding:4px 10px;font-size:12px;line-height:1.2;white-space:normal;text-align:center}
+}
+/* Very narrow phones (≤359px): drop the kanji subtitle and tighten the nav so brand + support button + four steps still fit. */
+@media(max-width:359px){
+  .site-header .app-owner-title span{display:none}
+  .site-header .support-slot .support-floating-trigger{max-width:100px;font-size:11px;padding:4px 8px}
+  .site-nav a{font-size:11px;padding:6px 0}
+}
