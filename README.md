@@ -107,3 +107,7 @@ Nội dung dùng tên kỹ năng, câu ngắn và phép tính từng bước. �
 Ván tự lưu ở `igo-game-v1`; tải lại tiếp tục lượt đang chờ của máy. Có tải SGF và chuyển sang phòng xem ván, không ghi đè ghi chú cũ. Đếm diện tích sau hai lượt bỏ: người chơi tự đánh dấu nhóm chết; quân đã bắt không cộng lại. Bàn có phóng to, chấm sao và xác nhận nước đi trên màn hình nhỏ.
 
 Engine Tìm kiếm chạy trong Web Worker, xét tối đa 6 nước mỗi bên ở độ sâu 2 lượt. Phân tích sau ván dùng cùng đánh giá gần đúng (diện tích và nguy cơ nhóm thiếu khí); các đơn vị đánh giá không phải điểm cuối ván hay xác suất thắng. Không có chứng cứ hiệu chuẩn kyu/dan; đây chưa phải KataGo hoặc engine ở sức chơi dan.
+
+## Giấy phép
+
+Mã nguồn được phát hành theo [Apache License 2.0](LICENSE). Xem [NOTICE](NOTICE) về phạm vi áp dụng.
