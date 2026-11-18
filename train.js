@@ -1,4 +1,4 @@
-import { empty, group, move } from './engine.js';
+import { empty, group } from './engine.js';
 import { trueEyes } from './reading.js';
 import { stages, buildBank } from './curriculum.js';
 import { renderTerms } from './terms.js';
@@ -11,6 +11,7 @@ import {
   renderProblemSelect,
 } from './train-view.js';
 import { createReadingClient } from './reading-client.js';
+import { refutationSteps, wrongMoveText, replyText, PASS_WRONG_TEXT } from './reading-trace.js';
 import { renderToday, renderTopics, renderJournal } from './train-panels.js';
 import {
   coordinate as boardCoordinate,
@@ -479,31 +480,17 @@ async function play(point) {
   if (result.status === 'wrong') {
     autoPlay = false;
     if (point === -1) {
-      fail(
-        'Bỏ lượt chưa đạt mục tiêu: trắng có thể bỏ lượt để kết thúc bàn mà nhóm mục tiêu chưa được xử lý. Hãy tìm một nước đặt quân.'
-      );
+      fail(PASS_WRONG_TEXT);
       return;
     }
-    const response =
-      result.counter === undefined
-        ? ''
-        : ` Trắng có thể ngăn bạn đạt mục tiêu bằng nước ${coordinate(result.counter, puzzle.size)}; xem trên bàn, rồi chọn “Trở lại thế hiện tại”.`;
     if (result.counter !== undefined) {
-      const a = move(board, point, 1, puzzle.size, history);
-      if (!a.error) {
-        const b = move(a.board, result.counter, 2, puzzle.size, [...history, a.board.join('')]);
-        if (!b.error) {
-          trace.push(
-            { board: [...a.board], point, color: 1, refute: true },
-            { board: [...b.board], point: result.counter, color: 2, refute: true }
-          );
-          viewStep = trace.length - 1;
-        }
+      const steps = refutationSteps(board, point, result.counter, puzzle.size, history);
+      if (steps.length) {
+        trace.push(...steps);
+        viewStep = trace.length - 1;
       }
     }
-    fail(
-      `Nước này không buộc ${puzzle.goal === 'eyes' ? 'tạo hai mắt' : 'bắt được nhóm'} trong số lượt còn lại.${response} Hãy thử hướng khác.`
-    );
+    fail(wrongMoveText(result, puzzle));
     return;
   }
   if (result.status === 'cancelled') return;
@@ -519,9 +506,7 @@ async function play(point) {
     success();
     return;
   }
-  feedback(
-    `Trắng ${coordinate(result.reply, puzzle.size)}${result.whiteCaptured ? `, bắt ${result.whiteCaptured} quân đen` : ''}. Đọc nước đen tiếp theo.`
-  );
+  feedback(replyText(result, puzzle.size));
   draw();
   if (autoPlay) await getHint(true);
 }
