@@ -94,6 +94,8 @@ export function botCandidates(b, n, history = []) {
       result.captured * 30 +
       rescue * 20 +
       pressure * 8 +
+      // Area gained by the move; weight tuned by self-play (scripts/selfplay.mjs): 3 beat 1.5 and 6.
+      Math.max(gain, 0) * 3 +
       Math.min(own.liberties.length, 5) * 1.2 -
       (Math.abs(r - (n - 1) / 2) + Math.abs(c - (n - 1) / 2)) * 0.12;
     candidates.push({ i, value });
