@@ -18,6 +18,7 @@
     "@playwright/test": "^1.65.1",
     "eslint": "^10.15.0",
     "globals": "^17.14.0",
+    "linkedom": "^0.18.15",
     "prettier": "^3.10.1",
     "typescript": "^7.0.2"
   }
