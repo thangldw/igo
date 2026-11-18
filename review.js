@@ -2,6 +2,7 @@ import { parseSgf, replaySgf, validateSgf, trialMove } from './sgf.js';
 import { parseOgsGameId, fetchOgsSgf } from './ogs.js';
 import { group } from './engine.js';
 import { renderTerms } from './terms.js';
+import { validNotes } from './review-notes.js';
 import {
   coordinate,
   colorName,
@@ -19,23 +20,36 @@ const $ = (id) => document.getElementById(id),
   KEY = 'igo-sgf-review-v1';
 const sample =
   '(;FF[4]GM[1]SZ[19]KM[6.5]RU[Japanese]PB[Đen minh họa]PW[Trắng minh họa]C[Ván tự tạo để học thao tác; không phải ván chuẩn 3 dan.];B[pd];W[dd];B[qp];W[dp];B[fq];W[cn]C[Dừng tại đây. Thử hai hướng phát triển trước khi đọc tiếp.](;B[qo]C[Nhánh minh họa A: gia cố bên phải.];W[fc];B[jq])(;B[cf]C[Nhánh minh họa B: tiếp cận góc trên trái.];W[fd];B[cc]))';
-let game = null,
-  source = '',
-  filename = '',
-  notes = {},
-  drafts = {},
-  choices = [],
-  frames = [],
-  cursor = 0,
-  trials = [],
-  inspected = [],
-  writable = true;
-const pointName = (p) => (p === -1 ? 'bỏ lượt' : coordinate(p, game.size));
-const base = () => frames[cursor],
-  current = () => (trials.length ? trials.at(-1) : base());
-const noteKey = () => JSON.stringify(choices.slice(0, cursor));
+/**
+ * @typedef {import('./sgf.js').SgfState} Frame
+ * @typedef {{
+ *   game: any, source: string, filename: string, notes: Record<string, any>,
+ *   drafts: Record<string, Record<string, string>>, choices: number[], frames: Frame[],
+ *   cursor: number, trials: Frame[], inspected: number[], writable: boolean
+ * }} ReviewState  `game` is the parsed SGF tree (see sgf.js).
+ */
+/** @type {ReviewState} */
+const review = {
+  game: null,
+  source: '',
+  filename: '',
+  notes: {},
+  drafts: {},
+  choices: [],
+  frames: [],
+  cursor: 0,
+  trials: [],
+  inspected: [],
+  writable: true,
+};
+/** @param {number} p */
+const pointName = (p) => (p === -1 ? 'bỏ lượt' : coordinate(p, review.game.size));
+const base = () => review.frames[review.cursor],
+  current = () => (review.trials.length ? review.trials.at(-1) : base());
+const noteKey = () => JSON.stringify(review.choices.slice(0, review.cursor));
+/** @param {number[]} path */
 function extend(path) {
-  let node = game.root;
+  let node = review.game.root;
   for (const n of path) node = node.children[n];
   while (node.children.length) {
     path.push(0);
@@ -43,28 +57,29 @@ function extend(path) {
   }
   return path;
 }
+/** @param {string} text @param {string} name @param {Record<string, any>} [savedNotes] */
 function open(text, name, savedNotes = {}) {
   const parsed = validateSgf(parseSgf(text));
   // Commit only after every branch passes replay validation.
-  game = parsed;
-  source = text;
-  filename = name;
-  notes = savedNotes;
-  drafts = {};
-  choices = extend([]);
-  frames = replaySgf(game, choices);
-  cursor = 0;
-  trials = [];
-  inspected = [];
-  $('game-title').textContent = `${game.black} · ${game.white}`;
+  review.game = parsed;
+  review.source = text;
+  review.filename = name;
+  review.notes = savedNotes;
+  review.drafts = {};
+  review.choices = extend([]);
+  review.frames = replaySgf(review.game, review.choices);
+  review.cursor = 0;
+  review.trials = [];
+  review.inspected = [];
+  $('game-title').textContent = `${review.game.black} · ${review.game.white}`;
   $('metadata').textContent =
-    `${game.size}×${game.size} · komi ${game.komi ?? 'không khai báo'} · luật ${game.rules} · kết quả ${game.result || 'chưa khai báo'} · ${game.nodeCount} nút`;
+    `${review.game.size}×${review.game.size} · komi ${review.game.komi ?? 'không khai báo'} · luật ${review.game.rules} · kết quả ${review.game.result || 'chưa khai báo'} · ${review.game.nodeCount} nút`;
   $('status').textContent =
     `Đã mở ${name}. File không được gửi lên máy chủ. Nước đi được kiểm tra về đặt quân và bắt quân; bạn vẫn cần tự đánh giá cách đi.`;
   render(true);
 }
 function render(loadNote = false) {
-  const ready = !!game;
+  const ready = !!review.game;
   for (const id of [
     'first',
     'prev',
@@ -83,7 +98,7 @@ function render(loadNote = false) {
   $('review-surface').hidden = !ready;
   if (!ready) return;
   const state = current(),
-    size = game.size;
+    size = review.game.size;
   $('board').replaceChildren();
   $('board').style.setProperty('--size', size);
   $('board').style.gridTemplateColumns = `repeat(${size},1fr)`;
@@ -91,10 +106,10 @@ function render(loadNote = false) {
     const button = createPoint(i, size);
     button.setAttribute(
       'aria-label',
-      `${pointName(i)}: ${colorName(state.board[i])}${inspected.includes(i) ? ', khí' : ''}`
+      `${pointName(i)}: ${colorName(state.board[i])}${review.inspected.includes(i) ? ', khí' : ''}`
     );
     if (state.board[i]) appendStone(button, state.board[i], state.last === i);
-    if (inspected.includes(i)) button.append(span('liberty-mark'));
+    if (review.inspected.includes(i)) button.append(span('liberty-mark'));
     appendEdgeLabels(button, i, size);
     button.onclick = () => {
       if ($('liberties').checked) {
@@ -102,28 +117,31 @@ function render(loadNote = false) {
           $('liberty-status').textContent = 'Chọn một nhóm quân để xem khí.';
           return;
         }
-        inspected = group(state.board, i, size).liberties;
-        $('liberty-status').textContent = `Nhóm tại ${pointName(i)} có ${inspected.length} khí.`;
+        review.inspected = group(state.board, i, size).liberties;
+        $('liberty-status').textContent =
+          `Nhóm tại ${pointName(i)} có ${review.inspected.length} khí.`;
         render();
       } else play(i);
     };
     $('board').append(button);
   }
   $('position').textContent =
-    `Ván gốc: nước ${base().count} · vị trí ${cursor}/${frames.length - 1}`;
+    `Ván gốc: nước ${base().count} · vị trí ${review.cursor}/${review.frames.length - 1}`;
   $('turn').textContent =
-    `${state.next === 1 ? '● Đen' : '○ Trắng'} đi${trials.length ? ' · đang thử cách đi khác' : ''}`;
-  $('seek').max = frames.length - 1;
-  $('seek').value = cursor;
-  $('first').disabled = $('prev').disabled = cursor === 0 || trials.length > 0;
-  $('next').disabled = $('last').disabled = cursor === frames.length - 1 || trials.length > 0;
-  $('seek').disabled = trials.length > 0;
-  $('undo').disabled = $('reset').disabled = !trials.length;
-  $('trial-status').textContent = trials.length
-    ? `Biến tự thử: ${trials.map((s) => `${s.next === 2 ? 'Đen' : 'Trắng'} ${pointName(s.last)}`).join(' → ')}. Đây là chuỗi bạn tự thử, chưa biết có thắng trước mọi cách đáp không.`
+    `${state.next === 1 ? '● Đen' : '○ Trắng'} đi${review.trials.length ? ' · đang thử cách đi khác' : ''}`;
+  $('seek').max = review.frames.length - 1;
+  $('seek').value = review.cursor;
+  $('first').disabled = $('prev').disabled = review.cursor === 0 || review.trials.length > 0;
+  $('next').disabled = $('last').disabled =
+    review.cursor === review.frames.length - 1 || review.trials.length > 0;
+  $('seek').disabled = review.trials.length > 0;
+  $('undo').disabled = $('reset').disabled = !review.trials.length;
+  $('trial-status').textContent = review.trials.length
+    ? `Biến tự thử: ${review.trials.map((s) => `${s.next === 2 ? 'Đen' : 'Trắng'} ${pointName(s.last)}`).join(' → ')}. Đây là chuỗi bạn tự thử, chưa biết có thắng trước mọi cách đáp không.`
     : 'Nhấn bàn để thử một biến. Điều hướng ván gốc không thay đổi file.';
   $('comment').textContent = base().comment || 'Không có lời bình.';
   $('branches').replaceChildren();
+  /** @type {any[]} */
   const children = base().node.children;
   if (children.length > 1) {
     children.forEach((child, i) => {
@@ -131,13 +149,13 @@ function render(loadNote = false) {
       const color = child.props.B ? 'Đen' : child.props.W ? 'Trắng' : '';
       const val = (child.props.B || child.props.W)?.[0];
       b.textContent = `Cách tiếp ${i + 1}${val !== undefined ? `: ${color} ${pointName(val === '' || val === 'tt' ? -1 : (val.charCodeAt(1) - 97) * size + val.charCodeAt(0) - 97)}` : ''}`;
-      b.disabled = trials.length > 0;
+      b.disabled = review.trials.length > 0;
       b.onclick = () => {
         rememberDraft();
-        choices = extend([...choices.slice(0, cursor), i]);
-        frames = replaySgf(game, choices);
-        cursor++;
-        inspected = [];
+        review.choices = extend([...review.choices.slice(0, review.cursor), i]);
+        review.frames = replaySgf(review.game, review.choices);
+        review.cursor++;
+        review.inspected = [];
         render(true);
       };
       $('branches').append(b);
@@ -145,29 +163,32 @@ function render(loadNote = false) {
   }
   if (loadNote) {
     $('comment-wrap').open = false;
-    const note = drafts[noteKey()] || notes[noteKey()] || {};
+    const note = review.drafts[noteKey()] || review.notes[noteKey()] || {};
     for (const id of ['candidates', 'refutation', 'conclusion']) $(id).value = note[id] || '';
     $('save-status').textContent = '';
   }
 }
 function rememberDraft() {
-  if (!game) return;
-  drafts[noteKey()] = {};
-  for (const id of ['candidates', 'refutation', 'conclusion']) drafts[noteKey()][id] = $(id).value;
+  if (!review.game) return;
+  review.drafts[noteKey()] = {};
+  for (const id of ['candidates', 'refutation', 'conclusion'])
+    review.drafts[noteKey()][id] = $(id).value;
 }
+/** @param {number} n */
 function navigate(n) {
-  if (!game || trials.length) return;
+  if (!review.game || review.trials.length) return;
   rememberDraft();
-  cursor = Math.max(0, Math.min(n, frames.length - 1));
-  inspected = [];
+  review.cursor = Math.max(0, Math.min(n, review.frames.length - 1));
+  review.inspected = [];
   $('liberty-status').textContent = '';
   render(true);
 }
+/** @param {number} point */
 function play(point) {
-  if (!game) return;
+  if (!review.game) return;
   try {
-    trials.push(trialMove(current(), point, game.size));
-    inspected = [];
+    review.trials.push(trialMove(current(), point, review.game.size));
+    review.inspected = [];
     $('liberty-status').textContent = '';
     render();
   } catch (e) {
@@ -175,27 +196,27 @@ function play(point) {
   }
 }
 $('first').onclick = () => navigate(0);
-$('prev').onclick = () => navigate(cursor - 1);
-$('next').onclick = () => navigate(cursor + 1);
-$('last').onclick = () => navigate(frames.length - 1);
+$('prev').onclick = () => navigate(review.cursor - 1);
+$('next').onclick = () => navigate(review.cursor + 1);
+$('last').onclick = () => navigate(review.frames.length - 1);
 $('seek').oninput = () => navigate(Number($('seek').value));
 $('pass').onclick = () => play(-1);
 $('undo').onclick = () => {
-  trials.pop();
-  inspected = [];
+  review.trials.pop();
+  review.inspected = [];
   render();
 };
 $('reset').onclick = () => {
-  trials = [];
-  inspected = [];
+  review.trials = [];
+  review.inspected = [];
   render();
 };
 $('liberties').onchange = () => {
-  inspected = [];
+  review.inspected = [];
   $('liberty-status').textContent = '';
   render();
 };
-$('ogs-form').onsubmit = async (event) => {
+$('ogs-form').onsubmit = async (/** @type {Event} */ event) => {
   event.preventDefault();
   const id = parseOgsGameId($('ogs-url').value);
   if (!id) {
@@ -230,13 +251,14 @@ $('file').onchange = async () => {
     $('status').textContent = `Không mở được: ${e.message} Ván đang mở được giữ nguyên.`;
   }
 };
-$('note-form').onsubmit = (e) => {
+$('note-form').onsubmit = (/** @type {Event} */ e) => {
   e.preventDefault();
-  if (!game) return;
-  const note = { move: base().count, path: choices.slice(0, cursor) };
+  if (!review.game) return;
+  /** @type {Record<string, any>} */
+  const note = { move: base().count, path: review.choices.slice(0, review.cursor) };
   for (const id of ['candidates', 'refutation', 'conclusion']) note[id] = $(id).value.trim();
-  notes[noteKey()] = note;
-  if (!writable) {
+  review.notes[noteKey()] = note;
+  if (!review.writable) {
     $('save-status').textContent =
       'Dữ liệu cũ không tương thích; chỉ giữ trong phiên này. Tải bản ghi để lưu.';
     return;
@@ -244,7 +266,14 @@ $('note-form').onsubmit = (e) => {
   try {
     localStorage.setItem(
       KEY,
-      JSON.stringify({ version: 1, source, filename, notes, choices, cursor })
+      JSON.stringify({
+        version: 1,
+        source: review.source,
+        filename: review.filename,
+        notes: review.notes,
+        choices: review.choices,
+        cursor: review.cursor,
+      })
     );
     $('save-status').textContent =
       `Đã lưu ghi chú ở nước ${base().count} và SGF gốc tại trình duyệt này.`;
@@ -253,12 +282,12 @@ $('note-form').onsubmit = (e) => {
   }
 };
 $('export').onclick = () => {
-  if (!game) return;
+  if (!review.game) return;
   const sections = [
-    `# Xem ván: ${game.black} · ${game.white}`,
+    `# Xem ván: ${review.game.black} · ${review.game.white}`,
     'Ghi chú tự đánh giá; không chứng nhận sức chơi.',
   ];
-  for (const note of Object.values(notes)) {
+  for (const note of Object.values(review.notes)) {
     sections.push(
       `## Nước ${note.move} · nhánh ${JSON.stringify(note.path)}`,
       `Các nước cân nhắc: ${note.candidates}`,
@@ -266,7 +295,7 @@ $('export').onclick = () => {
       `Đối chiếu: ${note.conclusion}`
     );
   }
-  sections.push('## SGF gốc', '```sgf', source, '```');
+  sections.push('## SGF gốc', '```sgf', review.source, '```');
   const url = URL.createObjectURL(
     new Blob([sections.join('\n\n')], { type: 'text/markdown;charset=utf-8' })
   );
@@ -276,30 +305,6 @@ $('export').onclick = () => {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
-function validNotes(value) {
-  return (
-    value &&
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
-    Object.entries(value).every(([key, n]) => {
-      try {
-        const path = JSON.parse(key);
-        return (
-          Array.isArray(path) &&
-          path.every((x) => Number.isInteger(x) && x >= 0) &&
-          n &&
-          Number.isInteger(n.move) &&
-          ['candidates', 'refutation', 'conclusion'].every(
-            (id) => typeof n[id] === 'string' && n[id].length <= 2000
-          ) &&
-          JSON.stringify(n.path) === key
-        );
-      } catch {
-        return false;
-      }
-    })
-  );
-}
 render();
 try {
   const raw = localStorage.getItem(KEY);
@@ -319,16 +324,16 @@ try {
       saved.cursor >= 0 &&
       saved.cursor <= saved.choices.length
     ) {
-      const recovered = replaySgf(game, saved.choices);
-      choices = saved.choices;
-      frames = recovered;
-      cursor = saved.cursor;
+      const recovered = replaySgf(review.game, saved.choices);
+      review.choices = saved.choices;
+      review.frames = recovered;
+      review.cursor = saved.cursor;
       render(true);
     }
     $('status').textContent = 'Đã khôi phục ván và ghi chú đã lưu trên trình duyệt này.';
   }
 } catch {
-  writable = false;
+  review.writable = false;
   $('status').textContent =
     'Không đọc được bản lưu cũ; chưa ghi đè. Có thể mở SGF và tải ghi chú cho phiên mới.';
 }

@@ -12,17 +12,5 @@
     "skipLibCheck": true
   },
   "include": ["*.js"],
-  "exclude": [
-    "*-worker.js",
-    "app.js",
-    "eslint.config.js",
-    "footer.js",
-    "node_modules",
-    "playwright.config.js",
-    "public",
-    "register-sw.js",
-    "review.js",
-    "sw.js",
-    "train.js"
-  ]
+  "exclude": ["node_modules", "public", "sw.js", "eslint.config.js", "playwright.config.js"]
 }

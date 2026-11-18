@@ -1,10 +1,11 @@
 import { move } from './engine.js';
 import { boundedReader, goalAchieved } from './reading.js';
 
+/** @param {any} data request fields posted by reading-client.js */
 export function handleReading(data) {
   const { id, action, board, size, target, remaining, history, point, goal = 'capture' } = data;
   let response;
-  const respond = (result) => {
+  const respond = (/** @type {object} */ result) => {
     response = { id, ...result };
   };
   const execute = () => {
@@ -27,7 +28,7 @@ export function handleReading(data) {
       }
       const played =
         point === -1 ? { board: [...board], captured: 0 } : move(board, point, 1, size, history);
-      if (played.error) {
+      if ('error' in played) {
         respond({ status: 'invalid', message: played.error });
         return;
       }
@@ -56,7 +57,7 @@ export function handleReading(data) {
         verdict.point === -1
           ? { board: played.board, captured: 0 }
           : move(played.board, verdict.point, 2, size, nextHistory);
-      if (reply.error) {
+      if ('error' in reply) {
         respond({ status: 'unknown' });
         return;
       }
