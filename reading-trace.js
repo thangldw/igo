@@ -42,3 +42,15 @@ export function replyText(result, size) {
 
 export const PASS_WRONG_TEXT =
   'Bỏ lượt chưa đạt mục tiêu: trắng có thể bỏ lượt để kết thúc bàn mà nhóm mục tiêu chưa được xử lý. Hãy tìm một nước đặt quân.';
+
+/**
+ * Text for the three escalating hints of a reading puzzle.
+ * @param {1 | 2 | 3} level
+ * @param {{ size: number, liberties?: number, point?: number }} data  `point` is the hinted move.
+ */
+export function hintText(level, { size, liberties = 0, point = 0 }) {
+  if (level === 1)
+    return `Gợi ý 1/3: nhóm có dấu tam giác còn ${liberties} khí (chấm trên bàn). Thử tìm nước liên quan tới các khí này.`;
+  if (level === 2) return `Gợi ý 2/3: nước đúng nằm ở hàng ${size - Math.floor(point / size)}.`;
+  return `Gợi ý 3/3: một nước giữ khả năng đạt mục tiêu là ${coordinate(point, size)}.`;
+}

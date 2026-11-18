@@ -225,3 +225,37 @@ export function showQuizChoices(puzzle, onPick) {
     byId('answers').append(button);
   });
 }
+
+/**
+ * Turn indicator under the training board.
+ * @param {{ viewStep: number, finished: boolean, mode: string, wrong: number, busy: boolean, reading: boolean }} s
+ */
+export function turnStatusText({ viewStep, finished, mode, wrong, busy, reading }) {
+  if (viewStep >= 0) return `Xem lại lượt ${viewStep} · không đặt quân ở thế này`;
+  if (finished) return mode === 'test' && wrong ? '× Bài chưa đúng' : '✓ Bài đã kết thúc';
+  if (busy) return 'Đang kiểm tra các cách đáp…';
+  return reading ? '● Đen đi' : 'Chọn câu trả lời bên dưới';
+}
+
+/**
+ * Remaining-moves line for reading puzzles; diagram-only puzzles say so.
+ * @param {{ reading: boolean, hasBoard: boolean, depth: number, viewStep: number, remaining: number }} s
+ */
+export function depthStatusText({ reading, hasBoard, depth, viewStep, remaining }) {
+  if (reading)
+    return `Còn ${Math.max(viewStep >= 0 ? depth - viewStep : remaining, 0)} lượt cả hai bên`;
+  return hasBoard ? 'Sơ đồ minh họa' : '';
+}
+
+/**
+ * Attempt summary: mistakes and whether help was used.
+ * @param {{ wrong: number, assisted: boolean, mode: string }} s
+ */
+export function attemptStatusText({ wrong, assisted, mode }) {
+  const help = assisted
+    ? 'Đã dùng gợi ý'
+    : mode === 'test'
+      ? 'Kiểm tra không gợi ý'
+      : 'Chưa dùng gợi ý';
+  return `${wrong ? `${wrong} lần sai · ` : ''}${help}`;
+}

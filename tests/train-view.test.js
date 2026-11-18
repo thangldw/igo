@@ -9,7 +9,11 @@ import {
   emptyQueueTitle,
   chapterLabel,
   tipText,
+  turnStatusText,
+  depthStatusText,
+  attemptStatusText,
 } from '../train-view.js';
+import { hintText } from '../reading-trace.js';
 import { stages } from '../curriculum.js';
 
 test('shuffle returns a permutation without mutating the input', () => {
@@ -68,4 +72,64 @@ test('tipText distinguishes quiz, capture and eye reading puzzles', () => {
     tipText({ kind: 'reading', goal: 'eyes' }),
   ];
   assert.equal(new Set(tips).size, 3);
+});
+
+test('turnStatusText prioritises replay, then result, then busy, then whose move', () => {
+  const base = {
+    viewStep: -1,
+    finished: false,
+    mode: 'practice',
+    wrong: 0,
+    busy: false,
+    reading: true,
+  };
+  assert.equal(
+    turnStatusText({ ...base, viewStep: 2, finished: true }),
+    'Xem lại lượt 2 · không đặt quân ở thế này'
+  );
+  assert.equal(turnStatusText({ ...base, finished: true }), '✓ Bài đã kết thúc');
+  assert.equal(
+    turnStatusText({ ...base, finished: true, mode: 'test', wrong: 1 }),
+    '× Bài chưa đúng'
+  );
+  assert.match(turnStatusText({ ...base, busy: true }), /Đang kiểm tra/);
+  assert.equal(turnStatusText(base), '● Đen đi');
+  assert.match(turnStatusText({ ...base, reading: false }), /Chọn câu trả lời/);
+});
+
+test('depthStatusText and attemptStatusText', () => {
+  assert.equal(
+    depthStatusText({ reading: true, hasBoard: true, depth: 5, viewStep: -1, remaining: 3 }),
+    'Còn 3 lượt cả hai bên'
+  );
+  assert.equal(
+    depthStatusText({ reading: true, hasBoard: true, depth: 5, viewStep: 2, remaining: 0 }),
+    'Còn 3 lượt cả hai bên'
+  );
+  assert.equal(
+    depthStatusText({ reading: false, hasBoard: true, depth: 0, viewStep: -1, remaining: 0 }),
+    'Sơ đồ minh họa'
+  );
+  assert.equal(
+    depthStatusText({ reading: false, hasBoard: false, depth: 0, viewStep: -1, remaining: 0 }),
+    ''
+  );
+  assert.equal(
+    attemptStatusText({ wrong: 0, assisted: false, mode: 'practice' }),
+    'Chưa dùng gợi ý'
+  );
+  assert.equal(
+    attemptStatusText({ wrong: 2, assisted: true, mode: 'practice' }),
+    '2 lần sai · Đã dùng gợi ý'
+  );
+  assert.equal(
+    attemptStatusText({ wrong: 0, assisted: false, mode: 'test' }),
+    'Kiểm tra không gợi ý'
+  );
+});
+
+test('hintText escalates from liberties to row to exact move', () => {
+  assert.match(hintText(1, { size: 5, liberties: 3 }), /còn 3 khí/);
+  assert.match(hintText(2, { size: 5, point: 7 }), /hàng 4/);
+  assert.match(hintText(3, { size: 5, point: 7 }), /C4/);
 });

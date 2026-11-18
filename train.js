@@ -14,11 +14,20 @@ import {
   showQuizChoices,
   chapterLabel,
   tipText,
+  turnStatusText,
+  depthStatusText,
+  attemptStatusText,
 } from './train-view.js';
 import { createReadingClient } from './reading-client.js';
 import { loadStudy, saveStudy } from './study-storage.js';
 import { setupBackup, setupJournalForm } from './train-forms.js';
-import { refutationSteps, wrongMoveText, replyText, PASS_WRONG_TEXT } from './reading-trace.js';
+import {
+  refutationSteps,
+  wrongMoveText,
+  replyText,
+  hintText,
+  PASS_WRONG_TEXT,
+} from './reading-trace.js';
 import { renderToday, renderTopics, renderJournal } from './train-panels.js';
 import {
   coordinate as boardCoordinate,
@@ -298,29 +307,19 @@ function draw() {
     root.append(button);
   }
   renderTrace();
-  $('turn').textContent =
-    viewStep >= 0
-      ? `Xem lại lượt ${viewStep} · không đặt quân ở thế này`
-      : finished
-        ? mode === 'test' && wrong
-          ? '× Bài chưa đúng'
-          : '✓ Bài đã kết thúc'
-        : busy
-          ? 'Đang kiểm tra các cách đáp…'
-          : puzzle.kind === 'reading'
-            ? '● Đen đi'
-            : 'Chọn câu trả lời bên dưới';
-  $('depth').textContent =
-    puzzle.kind === 'reading'
-      ? `Còn ${Math.max(viewStep >= 0 ? puzzle.depth - viewStep : remaining, 0)} lượt cả hai bên`
-      : puzzle.size
-        ? 'Sơ đồ minh họa'
-        : '';
+  const reading = puzzle.kind === 'reading';
+  $('turn').textContent = turnStatusText({ viewStep, finished, mode, wrong, busy, reading });
+  $('depth').textContent = depthStatusText({
+    reading,
+    hasBoard: Boolean(puzzle.size),
+    depth: puzzle.depth,
+    viewStep,
+    remaining,
+  });
   $('puzzle-pass').disabled = busy || finished;
   $('hint').textContent =
     puzzle.kind === 'reading' && hintLevel ? `Gợi ý ${Math.min(hintLevel + 1, 3)}/3` : 'Gợi ý';
-  $('attempt-status').textContent =
-    `${wrong ? `${wrong} lần sai · ` : ''}${assisted ? 'Đã dùng gợi ý' : mode === 'test' ? 'Kiểm tra không gợi ý' : 'Chưa dùng gợi ý'}`;
+  $('attempt-status').textContent = attemptStatusText({ wrong, assisted, mode });
 }
 function startAttempt() {
   if (!attemptStarted) {
@@ -477,9 +476,7 @@ async function getHint(playIt = false) {
     hintLevel = 1;
     selected = puzzle.target;
     const libs = group(board, puzzle.target, puzzle.size).liberties.length;
-    feedback(
-      `Gợi ý 1/3: nhóm có dấu tam giác còn ${libs} khí (chấm trên bàn). Thử tìm nước liên quan tới các khí này.`
-    );
+    feedback(hintText(1, { size: puzzle.size, liberties: libs }));
     draw();
     return;
   }
@@ -497,17 +494,13 @@ async function getHint(playIt = false) {
   }
   if (!playIt && hintLevel === 1) {
     hintLevel = 2;
-    feedback(
-      `Gợi ý 2/3: nước đúng nằm ở hàng ${puzzle.size - Math.floor(result.point / puzzle.size)}.`
-    );
+    feedback(hintText(2, { size: puzzle.size, point: result.point }));
     draw();
     return;
   }
   hintLevel = 3;
   hinted = result.point;
-  feedback(
-    `Gợi ý 3/3: một nước giữ khả năng đạt mục tiêu là ${coordinate(result.point, puzzle.size)}.`
-  );
+  feedback(hintText(3, { size: puzzle.size, point: result.point }));
   draw();
   if (playIt) await play(result.point);
 }
