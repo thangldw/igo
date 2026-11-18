@@ -11,7 +11,7 @@ export default [
   { files: ['sw.js'], languageOptions: { globals: { ...globals.serviceworker } } },
   { files: ['*-worker.js'], languageOptions: { globals: { ...globals.worker } } },
   {
-    files: ['scripts/**', 'tests/**', '*.config.js'],
+    files: ['scripts/**', 'tests/**', 'e2e/**', '*.config.js'],
     languageOptions: { globals: { ...globals.node } },
   },
 ];

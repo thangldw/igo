@@ -15,6 +15,8 @@ import {
   tipText,
 } from './train-view.js';
 import { createReadingClient } from './reading-client.js';
+import { loadStudy, saveStudy } from './study-storage.js';
+import { setupBackup, setupJournalForm } from './train-forms.js';
 import { refutationSteps, wrongMoveText, replyText, PASS_WRONG_TEXT } from './reading-trace.js';
 import { renderToday, renderTopics, renderJournal } from './train-panels.js';
 import {
@@ -26,7 +28,6 @@ import {
   appendEdgeLabels,
 } from './board-view.js';
 import {
-  restoreStudy,
   beginAttempt,
   recordMiss,
   recordSolve,
@@ -39,7 +40,6 @@ import {
   weekDots,
 } from './study-state.js';
 import { transformPuzzle, variantFor } from './symmetry.js';
-import { exportBackup, parseBackup } from './backup.js';
 
 /** @type {(id: string) => any} DOM lookups are by known ids in the page markup. */
 const $ = (id) => document.getElementById(id),
@@ -86,13 +86,7 @@ function feedback(text, type = '') {
   $('feedback').className = type;
 }
 function save() {
-  if (storageWritable) {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(study));
-    } catch {
-      storageAvailable = false;
-    }
-  }
+  if (storageWritable && !saveStudy(KEY, study)) storageAvailable = false;
   $('storage-status').textContent = storageStatusText({
     writable: storageWritable,
     available: storageAvailable,
@@ -656,109 +650,44 @@ $('inspect').onchange = () => {
   else selected = -1;
   draw();
 };
-const EXTRA_KEYS = ['igo-progress', 'igo-current-lesson-v1'];
-$('backup-export').onclick = () => {
-  const extras = {};
-  for (const k of EXTRA_KEYS) {
-    try {
-      const v = localStorage.getItem(k);
-      if (v) extras[k] = v;
-    } catch {
-      // storage unavailable (private mode or blocked); continue without persistence
-    }
-  }
-  const url = URL.createObjectURL(
-      new Blob([exportBackup(study, extras)], { type: 'application/json' })
-    ),
-    a = document.createElement('a');
-  a.href = url;
-  a.download = `igo-backup-${new Date().toLocaleDateString('sv-SE')}.json`;
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  $('backup-status').textContent = 'Đã xuất file sao lưu.';
-};
-$('backup-import').onchange = async () => {
-  const file = $('backup-import').files[0];
-  $('backup-import').value = '';
-  if (!file) return;
-  if (file.size > 2e6) {
-    $('backup-status').textContent = 'File quá lớn để là bản sao lưu Igo.';
-    return;
-  }
-  const result = parseBackup(
-    await file.text(),
-    bank.map((p) => p.id)
-  );
-  if (!result.ok) {
-    $('backup-status').textContent = result.error;
-    return;
-  }
-  try {
-    localStorage.setItem('igo-study-v1-before-import', JSON.stringify(study));
-    for (const [k, v] of Object.entries(result.extras)) localStorage.setItem(k, v);
-  } catch {
-    // storage unavailable (private mode or blocked); continue without persistence
-  }
-  study = result.study;
-  storageWritable = true;
-  storageAvailable = true;
-  save();
-  rebuild();
-  $('backup-status').textContent =
-    `Đã nhập ${result.restored} bài${result.skipped ? `, bỏ qua ${result.skipped} bài không còn trong ngân hàng` : ''}. Tiến độ cũ được giữ ở khóa igo-study-v1-before-import.`;
-};
-$('game-form').onsubmit = (event) => {
-  event.preventDefault();
-  const note = $('game-note').value.trim();
-  if (!note) return;
-  const url = $('game-url').value.trim();
-  if (url) {
-    try {
-      if (!['http:', 'https:'].includes(new URL(url).protocol)) throw Error();
-    } catch {
-      $('journal-status').textContent = 'Dùng link http hoặc https.';
-      return;
-    }
-  }
-  study.games.push({ date: new Date().toLocaleDateString('sv-SE'), url, note, stage });
-  study.games = study.games.slice(-100);
-  save();
-  journal();
-  $('game-form').reset();
-  $('journal-status').textContent = storageAvailable
-    ? 'Đã lưu lỗi của ván tại máy.'
-    : 'Đã giữ trong phiên này, chưa lưu được tại máy.';
-};
+setupBackup({
+  exportButton: $('backup-export'),
+  importInput: $('backup-import'),
+  status: $('backup-status'),
+  getStudy: () => study,
+  getBankIds: () => bank.map((p) => p.id),
+  onImport: (result) => {
+    study = result.study;
+    storageWritable = storageAvailable = true;
+    save();
+    rebuild();
+    journal();
+  },
+});
+setupJournalForm({
+  form: $('game-form'),
+  noteInput: $('game-note'),
+  urlInput: $('game-url'),
+  status: $('journal-status'),
+  onAdd: ({ date, url, note }) => {
+    study.games.push({ date, url, note, stage });
+    study.games = study.games.slice(-100);
+    save();
+    journal();
+    return storageAvailable;
+  },
+});
 try {
   const response = await fetch('./reading-bank.json');
   if (!response.ok) throw Error('BANK');
   bank = buildBank(await response.json());
-  let stored = null;
-  try {
-    stored = localStorage.getItem(KEY);
-  } catch {
-    storageAvailable = false;
-  }
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      if (
-        parsed?.version !== 1 ||
-        !parsed.records ||
-        typeof parsed.records !== 'object' ||
-        Array.isArray(parsed.records)
-      )
-        storageWritable = storageAvailable = false;
-    } catch {
-      storageWritable = storageAvailable = false;
-    }
-  }
-  study = restoreStudy(
-    stored,
+  const loaded = loadStudy(
+    KEY,
     bank.map((p) => p.id)
   );
+  study = loaded.study;
+  storageAvailable = loaded.available;
+  storageWritable = loaded.writable;
   const params = new URLSearchParams(location.search);
   if (stages.some((s) => s.id === params.get('stage'))) stage = params.get('stage');
   const requested = bank.find((p) => p.id === params.get('problem'));

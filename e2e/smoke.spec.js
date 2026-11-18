@@ -251,3 +251,40 @@ test('every board lesson can be solved by following the hints', async ({ page })
   }
   expect(solved).toBeGreaterThan(5);
 });
+
+test('backup export downloads JSON and import restores a journal note', async ({ page }) => {
+  await page.goto('/train.html');
+  await page.locator('.backup-panel summary').click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.locator('#backup-export').click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^igo-backup-\d{4}-\d\d-\d\d\.json$/);
+  const backup = JSON.parse(
+    await (await import('node:fs/promises')).readFile(await download.path(), 'utf8')
+  );
+  expect(backup.kind).toBe('igo-backup');
+  backup.study.games = [
+    { date: '2026-01-01', url: '', note: 'ghi chú từ bản sao lưu', stage: 'foundation' },
+  ];
+  await page.locator('#backup-import').setInputFiles({
+    name: 'b.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
+  await expect(page.locator('#backup-status')).toContainText('Đã nhập');
+  await page.locator('.practice-plan summary').click();
+  await expect(page.locator('#game-list')).toContainText('ghi chú từ bản sao lưu');
+});
+
+test('importing a foreign file is rejected without touching progress', async ({ page }) => {
+  await page.goto('/train.html');
+  await page.locator('.backup-panel summary').click();
+  await page.locator('#backup-import').setInputFiles({
+    name: 'x.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{"hello":1}'),
+  });
+  await expect(page.locator('#backup-status')).not.toContainText('Đã nhập');
+  await expect(page.locator('#backup-status')).not.toBeEmpty();
+});

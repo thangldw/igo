@@ -18,6 +18,8 @@
     "train.js",
     "train-panels.js",
     "train-view.js",
+    "study-storage.js",
+    "train-forms.js",
     "reading-trace.js",
     "curriculum.js",
     "curriculum-questions.js",
