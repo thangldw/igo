@@ -179,3 +179,49 @@ export function tipText(puzzle) {
     ? 'Tìm cách chia khoảng trống thành hai mắt thật cho nhóm có dấu tam giác. Các quân bảo vệ hai mắt phải thuộc cùng nhóm. App kiểm tra các cách Trắng đáp.'
     : 'Bắt nhóm có dấu tam giác trước khi hết lượt. App kiểm tra các cách Trắng đáp; bạn có thể dùng bất kỳ nước nào vẫn bảo đảm đạt mục tiêu.';
 }
+
+const byId = (/** @type {string} */ id) => /** @type {any} */ (document.getElementById(id));
+
+/**
+ * Replaces the board area with a "nothing to practise" message.
+ * @param {{ mode: string, stageName: string }} data
+ */
+export function showEmptyQueue({ mode, stageName }) {
+  byId('title').textContent = emptyQueueTitle(mode);
+  byId('chapter').textContent = stageName;
+  byId('objective').textContent = '';
+  byId('play-surface').hidden = true;
+  byId('board-size').hidden = true;
+  byId('concept').hidden = false;
+  byId('concept').textContent =
+    'Chọn “Làm bài mới” để tiếp tục, hoặc đổi chặng luyện. Bài sai sẽ vào hàng ôn ngay; bài tự giải được nhắc lại từ ngày mai.';
+  byId('guide-title').textContent = 'Ôn theo tiến độ';
+  byId('tip').textContent = 'Không cần làm lại mọi bài mỗi ngày. Ưu tiên bài sai và bài đến hạn.';
+  byId('turn').textContent = '';
+  byId('depth').textContent = '';
+  byId('reading-controls').hidden = true;
+  for (const id of ['hint', 'solution', 'retry', 'next']) byId(id).disabled = true;
+  byId('attempt-status').textContent = '';
+}
+
+/**
+ * Shows a multiple-choice puzzle: hides the reading controls, puts the prompt on the board area
+ * (or in the concept box when there is no diagram) and lists shuffled answer buttons.
+ * @param {{ size?: number, prompt: string, choices: string[] }} puzzle
+ * @param {(choice: number, button: HTMLButtonElement) => void} onPick
+ */
+export function showQuizChoices(puzzle, onPick) {
+  byId('reading-controls').hidden = true;
+  byId('hint').disabled = true;
+  if (!puzzle.size) {
+    byId('play-surface').hidden = true;
+    byId('concept').hidden = false;
+    byId('concept').textContent = puzzle.prompt;
+  } else byId('objective').textContent = puzzle.prompt;
+  shuffle(puzzle.choices.map((text, i) => ({ text, i }))).forEach(({ text, i }) => {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.onclick = () => onPick(i, button);
+    byId('answers').append(button);
+  });
+}

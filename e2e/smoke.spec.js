@@ -288,3 +288,36 @@ test('importing a foreign file is rejected without touching progress', async ({ 
   await expect(page.locator('#backup-status')).not.toContainText('Đã nhập');
   await expect(page.locator('#backup-status')).not.toBeEmpty();
 });
+
+test('review mode with no history shows the empty-queue message', async ({ page }) => {
+  await page.goto('/train.html');
+  await page.locator('#mode-review').click();
+  await expect(page.locator('#title')).toHaveText('Chưa có bài cần ôn ở mốc này');
+  await expect(page.locator('#hint')).toBeDisabled();
+  await page.locator('#mode-practice').click();
+  await expect(page.locator('#title')).not.toHaveText(/Chưa có bài/);
+});
+
+test('every training stage opens a puzzle; quiz puzzles take an answer', async ({ page }) => {
+  await page.goto('/train.html');
+  await page.locator('#mode-practice').click();
+  const stages = await page
+    .locator('#stage-select option')
+    .evaluateAll((o) => o.map((x) => x.value));
+  expect(stages.length).toBeGreaterThanOrEqual(5);
+  let quizzes = 0;
+  for (const stage of stages) {
+    await page.locator('#stage-select').evaluate((el, value) => {
+      el.value = value;
+      el.dispatchEvent(new Event('change'));
+    }, stage);
+    await expect(page.locator('#title')).not.toHaveText(/Đang tải|Chưa có bài/);
+    const answers = page.locator('#answers button');
+    if (await answers.count()) {
+      quizzes++;
+      await answers.first().click();
+      await expect(page.locator('#feedback')).not.toBeEmpty();
+    }
+  }
+  expect(quizzes).toBeGreaterThan(0);
+});

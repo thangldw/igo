@@ -10,7 +10,8 @@ import {
   renderTopicSelect,
   renderProblemSelect,
   modeHelpText,
-  emptyQueueTitle,
+  showEmptyQueue,
+  showQuizChoices,
   chapterLabel,
   tipText,
 } from './train-view.js';
@@ -216,22 +217,8 @@ function load() {
   if (!queue.length) {
     renderTerms($('terms'), '');
     puzzle = null;
-    $('title').textContent = emptyQueueTitle(mode);
-    $('chapter').textContent = stageInfo().name;
-    $('objective').textContent = '';
-    $('play-surface').hidden = true;
-    $('board-size').hidden = true;
-    $('concept').hidden = false;
-    $('concept').textContent =
-      'Chọn “Làm bài mới” để tiếp tục, hoặc đổi chặng luyện. Bài sai sẽ vào hàng ôn ngay; bài tự giải được nhắc lại từ ngày mai.';
-    $('guide-title').textContent = 'Ôn theo tiến độ';
-    $('tip').textContent = 'Không cần làm lại mọi bài mỗi ngày. Ưu tiên bài sai và bài đến hạn.';
-    $('turn').textContent = '';
-    $('depth').textContent = '';
-    $('reading-controls').hidden = true;
-    for (const id of ['hint', 'solution', 'retry', 'next']) $(id).disabled = true;
+    showEmptyQueue({ mode, stageName: stageInfo().name });
     feedback('');
-    $('attempt-status').textContent = '';
     return;
   }
   const canonical = queue[index];
@@ -273,21 +260,7 @@ function load() {
   url.searchParams.set('stage', stage);
   url.searchParams.set('problem', puzzle.id);
   window.history.replaceState(null, '', url);
-  if (puzzle.kind === 'quiz') {
-    $('reading-controls').hidden = true;
-    $('hint').disabled = true;
-    if (!puzzle.size) {
-      $('play-surface').hidden = true;
-      $('concept').hidden = false;
-      $('concept').textContent = puzzle.prompt;
-    } else $('objective').textContent = puzzle.prompt;
-    shuffle(puzzle.choices.map((text, i) => ({ text, i }))).forEach(({ text, i }) => {
-      const button = document.createElement('button');
-      button.textContent = text;
-      button.onclick = () => answer(i, button);
-      $('answers').append(button);
-    });
-  }
+  if (puzzle.kind === 'quiz') showQuizChoices(puzzle, answer);
   $('next').disabled = mode === 'test';
   $('next').classList.toggle('primary', false);
   feedback(mode === 'test' ? 'Lần thử đầu quyết định điểm. Gợi ý đã tắt.' : 'Đọc trước khi đi.');
