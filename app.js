@@ -262,95 +262,89 @@ function load(i) {
   navigation();
   draw();
 }
-function click(i, confirmed = false) {
-  if (busy) return;
-  if (mode === 'game' && ended) {
-    if (board[i]) {
-      const g = group(board, i, n);
-      const remove = deadStones.has(i);
-      g.stones.forEach((p) => (remove ? deadStones.delete(p) : deadStones.add(p)));
-      draw();
-    }
-    return;
-  }
-  if (mode === 'game' && !board[i] && $('confirm-move').checked && !confirmed) {
-    pendingPoint = i;
-    message(`Đã chọn ${pointName(i)}. Bấm “Đặt quân ở điểm đã chọn” để xác nhận.`);
-    draw();
-    return;
-  }
-  pendingPoint = -1;
-  if (board[i]) {
-    selected = mode === 'lesson' || $('show-liberties').checked ? i : -1;
-    draw();
-    if (mode === 'lesson' && !solved)
-      message(`Nhóm này có ${group(board, i, n).liberties.length} khí.`);
-    return;
-  }
-  if (mode === 'lesson') {
-    const l = current();
-    if (solved) return;
-    if (l.answer !== undefined) {
-      message('Hãy chọn câu trả lời bên dưới.');
+/** While scoring, clicking a stone toggles its whole group between alive and dead. */
+function toggleDeadGroup(i) {
+  if (!board[i]) return;
+  const remove = deadStones.has(i);
+  for (const p of group(board, i, n).stones) remove ? deadStones.delete(p) : deadStones.add(p);
+  draw();
+}
+/** Clicking an occupied point selects its group so liberties can be shown. */
+function selectGroup(i) {
+  selected = mode === 'lesson' || $('show-liberties').checked ? i : -1;
+  draw();
+  if (mode === 'lesson' && !solved)
+    message(`Nhóm này có ${group(board, i, n).liberties.length} khí.`);
+}
+/** Plays the scripted white answer in a sequence lesson after the learner's move. */
+function answerSequence() {
+  busy = true;
+  draw();
+  message('Trắng đang đáp theo biến minh họa…');
+  const currentEpoch = epoch;
+  setTimeout(() => {
+    if (currentEpoch !== epoch) return;
+    const replyPoint = candidates[0][lineStep];
+    const reply = move(board, replyPoint, 2, n, history);
+    busy = false;
+    if (reply.error) {
+      message('Biến bài học không hợp lệ. Hãy làm lại bài.', 'error');
       return;
     }
-    const result = move(board, i, 1, n, history);
-    if (result.error) {
-      message(result.error, 'error');
-      return;
-    }
-    if (l.kind !== 'place' && !targets().includes(i)) {
-      message(
-        'Nước hợp lệ nhưng chưa thuộc lời giải của bài này. Thử đọc lại mục tiêu hoặc xem gợi ý.',
-        'error'
-      );
-      return;
-    }
-    board = result.board;
+    candidates = candidates.filter((line) => line[lineStep] === replyPoint);
+    board = reply.board;
     history.push(board.join(''));
-    last = i;
-    selected = -1;
-    hinted = false;
-    if (l.kind === 'sequence') {
-      candidates = candidates.filter((line) => line[lineStep] === i);
-      lineStep++;
-      if (lineStep === candidates[0].length) {
-        complete(l.success);
-        draw();
-        return;
-      }
-      busy = true;
-      draw();
-      message('Trắng đang đáp theo biến minh họa…');
-      const currentEpoch = epoch;
-      setTimeout(() => {
-        if (currentEpoch !== epoch) return;
-        const replyPoint = candidates[0][lineStep];
-        const reply = move(board, replyPoint, 2, n, history);
-        busy = false;
-        if (reply.error) {
-          message('Biến bài học không hợp lệ. Hãy làm lại bài.', 'error');
-          return;
-        }
-        candidates = candidates.filter((line) => line[lineStep] === replyPoint);
-        board = reply.board;
-        history.push(board.join(''));
-        last = replyPoint;
-        lineStep++;
-        message(
-          reply.captured
-            ? `Trắng vừa bắt ${reply.captured} quân. Tìm nước đen tiếp theo.`
-            : 'Trắng đã đáp. Tìm nước đen tiếp theo.'
-        );
-        draw();
-      }, 400);
-      return;
-    }
-    complete(successText(l, result.captured));
+    last = replyPoint;
+    lineStep++;
+    message(
+      reply.captured
+        ? `Trắng vừa bắt ${reply.captured} quân. Tìm nước đen tiếp theo.`
+        : 'Trắng đã đáp. Tìm nước đen tiếp theo.'
+    );
     draw();
+  }, 400);
+}
+/** The learner tries a move on an empty point in lesson mode. */
+function playLessonMove(i) {
+  const l = current();
+  if (solved) return;
+  if (l.answer !== undefined) {
+    message('Hãy chọn câu trả lời bên dưới.');
     return;
   }
-  if (ended) return;
+  const result = move(board, i, 1, n, history);
+  if (result.error) {
+    message(result.error, 'error');
+    return;
+  }
+  if (l.kind !== 'place' && !targets().includes(i)) {
+    message(
+      'Nước hợp lệ nhưng chưa thuộc lời giải của bài này. Thử đọc lại mục tiêu hoặc xem gợi ý.',
+      'error'
+    );
+    return;
+  }
+  board = result.board;
+  history.push(board.join(''));
+  last = i;
+  selected = -1;
+  hinted = false;
+  if (l.kind === 'sequence') {
+    candidates = candidates.filter((line) => line[lineStep] === i);
+    lineStep++;
+    if (lineStep === candidates[0].length) {
+      complete(l.success);
+      draw();
+      return;
+    }
+    answerSequence();
+    return;
+  }
+  complete(successText(l, result.captured));
+  draw();
+}
+/** The player moves in a game against the bot; the bot then replies. */
+function playGameMove(i) {
   const result = move(board, i, 1, n, history);
   if (result.error) {
     message(result.error, 'error');
@@ -365,6 +359,20 @@ function click(i, confirmed = false) {
       : 'Quan sát khí của các nhóm trước khi đi tiếp.'
   );
   reply();
+}
+function click(i, confirmed = false) {
+  if (busy) return;
+  if (mode === 'game' && ended) return toggleDeadGroup(i);
+  if (mode === 'game' && !board[i] && $('confirm-move').checked && !confirmed) {
+    pendingPoint = i;
+    message(`Đã chọn ${pointName(i)}. Bấm “Đặt quân ở điểm đã chọn” để xác nhận.`);
+    draw();
+    return;
+  }
+  pendingPoint = -1;
+  if (board[i]) return selectGroup(i);
+  if (mode === 'lesson') return playLessonMove(i);
+  playGameMove(i);
 }
 function saveTurn() {
   snapshots.push({

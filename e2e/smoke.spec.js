@@ -217,3 +217,37 @@ test('quiz lessons accept the right answer, reject wrong ones and unlock "next"'
   }
   expect(quizzes).toBeGreaterThan(0);
 });
+
+test('every board lesson can be solved by following the hints', async ({ page }) => {
+  test.setTimeout(120000);
+  await page.goto('/');
+  const levels = await page.locator('#levels button').count();
+  expect(levels).toBeGreaterThanOrEqual(3);
+  let solved = 0;
+  for (let l = 0; l < levels; l++) {
+    await page.locator('#levels button').nth(l).click();
+    const ids = await page
+      .locator('#lesson-select option')
+      .evaluateAll((o) => o.map((x) => x.value));
+    for (const id of ids) {
+      await page.locator('#lesson-select').evaluate((el, value) => {
+        el.value = value;
+        el.dispatchEvent(new Event('change'));
+      }, id);
+      if (await page.locator('#answers button').count()) continue; // quiz, covered above
+      for (let step = 0; step < 12 && !(await page.locator('#next').isVisible()); step++) {
+        await page.locator('#hint').click();
+        // Lessons without a fixed target ("place anywhere") highlight nothing: any empty point works.
+        const hinted = page.locator('#board button.hinted');
+        const target = (await hinted.count())
+          ? hinted.first()
+          : page.locator('#board button:not(:has(.stone))').first();
+        await target.click();
+        await page.waitForTimeout(450); // scripted white replies arrive after 400ms
+      }
+      await expect(page.locator('#next'), `lesson ${id}`).toBeVisible();
+      solved++;
+    }
+  }
+  expect(solved).toBeGreaterThan(5);
+});
