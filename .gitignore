@@ -4,3 +4,6 @@
 coverage/
 node_modules/
 *.log
+public/
+test-results/
+playwright-report/

@@ -20,6 +20,13 @@ Ván với máy trên bàn 9×9, 13×13 hoặc 19×19; có hai mức cơ bản v
 
 `npm start` → http://localhost:4173. `npm test` kiểm tra luật, ngân hàng bài, lưu ván, tính điểm và engine tìm kiếm.
 
+## Phát triển
+
+- `npm run check`: ESLint, kiểm kiểu (`tsc --checkJs`: `noImplicitAny` cho module logic và dữ liệu, chế độ nhẹ hơn cho `app.js`, `train.js`, `review.js`), Prettier và 84 test đơn vị.
+- `npm run e2e`: kiểm thử Playwright trên desktop và mobile (cần Chrome; CI cài Chromium).
+- `npm run build`: tạo `public/` từ `deploy-files.json`, danh sách file triển khai duy nhất. Danh sách precache và phiên bản cache của `sw.js` được sinh từ đây. Thêm file mới thì chỉ cần thêm vào `deploy-files.json`.
+- `board-view.js` dùng chung cho bàn cờ ở ba trang; `lesson-storage.js` gói truy cập localStorage; `train-panels.js` chứa các khối giao diện thuần của trang luyện tập; `search-client.js` và `reading-client.js` bọc worker; `curriculum-questions.js` là ngân hàng câu hỏi; `types.js` chứa typedef dùng chung. `node scripts/selfplay.mjs <engine mới> <engine cũ> [số ván] [cỡ bàn]` cho tỉ lệ thắng khi so hai engine.
+
 ## Luật và giới hạn
 
 Đen đi trước; bắt nhóm hết khí; cấm tự sát; positional superko (không lặp lại thế bàn, bỏ lượt được phép). Hai lượt bỏ liên tiếp kết thúc. Đếm diện tích; komi mặc định 6,5 (0,5 khi chấp, chỉnh được). Điểm cuối chỉ là ước tính: người chơi tự đánh dấu quân chết (có gợi ý, xem bên dưới) và chưa có phân xử seki phức tạp. Chơi tiếp và bắt hết quân chết trước khi bỏ lượt. Máy heuristic không có mức rank, không dùng KataGo. Không phải triển khai đầy đủ bộ luật AGA hay Nhật.
@@ -51,15 +58,15 @@ Chủ ý chưa làm: đặt tên máy theo sức chơi (chưa có hiệu chỉnh
 
 `train.html` có **210 bài bổ sung**, giữ nguyên 18 bài nhập môn và tiến độ cũ.
 
-| Mốc nội dung | Số bài |
-| --- | ---: |
-| 30–20 kyu | 16 |
-| 20–10 kyu | 40 |
-| 10–5 kyu | 46 |
-| 5–1 kyu | 32 |
-| Mục tiêu 1 dan | 34 |
-| Mục tiêu 2 dan | 18 |
-| Mục tiêu 3 dan nghiệp dư | 24 |
+| Mốc nội dung             | Số bài |
+| ------------------------ | -----: |
+| 30–20 kyu                |     16 |
+| 20–10 kyu                |     40 |
+| 10–5 kyu                 |     46 |
+| 5–1 kyu                  |     32 |
+| Mục tiêu 1 dan           |     34 |
+| Mục tiêu 2 dan           |     18 |
+| Mục tiêu 3 dan nghiệp dư |     24 |
 
 Các nhãn là mục tiêu học, **chưa được hiệu chuẩn theo rating**. Không có cam kết giải hết là đạt 3 dan.
 
