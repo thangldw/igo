@@ -9,6 +9,10 @@ import {
   renderStages,
   renderTopicSelect,
   renderProblemSelect,
+  modeHelpText,
+  emptyQueueTitle,
+  chapterLabel,
+  tipText,
 } from './train-view.js';
 import { createReadingClient } from './reading-client.js';
 import { refutationSteps, wrongMoveText, replyText, PASS_WRONG_TEXT } from './reading-trace.js';
@@ -214,23 +218,11 @@ function load() {
   $('retry').disabled = mode === 'test';
   $('reading-controls').hidden = false;
   $('previous').disabled = mode === 'test' || index === 0;
-  $('mode-help').textContent =
-    mode === 'today'
-      ? 'Kế hoạch hôm nay: bài đến hạn ôn trước, rồi bài mới theo thứ tự lộ trình. Không cần chọn chặng.'
-      : mode === 'practice'
-        ? 'Chọn chủ đề và bài. Bài sai chuyển sang “Ôn bài cần nhớ”.'
-        : mode === 'review'
-          ? 'Chỉ hiện bài sai hoặc bài đã tới lịch ôn của chặng đang chọn. Chưa có bài thì đổi chặng hoặc chọn “Làm bài mới”.'
-          : '10 bài ngẫu nhiên trong chặng đang chọn. Chấm lần thử đầu; không có gợi ý, xem khí hay giải thích thuật ngữ.';
+  $('mode-help').textContent = modeHelpText(mode);
   if (!queue.length) {
     renderTerms($('terms'), '');
     puzzle = null;
-    $('title').textContent =
-      mode === 'review'
-        ? 'Chưa có bài cần ôn ở mốc này'
-        : mode === 'today'
-          ? 'Hôm nay đã xong kế hoạch'
-          : 'Chưa có bài theo bộ lọc';
+    $('title').textContent = emptyQueueTitle(mode);
     $('chapter').textContent = stageInfo().name;
     $('objective').textContent = '';
     $('play-surface').hidden = true;
@@ -262,8 +254,13 @@ function load() {
   viewStep = -1;
   history = [board.join('')];
   remaining = puzzle.depth || 0;
-  $('chapter').textContent =
-    `${stages.find((x) => x.id === puzzle.stage).name.toUpperCase()} · ${mode === 'test' ? 'KIỂM TRA' : mode === 'review' ? 'ÔN TẬP' : mode === 'today' ? 'HÔM NAY' : 'BÀI TẬP'} ${index + 1}/${queue.length}${puzzle.symmetry ? ' · GÓC NHÌN KHÁC' : ''}`;
+  $('chapter').textContent = chapterLabel({
+    stageName: stages.find((x) => x.id === puzzle.stage).name,
+    mode,
+    index,
+    total: queue.length,
+    rotated: puzzle.symmetry,
+  });
   $('title').textContent = puzzle.title;
   $('guide-title').textContent = puzzle.topic;
   $('objective').textContent = puzzle.kind === 'reading' ? puzzle.prompt : '';
@@ -271,12 +268,7 @@ function load() {
   $('board-size').textContent = `${puzzle.size} × ${puzzle.size}`;
   $('proof-label').textContent =
     puzzle.kind === 'reading' ? 'NGHĨ CẢ NƯỚC ĐỐI THỦ' : 'DÙNG CÁC ĐIỀU KIỆN TRONG ĐỀ';
-  $('tip').textContent =
-    puzzle.kind === 'reading'
-      ? puzzle.goal === 'eyes'
-        ? 'Tìm cách chia khoảng trống thành hai mắt thật cho nhóm có dấu tam giác. Các quân bảo vệ hai mắt phải thuộc cùng nhóm. App kiểm tra các cách Trắng đáp.'
-        : 'Bắt nhóm có dấu tam giác trước khi hết lượt. App kiểm tra các cách Trắng đáp; bạn có thể dùng bất kỳ nước nào vẫn bảo đảm đạt mục tiêu.'
-      : 'Chỉ dùng các điều kiện trong đề để chọn đáp án. Nếu có hình bàn 19×19, đó là hình minh họa cho tình huống, không phải lời giải đã được AI kiểm tra.';
+  $('tip').textContent = tipText(puzzle);
   $('explanation').textContent = puzzle.explanation;
   renderTerms(
     $('terms'),

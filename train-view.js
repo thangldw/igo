@@ -139,3 +139,43 @@ export function renderProblemSelect(select, queue, study, disabled) {
   });
   select.disabled = disabled || !queue.length;
 }
+
+/** Help line under the mode buttons. @param {string} mode */
+export function modeHelpText(mode) {
+  if (mode === 'today')
+    return 'Kế hoạch hôm nay: bài đến hạn ôn trước, rồi bài mới theo thứ tự lộ trình. Không cần chọn chặng.';
+  if (mode === 'practice') return 'Chọn chủ đề và bài. Bài sai chuyển sang “Ôn bài cần nhớ”.';
+  if (mode === 'review')
+    return 'Chỉ hiện bài sai hoặc bài đã tới lịch ôn của chặng đang chọn. Chưa có bài thì đổi chặng hoặc chọn “Làm bài mới”.';
+  return '10 bài ngẫu nhiên trong chặng đang chọn. Chấm lần thử đầu; không có gợi ý, xem khí hay giải thích thuật ngữ.';
+}
+
+/** Heading shown when the current mode/filter yields no problems. @param {string} mode */
+export function emptyQueueTitle(mode) {
+  if (mode === 'review') return 'Chưa có bài cần ôn ở mốc này';
+  if (mode === 'today') return 'Hôm nay đã xong kế hoạch';
+  return 'Chưa có bài theo bộ lọc';
+}
+
+const MODE_TAG = /** @type {Record<string, string>} */ ({
+  test: 'KIỂM TRA',
+  review: 'ÔN TẬP',
+  today: 'HÔM NAY',
+});
+/**
+ * Eyebrow above the title, e.g. "NHẬP MÔN · BÀI TẬP 3/20".
+ * @param {{ stageName: string, mode: string, index: number, total: number, rotated?: boolean }} p
+ */
+export function chapterLabel({ stageName, mode, index, total, rotated }) {
+  const tag = MODE_TAG[mode] ?? 'BÀI TẬP';
+  return `${stageName.toUpperCase()} · ${tag} ${index + 1}/${total}${rotated ? ' · GÓC NHÌN KHÁC' : ''}`;
+}
+
+/** How-to-practise tip for the guide panel. @param {{ kind: string, goal?: string }} puzzle */
+export function tipText(puzzle) {
+  if (puzzle.kind !== 'reading')
+    return 'Chỉ dùng các điều kiện trong đề để chọn đáp án. Nếu có hình bàn 19×19, đó là hình minh họa cho tình huống, không phải lời giải đã được AI kiểm tra.';
+  return puzzle.goal === 'eyes'
+    ? 'Tìm cách chia khoảng trống thành hai mắt thật cho nhóm có dấu tam giác. Các quân bảo vệ hai mắt phải thuộc cùng nhóm. App kiểm tra các cách Trắng đáp.'
+    : 'Bắt nhóm có dấu tam giác trước khi hết lượt. App kiểm tra các cách Trắng đáp; bạn có thể dùng bất kỳ nước nào vẫn bảo đảm đạt mục tiêu.';
+}
