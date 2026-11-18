@@ -54,34 +54,37 @@ import { transformPuzzle, variantFor } from './symmetry.js';
 /** @type {(id: string) => any} DOM lookups are by known ids in the page markup. */
 const $ = (id) => document.getElementById(id),
   KEY = 'igo-study-v1';
-let bank = [],
-  study,
-  stage = 'foundation',
-  topic = 'all',
-  mode = 'practice',
-  queue = [],
-  index = 0,
-  puzzle;
-let board = [],
-  history = [],
-  remaining = 0,
-  last = -1,
-  selected = -1,
-  hinted = -2,
-  busy = false,
-  finished = false,
-  wrong = 0,
-  assisted = false,
-  attemptStarted = false;
-let epoch = 0,
-  testResults = [],
-  autoPlay = false,
-  storageAvailable = true,
-  storageWritable = true;
-let trace = [],
-  viewStep = -1,
-  hintLevel = 0,
-  startedAt = 0;
+const train = {
+  bank: [],
+  study: undefined,
+  stage: 'foundation',
+  topic: 'all',
+  mode: 'practice',
+  queue: [],
+  index: 0,
+  puzzle: undefined,
+  board: [],
+  history: [],
+  remaining: 0,
+  last: -1,
+  selected: -1,
+  hinted: -2,
+  busy: false,
+  finished: false,
+  wrong: 0,
+  assisted: false,
+  attemptStarted: false,
+  epoch: 0,
+  testResults: [],
+  autoPlay: false,
+  storageAvailable: true,
+  storageWritable: true,
+  trace: [],
+  viewStep: -1,
+  hintLevel: 0,
+  startedAt: 0,
+};
+
 const reading = createReadingClient();
 function showPuzzle() {
   const heading = $('test-result').hidden ? $('title') : $('test-result');
@@ -89,17 +92,17 @@ function showPuzzle() {
   heading.focus({ preventScroll: true });
   heading.scrollIntoView({ block: 'start' });
 }
-const stageInfo = () => stages.find((s) => s.id === stage);
+const stageInfo = () => stages.find((s) => s.id === train.stage);
 const coordinate = (point, size) => (point === -1 ? 'bỏ lượt' : boardCoordinate(point, size));
 function feedback(text, type = '') {
   $('feedback').textContent = text;
   $('feedback').className = type;
 }
 function save() {
-  if (storageWritable && !saveStudy(KEY, study)) storageAvailable = false;
+  if (train.storageWritable && !saveStudy(KEY, train.study)) train.storageAvailable = false;
   $('storage-status').textContent = storageStatusText({
-    writable: storageWritable,
-    available: storageAvailable,
+    writable: train.storageWritable,
+    available: train.storageAvailable,
   });
 }
 function renderProgress() {
@@ -107,12 +110,12 @@ function renderProgress() {
     { list: $('stages'), select: $('stage-select'), total: $('total') },
     {
       stages,
-      bank,
-      study,
-      stage,
+      bank: train.bank,
+      study: train.study,
+      stage: train.stage,
       onPick: (id) => {
-        stage = id;
-        topic = 'all';
+        train.stage = id;
+        train.topic = 'all';
         rebuild();
         showPuzzle();
       },
@@ -123,69 +126,72 @@ function renderProgress() {
   $('stage-focus').textContent = stageInfo().focus;
 }
 function rebuild(preferred) {
-  const stageBank = bank.filter((p) => p.stage === stage);
-  topic = renderTopicSelect(
+  const stageBank = train.bank.filter((p) => p.stage === train.stage);
+  train.topic = renderTopicSelect(
     $('topic'),
     stageBank.map((p) => p.topic),
-    topic,
-    mode === 'test' || mode === 'today'
+    train.topic,
+    train.mode === 'test' || train.mode === 'today'
   );
-  const candidates = stageBank.filter((p) => topic === 'all' || p.topic === topic);
-  queue =
-    mode === 'today'
+  const candidates = stageBank.filter((p) => train.topic === 'all' || p.topic === train.topic);
+  train.queue =
+    train.mode === 'today'
       ? dailyPlan(
-          bank,
-          study,
+          train.bank,
+          train.study,
           Date.now(),
           stages.map((x) => x.id)
         ).items
-      : mode === 'review'
-        ? candidates.filter((p) => needsReview(study.records[p.id]))
-        : mode === 'test'
+      : train.mode === 'review'
+        ? candidates.filter((p) => needsReview(train.study.records[p.id]))
+        : train.mode === 'test'
           ? shuffle(stageBank).slice(0, 10)
           : candidates;
-  testResults = [];
-  index = preferred
+  train.testResults = [];
+  train.index = preferred
     ? Math.max(
         0,
-        queue.findIndex((p) => p.id === preferred)
+        train.queue.findIndex((p) => p.id === preferred)
       )
     : 0;
-  renderProblemSelect($('problem-select'), queue, study, mode === 'test');
+  renderProblemSelect($('problem-select'), train.queue, train.study, train.mode === 'test');
   for (const m of ['today', 'practice', 'review', 'test'])
-    $(`mode-${m}`).setAttribute('aria-pressed', String(mode === m));
+    $(`mode-${m}`).setAttribute('aria-pressed', String(train.mode === m));
   renderProgress();
   renderTodayCard();
   load();
 }
 function renderTodayCard() {
   const card = $('today');
-  card.hidden = mode !== 'today';
+  card.hidden = train.mode !== 'today';
   if (card.hidden) return;
   const plan = dailyPlan(
-    bank,
-    study,
+    train.bank,
+    train.study,
     Date.now(),
     stages.map((x) => x.id)
   );
-  renderToday(card, { plan, streak: streakDays(study), dots: weekDots(study) });
+  renderToday(card, { plan, streak: streakDays(train.study), dots: weekDots(train.study) });
 }
 if (matchMedia('(max-width:700px)').matches) $('topic-panel').open = false;
 function renderTopicStats() {
-  const stats = topicStats(bank, study).filter((t) => t.attempted > 0);
+  const stats = topicStats(train.bank, train.study).filter((t) => t.attempted > 0);
   renderTopics($('topic-stats'), stats, (t) => {
-    const pool = bank
+    const pool = train.bank
       .filter((p) => p.topic === t.topic)
       .sort(
         (a, b) =>
-          Number(needsReview(study.records[b.id])) - Number(needsReview(study.records[a.id])) ||
+          Number(needsReview(train.study.records[b.id])) -
+            Number(needsReview(train.study.records[a.id])) ||
           stages.findIndex((x) => x.id === a.stage) - stages.findIndex((x) => x.id === b.stage)
       );
     const first =
-      pool.find((p) => needsReview(study.records[p.id]) || !study.records[p.id]?.clean) || pool[0];
-    mode = 'practice';
-    stage = first.stage;
-    topic = t.topic;
+      pool.find(
+        (p) => needsReview(train.study.records[p.id]) || !train.study.records[p.id]?.clean
+      ) || pool[0];
+    train.mode = 'practice';
+    train.stage = first.stage;
+    train.topic = t.topic;
     rebuild(first.id);
     showPuzzle();
   });
@@ -194,110 +200,122 @@ function ask(action, point) {
   return reading.ask({
     action,
     point,
-    board,
-    size: puzzle.size,
-    target: puzzle.target,
-    remaining,
-    history,
-    goal: puzzle.goal || 'capture',
+    board: train.board,
+    size: train.puzzle.size,
+    target: train.puzzle.target,
+    remaining: train.remaining,
+    history: train.history,
+    goal: train.puzzle.goal || 'capture',
   });
 }
 function load() {
-  epoch++;
+  train.epoch++;
   reading.reset();
-  busy = finished = assisted = attemptStarted = autoPlay = false;
-  wrong = 0;
-  last = selected = -1;
-  hinted = -2;
+  train.busy = train.finished = train.assisted = train.attemptStarted = train.autoPlay = false;
+  train.wrong = 0;
+  train.last = train.selected = -1;
+  train.hinted = -2;
   $('inspect').checked = false;
-  $('inspect').disabled = mode === 'test';
+  $('inspect').disabled = train.mode === 'test';
   $('test-result').hidden = true;
   $('explanation-wrap').hidden = true;
   $('answers').replaceChildren();
   $('variation').hidden = true;
   $('concept').hidden = true;
   $('play-surface').hidden = false;
-  $('hint').disabled = mode === 'test';
-  $('solution').disabled = mode === 'test';
-  $('retry').disabled = mode === 'test';
+  $('hint').disabled = train.mode === 'test';
+  $('solution').disabled = train.mode === 'test';
+  $('retry').disabled = train.mode === 'test';
   $('reading-controls').hidden = false;
-  $('previous').disabled = mode === 'test' || index === 0;
-  $('mode-help').textContent = modeHelpText(mode);
-  if (!queue.length) {
+  $('previous').disabled = train.mode === 'test' || train.index === 0;
+  $('mode-help').textContent = modeHelpText(train.mode);
+  if (!train.queue.length) {
     renderTerms($('terms'), '');
-    puzzle = null;
-    showEmptyQueue({ mode, stageName: stageInfo().name });
+    train.puzzle = null;
+    showEmptyQueue({ mode: train.mode, stageName: stageInfo().name });
     feedback('');
     return;
   }
-  const canonical = queue[index];
-  hintLevel = 0;
-  startedAt = Date.now();
-  puzzle =
-    mode === 'test'
+  const canonical = train.queue[train.index];
+  train.hintLevel = 0;
+  train.startedAt = Date.now();
+  train.puzzle =
+    train.mode === 'test'
       ? canonical
-      : transformPuzzle(canonical, variantFor(study.records[canonical.id]?.attempts || 0));
-  $('problem-select').value = String(index);
-  board = empty(puzzle.size || 5);
-  for (const [p, c] of puzzle.setup) board[p] = c;
-  trace = [{ board: [...board], point: -1, color: 0 }];
-  viewStep = -1;
-  history = [board.join('')];
-  remaining = puzzle.depth || 0;
+      : transformPuzzle(canonical, variantFor(train.study.records[canonical.id]?.attempts || 0));
+  $('problem-select').value = String(train.index);
+  train.board = empty(train.puzzle.size || 5);
+  for (const [p, c] of train.puzzle.setup) train.board[p] = c;
+  train.trace = [{ board: [...train.board], point: -1, color: 0 }];
+  train.viewStep = -1;
+  train.history = [train.board.join('')];
+  train.remaining = train.puzzle.depth || 0;
   $('chapter').textContent = chapterLabel({
-    stageName: stages.find((x) => x.id === puzzle.stage).name,
-    mode,
-    index,
-    total: queue.length,
-    rotated: puzzle.symmetry,
+    stageName: stages.find((x) => x.id === train.puzzle.stage).name,
+    mode: train.mode,
+    index: train.index,
+    total: train.queue.length,
+    rotated: train.puzzle.symmetry,
   });
-  $('title').textContent = puzzle.title;
-  $('guide-title').textContent = puzzle.topic;
-  $('objective').textContent = puzzle.kind === 'reading' ? puzzle.prompt : '';
-  $('board-size').hidden = !puzzle.size;
-  $('board-size').textContent = `${puzzle.size} × ${puzzle.size}`;
+  $('title').textContent = train.puzzle.title;
+  $('guide-title').textContent = train.puzzle.topic;
+  $('objective').textContent = train.puzzle.kind === 'reading' ? train.puzzle.prompt : '';
+  $('board-size').hidden = !train.puzzle.size;
+  $('board-size').textContent = `${train.puzzle.size} × ${train.puzzle.size}`;
   $('proof-label').textContent =
-    puzzle.kind === 'reading' ? 'NGHĨ CẢ NƯỚC ĐỐI THỦ' : 'DÙNG CÁC ĐIỀU KIỆN TRONG ĐỀ';
-  $('tip').textContent = tipText(puzzle);
-  $('explanation').textContent = puzzle.explanation;
+    train.puzzle.kind === 'reading' ? 'NGHĨ CẢ NƯỚC ĐỐI THỦ' : 'DÙNG CÁC ĐIỀU KIỆN TRONG ĐỀ';
+  $('tip').textContent = tipText(train.puzzle);
+  $('explanation').textContent = train.puzzle.explanation;
   renderTerms(
     $('terms'),
-    [stageInfo().name, puzzle.title, puzzle.prompt, puzzle.choices?.join(' ') || ''].join(' '),
-    { disabled: mode === 'test' }
+    [
+      stageInfo().name,
+      train.puzzle.title,
+      train.puzzle.prompt,
+      train.puzzle.choices?.join(' ') || '',
+    ].join(' '),
+    { disabled: train.mode === 'test' }
   );
   const url = new URL(location.href);
-  url.searchParams.set('stage', stage);
-  url.searchParams.set('problem', puzzle.id);
+  url.searchParams.set('stage', train.stage);
+  url.searchParams.set('problem', train.puzzle.id);
   window.history.replaceState(null, '', url);
-  if (puzzle.kind === 'quiz') showQuizChoices(puzzle, answer);
-  $('next').disabled = mode === 'test';
+  if (train.puzzle.kind === 'quiz') showQuizChoices(train.puzzle, answer);
+  $('next').disabled = train.mode === 'test';
   $('next').classList.toggle('primary', false);
-  feedback(mode === 'test' ? 'Lần thử đầu quyết định điểm. Gợi ý đã tắt.' : 'Đọc trước khi đi.');
+  feedback(
+    train.mode === 'test' ? 'Lần thử đầu quyết định điểm. Gợi ý đã tắt.' : 'Đọc trước khi đi.'
+  );
   draw();
 }
 function draw() {
-  if (!puzzle) return;
-  const size = puzzle.size || 5,
+  if (!train.puzzle) return;
+  const size = train.puzzle.size || 5,
     root = $('board');
   root.replaceChildren();
   root.style.gridTemplateColumns = `repeat(${size},1fr)`;
-  const shown = viewStep >= 0 ? trace[viewStep].board : board,
-    shownLast = viewStep >= 0 ? trace[viewStep].point : last;
-  const eyes = puzzle.goal === 'eyes' && finished ? trueEyes(shown, size, puzzle.target) : [];
+  const shown = train.viewStep >= 0 ? train.trace[train.viewStep].board : train.board,
+    shownLast = train.viewStep >= 0 ? train.trace[train.viewStep].point : train.last;
+  const eyes =
+    train.puzzle.goal === 'eyes' && train.finished
+      ? trueEyes(shown, size, train.puzzle.target)
+      : [];
   const liberties =
-    viewStep < 0 && selected >= 0 && board[selected] ? group(board, selected, size).liberties : [];
-  for (let i = 0; i < board.length; i++) {
-    const button = createPoint(i, size, viewStep < 0 && i === hinted ? 'hinted' : '');
+    train.viewStep < 0 && train.selected >= 0 && train.board[train.selected]
+      ? group(train.board, train.selected, size).liberties
+      : [];
+  for (let i = 0; i < train.board.length; i++) {
+    const button = createPoint(i, size, train.viewStep < 0 && i === train.hinted ? 'hinted' : '');
     button.setAttribute(
       'aria-label',
-      `${coordinate(i, size)}: ${colorName(shown[i])}${puzzle.kind === 'reading' && i === puzzle.target ? ', mục tiêu' : ''}${liberties.includes(i) ? ', khí' : ''}${eyes.includes(i) ? ', mắt thật' : ''}`
+      `${coordinate(i, size)}: ${colorName(shown[i])}${train.puzzle.kind === 'reading' && i === train.puzzle.target ? ', mục tiêu' : ''}${liberties.includes(i) ? ', khí' : ''}${eyes.includes(i) ? ', mắt thật' : ''}`
     );
     if (shown[i]) {
       const stone = appendStone(button, shown[i], shownLast === i);
       if (
-        puzzle.kind === 'reading' &&
-        i === puzzle.target &&
-        shown[i] === (puzzle.goal === 'eyes' ? 1 : 2)
+        train.puzzle.kind === 'reading' &&
+        i === train.puzzle.target &&
+        shown[i] === (train.puzzle.goal === 'eyes' ? 1 : 2)
       )
         stone.append(span('target-marker'));
     } else if (eyes.includes(i)) button.append(span('eye-marker'));
@@ -307,44 +325,61 @@ function draw() {
     root.append(button);
   }
   renderTrace();
-  const reading = puzzle.kind === 'reading';
-  $('turn').textContent = turnStatusText({ viewStep, finished, mode, wrong, busy, reading });
+  const reading = train.puzzle.kind === 'reading';
+  $('turn').textContent = turnStatusText({
+    viewStep: train.viewStep,
+    finished: train.finished,
+    mode: train.mode,
+    wrong: train.wrong,
+    busy: train.busy,
+    reading,
+  });
   $('depth').textContent = depthStatusText({
     reading,
-    hasBoard: Boolean(puzzle.size),
-    depth: puzzle.depth,
-    viewStep,
-    remaining,
+    hasBoard: Boolean(train.puzzle.size),
+    depth: train.puzzle.depth,
+    viewStep: train.viewStep,
+    remaining: train.remaining,
   });
-  $('puzzle-pass').disabled = busy || finished;
+  $('puzzle-pass').disabled = train.busy || train.finished;
   $('hint').textContent =
-    puzzle.kind === 'reading' && hintLevel ? `Gợi ý ${Math.min(hintLevel + 1, 3)}/3` : 'Gợi ý';
-  $('attempt-status').textContent = attemptStatusText({ wrong, assisted, mode });
+    train.puzzle.kind === 'reading' && train.hintLevel
+      ? `Gợi ý ${Math.min(train.hintLevel + 1, 3)}/3`
+      : 'Gợi ý';
+  $('attempt-status').textContent = attemptStatusText({
+    wrong: train.wrong,
+    assisted: train.assisted,
+    mode: train.mode,
+  });
 }
 function startAttempt() {
-  if (!attemptStarted) {
-    beginAttempt(study, puzzle.id);
-    attemptStarted = true;
+  if (!train.attemptStarted) {
+    beginAttempt(train.study, train.puzzle.id);
+    train.attemptStarted = true;
     save();
   }
 }
 function markAssisted() {
   startAttempt();
-  assisted = true;
-  reveal(study, puzzle.id);
+  train.assisted = true;
+  reveal(train.study, train.puzzle.id);
   save();
 }
 function fail(text) {
   startAttempt();
-  wrong++;
-  if (wrong === 1) recordMiss(study, puzzle.id);
-  reveal(study, puzzle.id);
+  train.wrong++;
+  if (train.wrong === 1) recordMiss(train.study, train.puzzle.id);
+  reveal(train.study, train.puzzle.id);
   save();
   renderProgress();
   feedback(text, 'error');
-  if (mode === 'test') {
-    finished = true;
-    testResults.push({ id: puzzle.id, correct: false, ms: Date.now() - startedAt });
+  if (train.mode === 'test') {
+    train.finished = true;
+    train.testResults.push({
+      id: train.puzzle.id,
+      correct: false,
+      ms: Date.now() - train.startedAt,
+    });
     $('next').disabled = false;
     $('next').classList.add('primary');
     $('explanation-wrap').hidden = false;
@@ -354,18 +389,18 @@ function fail(text) {
   draw();
 }
 function success() {
-  finished = true;
-  const clean = wrong === 0 && !assisted && eligibleClean(study, puzzle.id);
-  recordSolve(study, puzzle.id, clean);
+  train.finished = true;
+  const clean = train.wrong === 0 && !train.assisted && eligibleClean(train.study, train.puzzle.id);
+  recordSolve(train.study, train.puzzle.id, clean);
   // Revealing the explanation prevents immediate replay from counting as fresh recall.
-  reveal(study, puzzle.id);
+  reveal(train.study, train.puzzle.id);
   save();
   renderProgress();
-  if (mode === 'test')
-    testResults.push({
-      id: puzzle.id,
-      correct: wrong === 0 && !assisted,
-      ms: Date.now() - startedAt,
+  if (train.mode === 'test')
+    train.testResults.push({
+      id: train.puzzle.id,
+      correct: train.wrong === 0 && !train.assisted,
+      ms: Date.now() - train.startedAt,
     });
   $('next').disabled = false;
   $('next').classList.add('primary');
@@ -380,211 +415,234 @@ function success() {
   draw();
 }
 function answer(choice, button) {
-  if (finished || busy) return;
+  if (train.finished || train.busy) return;
   startAttempt();
-  if (choice === puzzle.answer) {
+  if (choice === train.puzzle.answer) {
     button.className = 'correct';
     success();
   } else {
     button.className = 'incorrect';
     button.disabled = true;
-    fail('Chưa đúng. Đọc lại điều kiện trong đề. ' + (mode === 'test' ? puzzle.explanation : ''));
+    fail(
+      'Chưa đúng. Đọc lại điều kiện trong đề. ' +
+        (train.mode === 'test' ? train.puzzle.explanation : '')
+    );
   }
 }
 async function selectPoint(point) {
-  if (!puzzle || busy || finished) return;
-  if (viewStep >= 0) {
+  if (!train.puzzle || train.busy || train.finished) return;
+  if (train.viewStep >= 0) {
     feedback('Đang xem lại chuỗi. Chọn “Trở lại thế hiện tại” để tiếp tục.');
     return;
   }
-  if (board[point]) {
-    if (puzzle.kind === 'reading' && $('inspect').checked) {
-      selected = point;
+  if (train.board[point]) {
+    if (train.puzzle.kind === 'reading' && $('inspect').checked) {
+      train.selected = point;
       markAssisted();
       draw();
       feedback(
-        `Nhóm tại ${coordinate(point, puzzle.size)} có ${group(board, point, puzzle.size).liberties.length} khí.`
+        `Nhóm tại ${coordinate(point, train.puzzle.size)} có ${group(train.board, point, train.puzzle.size).liberties.length} khí.`
       );
     }
     return;
   }
-  if (puzzle.kind === 'quiz') return;
+  if (train.puzzle.kind === 'quiz') return;
   await play(point);
 }
 async function play(point) {
-  if (!puzzle || puzzle.kind !== 'reading' || busy || finished || viewStep >= 0) return;
+  if (
+    !train.puzzle ||
+    train.puzzle.kind !== 'reading' ||
+    train.busy ||
+    train.finished ||
+    train.viewStep >= 0
+  )
+    return;
   startAttempt();
-  busy = true;
-  const currentEpoch = epoch;
+  train.busy = true;
+  const currentEpoch = train.epoch;
   draw();
   const result = await ask('check', point);
-  if (currentEpoch !== epoch) return;
-  busy = false;
-  hinted = -2;
-  selected = -1;
+  if (currentEpoch !== train.epoch) return;
+  train.busy = false;
+  train.hinted = -2;
+  train.selected = -1;
   if (result.status === 'unknown') {
     feedback(
       'Bộ đọc vượt giới hạn tính toán hoặc chưa tải được. Nước này chưa được chấm; thử nước khác hoặc tải lại trang.'
     );
-    autoPlay = false;
+    train.autoPlay = false;
     draw();
     return;
   }
   if (result.status === 'invalid') {
-    autoPlay = false;
+    train.autoPlay = false;
     fail(result.message);
     return;
   }
   if (result.status === 'wrong') {
-    autoPlay = false;
+    train.autoPlay = false;
     if (point === -1) {
       fail(PASS_WRONG_TEXT);
       return;
     }
     if (result.counter !== undefined) {
-      const steps = refutationSteps(board, point, result.counter, puzzle.size, history);
+      const steps = refutationSteps(
+        train.board,
+        point,
+        result.counter,
+        train.puzzle.size,
+        train.history
+      );
       if (steps.length) {
-        trace.push(...steps);
-        viewStep = trace.length - 1;
+        train.trace.push(...steps);
+        train.viewStep = train.trace.length - 1;
       }
     }
-    fail(wrongMoveText(result, puzzle));
+    fail(wrongMoveText(result, train.puzzle));
     return;
   }
   if (result.status === 'cancelled') return;
-  trace.push({ board: [...result.playerBoard], point, color: 1 });
+  train.trace.push({ board: [...result.playerBoard], point, color: 1 });
   if (result.status === 'continue')
-    trace.push({ board: [...result.board], point: result.reply, color: 2 });
-  board = result.board;
-  history = result.history;
-  remaining = result.remaining;
-  last = result.status === 'continue' ? result.reply : point;
+    train.trace.push({ board: [...result.board], point: result.reply, color: 2 });
+  train.board = result.board;
+  train.history = result.history;
+  train.remaining = result.remaining;
+  train.last = result.status === 'continue' ? result.reply : point;
   if (result.status === 'solved') {
-    autoPlay = false;
+    train.autoPlay = false;
     success();
     return;
   }
-  feedback(replyText(result, puzzle.size));
+  feedback(replyText(result, train.puzzle.size));
   draw();
-  if (autoPlay) await getHint(true);
+  if (train.autoPlay) await getHint(true);
 }
 async function getHint(playIt = false) {
-  if (!puzzle || puzzle.kind !== 'reading' || busy || finished || mode === 'test' || viewStep >= 0)
+  if (
+    !train.puzzle ||
+    train.puzzle.kind !== 'reading' ||
+    train.busy ||
+    train.finished ||
+    train.mode === 'test' ||
+    train.viewStep >= 0
+  )
     return;
   markAssisted();
-  if (!playIt && hintLevel === 0) {
-    hintLevel = 1;
-    selected = puzzle.target;
-    const libs = group(board, puzzle.target, puzzle.size).liberties.length;
-    feedback(hintText(1, { size: puzzle.size, liberties: libs }));
+  if (!playIt && train.hintLevel === 0) {
+    train.hintLevel = 1;
+    train.selected = train.puzzle.target;
+    const libs = group(train.board, train.puzzle.target, train.puzzle.size).liberties.length;
+    feedback(hintText(1, { size: train.puzzle.size, liberties: libs }));
     draw();
     return;
   }
-  busy = true;
-  const currentEpoch = epoch;
+  train.busy = true;
+  const currentEpoch = train.epoch;
   draw();
   const result = await ask('hint');
-  if (currentEpoch !== epoch) return;
-  busy = false;
+  if (currentEpoch !== train.epoch) return;
+  train.busy = false;
   if (result.status !== 'hint') {
-    autoPlay = false;
+    train.autoPlay = false;
     feedback('Chưa tính được gợi ý trong giới hạn. Bạn có thể thử lại bài.');
     draw();
     return;
   }
-  if (!playIt && hintLevel === 1) {
-    hintLevel = 2;
-    feedback(hintText(2, { size: puzzle.size, point: result.point }));
+  if (!playIt && train.hintLevel === 1) {
+    train.hintLevel = 2;
+    feedback(hintText(2, { size: train.puzzle.size, point: result.point }));
     draw();
     return;
   }
-  hintLevel = 3;
-  hinted = result.point;
-  feedback(hintText(3, { size: puzzle.size, point: result.point }));
+  train.hintLevel = 3;
+  train.hinted = result.point;
+  feedback(hintText(3, { size: train.puzzle.size, point: result.point }));
   draw();
   if (playIt) await play(result.point);
 }
 function next() {
-  if (mode === 'test' && !finished) return;
-  if (index + 1 < queue.length) {
-    index++;
+  if (train.mode === 'test' && !train.finished) return;
+  if (train.index + 1 < train.queue.length) {
+    train.index++;
     load();
     return;
   }
-  if (mode === 'test') {
+  if (train.mode === 'test') {
     $('test-result').hidden = false;
-    $('test-result').textContent = testResultText(testResults, queue.length);
+    $('test-result').textContent = testResultText(train.testResults, train.queue.length);
     $('next').disabled = true;
     feedback('Phiên kiểm tra đã kết thúc. Chọn một chế độ để bắt đầu phiên khác.');
     return;
   }
-  if (mode === 'review' || mode === 'today') {
+  if (train.mode === 'review' || train.mode === 'today') {
     rebuild();
     return;
   }
-  const nextStage = stages[stages.findIndex((s) => s.id === stage) + 1];
+  const nextStage = stages[stages.findIndex((s) => s.id === train.stage) + 1];
   if (nextStage) {
-    stage = nextStage.id;
-    topic = 'all';
+    train.stage = nextStage.id;
+    train.topic = 'all';
     rebuild();
   } else {
-    index = 0;
+    train.index = 0;
     load();
   }
 }
 function renderTrace() {
-  $('variation').hidden = puzzle.kind !== 'reading' || trace.length < 2;
+  $('variation').hidden = train.puzzle.kind !== 'reading' || train.trace.length < 2;
   $('move-list').replaceChildren();
   if ($('variation').hidden) return;
-  trace.forEach((item, i) => {
+  train.trace.forEach((item, i) => {
     const button = document.createElement('button');
     button.textContent =
       i === 0
         ? 'Thế đầu'
         : item.refute
-          ? `${item.color === 1 ? '✗ Đen' : 'Trắng (phản bác)'} ${coordinate(item.point, puzzle.size)}`
-          : `${i}. ${item.color === 1 ? 'Đen' : 'Trắng'} ${coordinate(item.point, puzzle.size)}`;
-    button.setAttribute('aria-pressed', String(viewStep === i));
+          ? `${item.color === 1 ? '✗ Đen' : 'Trắng (phản bác)'} ${coordinate(item.point, train.puzzle.size)}`
+          : `${i}. ${item.color === 1 ? 'Đen' : 'Trắng'} ${coordinate(item.point, train.puzzle.size)}`;
+    button.setAttribute('aria-pressed', String(train.viewStep === i));
     button.onclick = () => {
-      viewStep = i;
-      autoPlay = false;
+      train.viewStep = i;
+      train.autoPlay = false;
       draw();
     };
     $('move-list').append(button);
   });
 }
 $('live-position').onclick = () => {
-  trace = trace.filter((t) => !t.refute);
-  viewStep = -1;
+  train.trace = train.trace.filter((t) => !t.refute);
+  train.viewStep = -1;
   draw();
 };
 function journal() {
-  renderJournal($('game-list'), study.games);
+  renderJournal($('game-list'), train.study.games);
 }
 for (const m of ['today', 'practice', 'review', 'test'])
   $(`mode-${m}`).onclick = () => {
-    mode = m;
+    train.mode = m;
     rebuild();
   };
 $('stage-select').onchange = () => {
-  stage = $('stage-select').value;
-  topic = 'all';
+  train.stage = $('stage-select').value;
+  train.topic = 'all';
   rebuild();
   showPuzzle();
 };
 $('previous').onclick = () => {
-  if (mode !== 'test' && index > 0) {
-    index--;
+  if (train.mode !== 'test' && train.index > 0) {
+    train.index--;
     load();
     showPuzzle();
   }
 };
 $('topic').onchange = () => {
-  topic = $('topic').value;
+  train.topic = $('topic').value;
   rebuild();
 };
 $('problem-select').onchange = () => {
-  index = Number($('problem-select').value);
+  train.index = Number($('problem-select').value);
   load();
   showPuzzle();
 };
@@ -595,36 +653,36 @@ $('next').onclick = () => {
 $('retry').onclick = load;
 $('hint').onclick = () => getHint();
 $('solution').onclick = () => {
-  if (!puzzle || busy || finished || mode === 'test') return;
-  if (viewStep >= 0) {
+  if (!train.puzzle || train.busy || train.finished || train.mode === 'test') return;
+  if (train.viewStep >= 0) {
     feedback('Chọn “Trở lại thế hiện tại” trước khi xem lời giải.');
     return;
   }
   markAssisted();
-  if (puzzle.kind === 'quiz') {
+  if (train.puzzle.kind === 'quiz') {
     $('explanation-wrap').hidden = false;
-    feedback(`Đáp án: ${puzzle.choices[puzzle.answer]}. ${puzzle.explanation}`);
+    feedback(`Đáp án: ${train.puzzle.choices[train.puzzle.answer]}. ${train.puzzle.explanation}`);
     draw();
   } else {
-    autoPlay = true;
+    train.autoPlay = true;
     getHint(true);
   }
 };
 $('puzzle-pass').onclick = () => play(-1);
 $('inspect').onchange = () => {
   if ($('inspect').checked) markAssisted();
-  else selected = -1;
+  else train.selected = -1;
   draw();
 };
 setupBackup({
   exportButton: $('backup-export'),
   importInput: $('backup-import'),
   status: $('backup-status'),
-  getStudy: () => study,
-  getBankIds: () => bank.map((p) => p.id),
+  getStudy: () => train.study,
+  getBankIds: () => train.bank.map((p) => p.id),
   onImport: (result) => {
-    study = result.study;
-    storageWritable = storageAvailable = true;
+    train.study = result.study;
+    train.storageWritable = train.storageAvailable = true;
     save();
     rebuild();
     journal();
@@ -636,29 +694,29 @@ setupJournalForm({
   urlInput: $('game-url'),
   status: $('journal-status'),
   onAdd: ({ date, url, note }) => {
-    study.games.push({ date, url, note, stage });
-    study.games = study.games.slice(-100);
+    train.study.games.push({ date, url, note, stage: train.stage });
+    train.study.games = train.study.games.slice(-100);
     save();
     journal();
-    return storageAvailable;
+    return train.storageAvailable;
   },
 });
 try {
   const response = await fetch('./reading-bank.json');
   if (!response.ok) throw Error('BANK');
-  bank = buildBank(await response.json());
+  train.bank = buildBank(await response.json());
   const loaded = loadStudy(
     KEY,
-    bank.map((p) => p.id)
+    train.bank.map((p) => p.id)
   );
-  study = loaded.study;
-  storageAvailable = loaded.available;
-  storageWritable = loaded.writable;
+  train.study = loaded.study;
+  train.storageAvailable = loaded.available;
+  train.storageWritable = loaded.writable;
   const params = new URLSearchParams(location.search);
-  if (stages.some((s) => s.id === params.get('stage'))) stage = params.get('stage');
-  const requested = bank.find((p) => p.id === params.get('problem'));
-  if (requested) stage = requested.stage;
-  else if (!params.get('stage')) mode = 'today';
+  if (stages.some((s) => s.id === params.get('stage'))) train.stage = params.get('stage');
+  const requested = train.bank.find((p) => p.id === params.get('problem'));
+  if (requested) train.stage = requested.stage;
+  else if (!params.get('stage')) train.mode = 'today';
   rebuild(requested?.id);
   journal();
   save();

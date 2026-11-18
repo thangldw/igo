@@ -44,60 +44,63 @@ import {
 /** @type {(id: string) => any} DOM lookups are by known ids in the page markup. */
 const $ = (id) => document.getElementById(id);
 const search = createSearchClient();
-let done = loadProgress(lessons);
-let lesson = 0,
-  level = 'beginner',
-  n = 5,
-  board = [],
-  history = [],
-  snapshots = [];
-let last = -1,
-  mode = 'lesson',
-  passes = 0,
-  ended = false,
-  captures = [0, 0];
-let selected = -1,
-  hinted = false,
-  busy = false,
-  epoch = 0,
-  solved = false,
-  lineStep = 0,
-  candidates = [];
-let gameMoves = [],
-  deadStones = new Set(),
-  pendingPoint = -1,
-  handicap = 0,
-  komi = 6.5;
-const pointName = (i) => coordinate(i, n);
+const app = {
+  done: loadProgress(lessons),
+  lesson: 0,
+  level: 'beginner',
+  n: 5,
+  board: [],
+  history: [],
+  snapshots: [],
+  last: -1,
+  mode: 'lesson',
+  passes: 0,
+  ended: false,
+  captures: [0, 0],
+  selected: -1,
+  hinted: false,
+  busy: false,
+  epoch: 0,
+  solved: false,
+  lineStep: 0,
+  candidates: [],
+  gameMoves: [],
+  deadStones: new Set(),
+  pendingPoint: -1,
+  handicap: 0,
+  komi: 6.5,
+};
+
+const pointName = (i) => coordinate(i, app.n);
 function scoreDetails() {
-  const s = areaScore(board, n, [...deadStones], komi);
-  $('score-detail').textContent = scoreSummary(s, komi);
+  const s = areaScore(app.board, app.n, [...app.deadStones], app.komi);
+  $('score-detail').textContent = scoreSummary(s, app.komi);
   return s;
 }
 function record() {
   return {
     version: 1,
-    size: n,
+    size: app.n,
     difficulty: $('bot-level').value,
-    ...(handicap ? { handicap } : {}),
-    komi,
-    moves: gameMoves,
+    ...(app.handicap ? { handicap: app.handicap } : {}),
+    komi: app.komi,
+    moves: app.gameMoves,
   };
 }
 function persist() {
-  if (mode !== 'game') return;
+  if (app.mode !== 'game') return;
   $('game-save-status').textContent = writeItem(GAME_KEY, JSON.stringify(record()))
-    ? `Đã lưu tại máy · ${gameMoves.length} nước`
+    ? `Đã lưu tại máy · ${app.gameMoves.length} nước`
     : 'Không lưu được. Hãy tải SGF để giữ ván.';
 }
 function syncNav() {
-  document.body.dataset.mode = mode;
+  document.body.dataset.mode = app.mode;
   const title = document.querySelector('.page-title');
-  if (title) title.textContent = mode === 'game' ? 'Chơi với máy' : 'Học cách chơi';
+  if (title) title.textContent = app.mode === 'game' ? 'Chơi với máy' : 'Học cách chơi';
   for (const link of /** @type {NodeListOf<HTMLElement>} */ (
     document.querySelectorAll('.site-nav a[data-nav]')
   )) {
-    const on = link.dataset.nav === (mode === 'game' ? 'play' : 'learn');
+    const on = link.dataset.nav === (app.mode === 'game' ? 'play' : 'learn');
     if (link.dataset.nav === 'learn' || link.dataset.nav === 'play')
       on ? link.setAttribute('aria-current', 'page') : link.removeAttribute('aria-current');
   }
@@ -109,32 +112,32 @@ function resume() {
     $('game-size').value = String(saved.size);
     $('game-handicap').value = String(saved.handicap || 0);
     start(false);
-    handicap = saved.handicap || 0;
-    komi = recordKomi(saved);
-    gameMoves = saved.moves;
-    board = state.board;
-    history = state.history;
-    last = state.last;
-    captures = state.captures;
-    passes = state.passes;
-    snapshots = state.snapshots;
-    ended = state.ended;
+    app.handicap = saved.handicap || 0;
+    app.komi = recordKomi(saved);
+    app.gameMoves = saved.moves;
+    app.board = state.board;
+    app.history = state.history;
+    app.last = state.last;
+    app.captures = state.captures;
+    app.passes = state.passes;
+    app.snapshots = state.snapshots;
+    app.ended = state.ended;
     $('bot-level').value = ['easy', 'basic', 'search'].includes(saved.difficulty)
       ? saved.difficulty
       : 'easy';
     draw();
     persist();
     message('Đã tiếp tục ván đã lưu.');
-    if (ended) finish();
+    if (app.ended) finish();
     else if (state.next === 2) reply();
   } catch {
-    if (mode === 'lesson') load(0);
+    if (app.mode === 'lesson') load(0);
     message('Không đọc được ván lưu. Dữ liệu cũ được giữ nguyên; hãy bắt đầu ván mới.', 'error');
   }
 }
-const current = () => lessons[lesson];
-const currentLevel = () => levels.find((l) => l.id === level);
-const levelLessons = () => lessons.filter((l) => l.level === level);
+const current = () => lessons[app.lesson];
+const currentLevel = () => levels.find((l) => l.id === app.level);
+const levelLessons = () => lessons.filter((l) => l.level === app.level);
 function showLesson() {
   const heading = $('title');
   heading.tabIndex = -1;
@@ -142,7 +145,9 @@ function showLesson() {
   heading.scrollIntoView({ block: 'start' });
 }
 const targets = () =>
-  current().lines ? [...new Set(candidates.map((line) => line[lineStep]))] : [current().target];
+  current().lines
+    ? [...new Set(app.candidates.map((line) => line[app.lineStep]))]
+    : [current().target];
 
 function message(text, type = '') {
   $('feedback').textContent = text;
@@ -161,10 +166,10 @@ function navigation() {
     {
       levels,
       lessons,
-      level,
-      inLesson: mode === 'lesson',
+      level: app.level,
+      inLesson: app.mode === 'lesson',
       currentId: current().id,
-      done,
+      done: app.done,
       onLevel: (id) => {
         load(lessons.findIndex((item) => item.level === id));
         showLesson();
@@ -179,9 +184,9 @@ function navigation() {
 function draw() {
   const root = $('board');
   const zoom = Number($('board-zoom').value) / 100;
-  const large = mode === 'game' && (n > 9 || zoom > 1);
+  const large = app.mode === 'game' && (app.n > 9 || zoom > 1);
   const width = boardPixelWidth({
-    n,
+    n: app.n,
     zoom,
     columnWidth: document.querySelector('.stage-board').clientWidth - 48,
     viewportHeight: window.innerHeight,
@@ -189,67 +194,81 @@ function draw() {
   root.style.minWidth = large ? `${width}px` : '';
   $('play-surface').style.minWidth = large ? `${width + 48}px` : '';
   root.replaceChildren();
-  root.style.gridTemplateColumns = `repeat(${n},1fr)`;
-  $('scoring-panel').hidden = $('analysis-panel').hidden = mode !== 'game' || !ended;
-  const scored = mode === 'game' && ended ? scoreDetails() : null;
-  $('confirm-point').hidden = $('cancel-point').hidden = pendingPoint < 0;
+  root.style.gridTemplateColumns = `repeat(${app.n},1fr)`;
+  $('scoring-panel').hidden = $('analysis-panel').hidden = app.mode !== 'game' || !app.ended;
+  const scored = app.mode === 'game' && app.ended ? scoreDetails() : null;
+  $('confirm-point').hidden = $('cancel-point').hidden = app.pendingPoint < 0;
   for (const id of ['export-game', 'review-game', 'analyze-game', 'confirm-point'])
-    $(id).disabled = busy;
-  const liberties = selected >= 0 && board[selected] ? group(board, selected, n).liberties : [];
-  for (let i = 0; i < board.length; i++) {
+    $(id).disabled = app.busy;
+  const liberties =
+    app.selected >= 0 && app.board[app.selected]
+      ? group(app.board, app.selected, app.n).liberties
+      : [];
+  for (let i = 0; i < app.board.length; i++) {
     const button = createPoint(
       i,
-      n,
-      mode === 'lesson' && hinted && targets().includes(i) ? 'hinted' : ''
+      app.n,
+      app.mode === 'lesson' && app.hinted && targets().includes(i) ? 'hinted' : ''
     );
-    if (mode === 'game') {
-      if (isStarPoint(i, n)) button.append(span('star-point'));
-      if (i === pendingPoint) button.classList.add('pending-point');
-      if (deadStones.has(i)) button.classList.add('dead-stone');
-      if (scored && !board[i] && scored.owners[i])
+    if (app.mode === 'game') {
+      if (isStarPoint(i, app.n)) button.append(span('star-point'));
+      if (i === app.pendingPoint) button.classList.add('pending-point');
+      if (app.deadStones.has(i)) button.classList.add('dead-stone');
+      if (scored && !app.board[i] && scored.owners[i])
         button.classList.add(scored.owners[i] === 1 ? 'black-area' : 'white-area');
     }
     button.setAttribute(
       'aria-label',
-      `${coordinate(i, n)}: ${colorName(board[i])}${liberties.includes(i) ? ', khí' : ''}`
+      `${coordinate(i, app.n)}: ${colorName(app.board[i])}${liberties.includes(i) ? ', khí' : ''}`
     );
-    if (board[i]) appendStone(button, board[i], last === i);
+    if (app.board[i]) appendStone(button, app.board[i], app.last === i);
     else if (liberties.includes(i)) button.append(span('liberty'));
     button.onclick = () => click(i);
-    appendEdgeLabels(button, i, n);
+    appendEdgeLabels(button, i, app.n);
     root.append(button);
   }
-  $('turn').textContent = turnText({ mode, lesson: current(), lineStep, solved, ended, busy });
-  $('captured').textContent = capturedText({ mode, lesson: current(), captures });
+  $('turn').textContent = turnText({
+    mode: app.mode,
+    lesson: current(),
+    lineStep: app.lineStep,
+    solved: app.solved,
+    ended: app.ended,
+    busy: app.busy,
+  });
+  $('captured').textContent = capturedText({
+    mode: app.mode,
+    lesson: current(),
+    captures: app.captures,
+  });
 }
 function complete(text) {
-  solved = true;
-  if (!done.includes(current().id)) {
-    done.push(current().id);
-    saveProgress(done);
+  app.solved = true;
+  if (!app.done.includes(current().id)) {
+    app.done.push(current().id);
+    saveProgress(app.done);
   }
   message(text, 'success');
   $('next').hidden = false;
-  $('next').textContent = nextLabel(lessons[lesson + 1], level, levels);
+  $('next').textContent = nextLabel(lessons[app.lesson + 1], app.level, levels);
   navigation();
 }
 function load(i) {
   search.cancel();
-  pendingPoint = -1;
-  epoch++;
-  busy = false;
-  mode = 'lesson';
+  app.pendingPoint = -1;
+  app.epoch++;
+  app.busy = false;
+  app.mode = 'lesson';
   syncNav();
-  lesson = i;
-  level = current().level;
-  n = 5;
-  board = empty(n);
-  for (const [p, c] of current().setup || []) board[p] = c;
-  history = [board.join('')];
-  last = selected = -1;
-  hinted = solved = false;
-  lineStep = 0;
-  candidates = current().lines || [];
+  app.lesson = i;
+  app.level = current().level;
+  app.n = 5;
+  app.board = empty(app.n);
+  for (const [p, c] of current().setup || []) app.board[p] = c;
+  app.history = [app.board.join('')];
+  app.last = app.selected = -1;
+  app.hinted = app.solved = false;
+  app.lineStep = 0;
+  app.candidates = current().lines || [];
   const number = levelLessons().indexOf(current()) + 1;
   const conceptual = showLessonChrome({
     lesson: current(),
@@ -258,7 +277,7 @@ function load(i) {
   });
   saveLessonId(current().id);
   renderAnswers($('answers'), current(), (correct) => {
-    if (solved) return;
+    if (app.solved) return;
     if (correct) complete(successText(current()));
     else message('Chưa đúng. Kiểm tra lại khí hoặc điều kiện trong đề.', 'error');
     draw();
@@ -269,38 +288,39 @@ function load(i) {
 }
 /** While scoring, clicking a stone toggles its whole group between alive and dead. */
 function toggleDeadGroup(i) {
-  if (!board[i]) return;
-  const remove = deadStones.has(i);
-  for (const p of group(board, i, n).stones) remove ? deadStones.delete(p) : deadStones.add(p);
+  if (!app.board[i]) return;
+  const remove = app.deadStones.has(i);
+  for (const p of group(app.board, i, app.n).stones)
+    remove ? app.deadStones.delete(p) : app.deadStones.add(p);
   draw();
 }
 /** Clicking an occupied point selects its group so liberties can be shown. */
 function selectGroup(i) {
-  selected = mode === 'lesson' || $('show-liberties').checked ? i : -1;
+  app.selected = app.mode === 'lesson' || $('show-liberties').checked ? i : -1;
   draw();
-  if (mode === 'lesson' && !solved)
-    message(`Nhóm này có ${group(board, i, n).liberties.length} khí.`);
+  if (app.mode === 'lesson' && !app.solved)
+    message(`Nhóm này có ${group(app.board, i, app.n).liberties.length} khí.`);
 }
 /** Plays the scripted white answer in a sequence lesson after the learner's move. */
 function answerSequence() {
-  busy = true;
+  app.busy = true;
   draw();
   message('Trắng đang đáp theo biến minh họa…');
-  const currentEpoch = epoch;
+  const currentEpoch = app.epoch;
   setTimeout(() => {
-    if (currentEpoch !== epoch) return;
-    const replyPoint = candidates[0][lineStep];
-    const reply = move(board, replyPoint, 2, n, history);
-    busy = false;
+    if (currentEpoch !== app.epoch) return;
+    const replyPoint = app.candidates[0][app.lineStep];
+    const reply = move(app.board, replyPoint, 2, app.n, app.history);
+    app.busy = false;
     if (reply.error) {
       message('Biến bài học không hợp lệ. Hãy làm lại bài.', 'error');
       return;
     }
-    candidates = candidates.filter((line) => line[lineStep] === replyPoint);
-    board = reply.board;
-    history.push(board.join(''));
-    last = replyPoint;
-    lineStep++;
+    app.candidates = app.candidates.filter((line) => line[app.lineStep] === replyPoint);
+    app.board = reply.board;
+    app.history.push(app.board.join(''));
+    app.last = replyPoint;
+    app.lineStep++;
     message(
       reply.captured
         ? `Trắng vừa bắt ${reply.captured} quân. Tìm nước đen tiếp theo.`
@@ -312,12 +332,12 @@ function answerSequence() {
 /** The learner tries a move on an empty point in lesson mode. */
 function playLessonMove(i) {
   const l = current();
-  if (solved) return;
+  if (app.solved) return;
   if (l.answer !== undefined) {
     message('Hãy chọn câu trả lời bên dưới.');
     return;
   }
-  const result = move(board, i, 1, n, history);
+  const result = move(app.board, i, 1, app.n, app.history);
   if (result.error) {
     message(result.error, 'error');
     return;
@@ -329,15 +349,15 @@ function playLessonMove(i) {
     );
     return;
   }
-  board = result.board;
-  history.push(board.join(''));
-  last = i;
-  selected = -1;
-  hinted = false;
+  app.board = result.board;
+  app.history.push(app.board.join(''));
+  app.last = i;
+  app.selected = -1;
+  app.hinted = false;
   if (l.kind === 'sequence') {
-    candidates = candidates.filter((line) => line[lineStep] === i);
-    lineStep++;
-    if (lineStep === candidates[0].length) {
+    app.candidates = app.candidates.filter((line) => line[app.lineStep] === i);
+    app.lineStep++;
+    if (app.lineStep === app.candidates[0].length) {
       complete(l.success);
       draw();
       return;
@@ -350,14 +370,14 @@ function playLessonMove(i) {
 }
 /** The player moves in a game against the bot; the bot then replies. */
 function playGameMove(i) {
-  const result = move(board, i, 1, n, history);
+  const result = move(app.board, i, 1, app.n, app.history);
   if (result.error) {
     message(result.error, 'error');
     return;
   }
   saveTurn();
   apply(result, i, 1);
-  passes = 0;
+  app.passes = 0;
   message(
     result.captured
       ? `Bạn bắt được ${result.captured} quân trắng.`
@@ -366,125 +386,125 @@ function playGameMove(i) {
   reply();
 }
 function click(i, confirmed = false) {
-  if (busy) return;
-  if (mode === 'game' && ended) return toggleDeadGroup(i);
-  if (mode === 'game' && !board[i] && $('confirm-move').checked && !confirmed) {
-    pendingPoint = i;
+  if (app.busy) return;
+  if (app.mode === 'game' && app.ended) return toggleDeadGroup(i);
+  if (app.mode === 'game' && !app.board[i] && $('confirm-move').checked && !confirmed) {
+    app.pendingPoint = i;
     message(`Đã chọn ${pointName(i)}. Bấm “Đặt quân ở điểm đã chọn” để xác nhận.`);
     draw();
     return;
   }
-  pendingPoint = -1;
-  if (board[i]) return selectGroup(i);
-  if (mode === 'lesson') return playLessonMove(i);
+  app.pendingPoint = -1;
+  if (app.board[i]) return selectGroup(i);
+  if (app.mode === 'lesson') return playLessonMove(i);
   playGameMove(i);
 }
 function saveTurn() {
-  snapshots.push({
-    board: [...board],
-    history: [...history],
-    last,
-    captures: [...captures],
-    passes,
-    moveCount: gameMoves.length,
+  app.snapshots.push({
+    board: [...app.board],
+    history: [...app.history],
+    last: app.last,
+    captures: [...app.captures],
+    passes: app.passes,
+    moveCount: app.gameMoves.length,
   });
 }
 function apply(result, i, c) {
-  gameMoves.push({ color: c, point: i });
-  board = result.board;
-  history.push(board.join(''));
-  last = i;
-  selected = -1;
-  captures[c - 1] += result.captured;
+  app.gameMoves.push({ color: c, point: i });
+  app.board = result.board;
+  app.history.push(app.board.join(''));
+  app.last = i;
+  app.selected = -1;
+  app.captures[c - 1] += result.captured;
   draw();
 }
 function reply() {
   persist();
-  busy = true;
+  app.busy = true;
   draw();
-  const currentEpoch = epoch;
+  const currentEpoch = app.epoch;
   const applyReply = (i) => {
-    if (currentEpoch !== epoch) return;
+    if (currentEpoch !== app.epoch) return;
     if (i === -1 || i === null) {
-      gameMoves.push({ color: 2, point: -1 });
-      passes++;
+      app.gameMoves.push({ color: 2, point: -1 });
+      app.passes++;
       message('Máy bỏ lượt vì không tìm thấy nước có ích theo cách đánh giá của máy.');
-      if (passes >= 2) finish();
+      if (app.passes >= 2) finish();
     } else {
-      const result = move(board, i, 2, n, history);
+      const result = move(app.board, i, 2, app.n, app.history);
       if (result.error) {
-        busy = false;
+        app.busy = false;
         message(result.error, 'error');
         return;
       }
       apply(result, i, 2);
-      passes = 0;
+      app.passes = 0;
     }
-    busy = false;
+    app.busy = false;
     persist();
     draw();
   };
   if ($('bot-level').value === 'search') {
     search
-      .run({ type: 'move', board, size: n, history })
+      .run({ type: 'move', board: app.board, size: app.n, history: app.history })
       .then((data) => {
-        if (data.cancelled || currentEpoch !== epoch) return;
+        if (data.cancelled || currentEpoch !== app.epoch) return;
         if (data.error) {
-          applyReply(bot(board, n, history));
+          applyReply(bot(app.board, app.n, app.history));
           message('Engine tìm kiếm lỗi; máy đã dùng mức Cơ bản cho lượt này.');
           return;
         }
         applyReply(data.result.best.point);
       })
       .catch(() => {
-        if (currentEpoch !== epoch) return;
-        applyReply(bot(board, n, history));
+        if (currentEpoch !== app.epoch) return;
+        applyReply(bot(app.board, app.n, app.history));
         message('Không tải được engine tìm kiếm; máy đã dùng mức Cơ bản cho lượt này.');
       });
   } else
     setTimeout(() => {
-      if (currentEpoch === epoch)
-        applyReply(bot(board, n, history, { difficulty: $('bot-level').value }));
+      if (currentEpoch === app.epoch)
+        applyReply(bot(app.board, app.n, app.history, { difficulty: $('bot-level').value }));
     }, 350);
 }
 function start(save = true) {
   search.cancel();
-  epoch++;
-  busy = false;
-  mode = 'game';
+  app.epoch++;
+  app.busy = false;
+  app.mode = 'game';
   syncNav();
-  n = Number($('game-size').value);
-  handicap = Number($('game-handicap').value) || 0;
-  komi = Number($('game-komi').value);
-  if (!Number.isFinite(komi)) komi = 6.5;
-  board = empty(n);
-  for (const p of handicapPoints(n, handicap)) board[p] = 1;
+  app.n = Number($('game-size').value);
+  app.handicap = Number($('game-handicap').value) || 0;
+  app.komi = Number($('game-komi').value);
+  if (!Number.isFinite(app.komi)) app.komi = 6.5;
+  app.board = empty(app.n);
+  for (const p of handicapPoints(app.n, app.handicap)) app.board[p] = 1;
   clock.reset();
-  gameMoves = [];
+  app.gameMoves = [];
   $('analysis-output').textContent = '';
-  deadStones.clear();
-  pendingPoint = -1;
-  history = [board.join('')];
-  snapshots = [];
-  last = selected = -1;
-  passes = 0;
-  ended = false;
-  captures = [0, 0];
-  hinted = solved = false;
-  showGameChrome({ n, handicap });
+  app.deadStones.clear();
+  app.pendingPoint = -1;
+  app.history = [app.board.join('')];
+  app.snapshots = [];
+  app.last = app.selected = -1;
+  app.passes = 0;
+  app.ended = false;
+  app.captures = [0, 0];
+  app.hinted = app.solved = false;
+  showGameChrome({ n: app.n, handicap: app.handicap });
   message(
-    handicap
+    app.handicap
       ? 'Đen đã có sẵn quân chấp; máy (Trắng) đi trước.'
       : 'Chạm một giao điểm để đi nước đầu.'
   );
   navigation();
   draw();
   if (save) persist();
-  if (handicap && save) reply();
+  if (app.handicap && save) reply();
 }
 function finish() {
-  ended = true;
-  pendingPoint = -1;
+  app.ended = true;
+  app.pendingPoint = -1;
   message(
     'Hai bên đã bỏ lượt liên tiếp. Kiểm tra điểm ở phần bên trái: nhấn nhóm trên bàn để đánh dấu quân chết, hoặc chọn chơi tiếp nếu còn tranh chấp.'
   );
@@ -495,11 +515,11 @@ $('game-handicap').onchange = () => {
 const clock = createGameClock({
   element: $('game-clock'),
   getLimit: () => Number($('clock-limit').value),
-  isRunning: () => !busy,
+  isRunning: () => !app.busy,
   onExpire: () =>
     message('Hết giờ do bạn đặt. Ván tập vẫn tiếp tục; đây chỉ là nhắc nhịp suy nghĩ.'),
 });
-setInterval(() => clock.tick(mode === 'game', ended), 1000);
+setInterval(() => clock.tick(app.mode === 'game', app.ended), 1000);
 $('clock-limit').onchange = () => clock.reset();
 function savedLessonIndex() {
   const i = lessons.findIndex((l) => l.id === loadLessonId());
@@ -510,12 +530,13 @@ document
   ?.addEventListener('click', (/** @type {MouseEvent} */ event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
     event.preventDefault();
-    if (mode !== 'game') enterPlay();
+    if (app.mode !== 'game') enterPlay();
   });
 document
   .querySelector('.site-nav a[data-nav="learn"]')
   ?.addEventListener('click', (/** @type {MouseEvent} */ event) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button || mode !== 'game') return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button || app.mode !== 'game')
+      return;
     event.preventDefault();
     load(savedLessonIndex());
   });
@@ -524,16 +545,16 @@ function enterPlay() {
   else start();
 }
 $('new-game').onclick = () => start();
-$('retry').onclick = () => load(lesson);
+$('retry').onclick = () => load(app.lesson);
 $('next').onclick = () => {
-  lesson === lessons.length - 1 ? start() : load(lesson + 1);
+  app.lesson === lessons.length - 1 ? start() : load(app.lesson + 1);
   showLesson();
 };
 $('hint').onclick = () => {
-  hinted = true;
+  app.hinted = true;
   const l = current();
   if (l.kind === 'count') {
-    selected = 12;
+    app.selected = 12;
     message('Bốn điểm trống: trên, dưới, trái, phải.');
   } else if (l.kind === 'territory') message('Vùng trống giữa vòng đen chỉ có một giao điểm.');
   else
@@ -546,11 +567,11 @@ $('hint').onclick = () => {
   draw();
 };
 $('pass').onclick = () => {
-  if (busy || ended) return;
+  if (app.busy || app.ended) return;
   saveTurn();
-  gameMoves.push({ color: 1, point: -1 });
-  passes++;
-  if (passes >= 2) {
+  app.gameMoves.push({ color: 1, point: -1 });
+  app.passes++;
+  if (app.passes >= 2) {
     finish();
     persist();
     draw();
@@ -560,23 +581,23 @@ $('pass').onclick = () => {
   }
 };
 $('undo').onclick = () => {
-  if (busy || !snapshots.length) return;
-  epoch++;
-  const s = snapshots.pop();
-  board = s.board;
-  history = s.history;
-  last = s.last;
-  captures = s.captures;
-  passes = s.passes;
-  gameMoves = gameMoves.slice(0, s.moveCount);
+  if (app.busy || !app.snapshots.length) return;
+  app.epoch++;
+  const s = app.snapshots.pop();
+  app.board = s.board;
+  app.history = s.history;
+  app.last = s.last;
+  app.captures = s.captures;
+  app.passes = s.passes;
+  app.gameMoves = app.gameMoves.slice(0, s.moveCount);
   persist();
-  ended = false;
-  selected = -1;
+  app.ended = false;
+  app.selected = -1;
   message('Đã lùi cả lượt của bạn và máy.');
   draw();
 };
 $('show-liberties').onchange = () => {
-  if (!$('show-liberties').checked) selected = -1;
+  if (!$('show-liberties').checked) app.selected = -1;
   draw();
 };
 $('lesson-select').onchange = () => {
@@ -584,8 +605,8 @@ $('lesson-select').onchange = () => {
   showLesson();
 };
 $('previous').onclick = () => {
-  if (lesson > 0) {
-    load(lesson - 1);
+  if (app.lesson > 0) {
+    load(app.lesson - 1);
     showLesson();
   }
 };
@@ -619,18 +640,18 @@ $('game-size').onchange = () => {
 };
 
 $('export-game').onclick = () => {
-  if (busy) return;
+  if (app.busy) return;
   const url = URL.createObjectURL(
     new Blob([recordSgf(record())], { type: 'application/x-go-sgf;charset=utf-8' })
   );
   const a = document.createElement('a');
   a.href = url;
-  a.download = `igo-${n}x${n}.sgf`;
+  a.download = `igo-${app.n}x${app.n}.sgf`;
   a.click();
   URL.revokeObjectURL(url);
 };
 $('review-game').onclick = () => {
-  if (busy) {
+  if (app.busy) {
     message('Đợi máy đi xong rồi mở ván.');
     return;
   }
@@ -640,19 +661,19 @@ $('review-game').onclick = () => {
 
 $('board-zoom').oninput = draw;
 $('confirm-point').onclick = () => {
-  if (pendingPoint >= 0) click(pendingPoint, true);
+  if (app.pendingPoint >= 0) click(app.pendingPoint, true);
 };
 $('cancel-point').onclick = () => {
-  pendingPoint = -1;
+  app.pendingPoint = -1;
   draw();
 };
 $('confirm-move').onchange = () => {
-  pendingPoint = -1;
+  app.pendingPoint = -1;
   draw();
 };
 $('suggest-dead').onclick = () => {
-  if (busy) return;
-  const activeEpoch = epoch;
+  if (app.busy) return;
+  const activeEpoch = app.epoch;
   $('suggest-dead').disabled = true;
   $('dead-status').textContent = 'Đang mô phỏng các ván tiếp theo…';
   const done = (text) => {
@@ -660,14 +681,14 @@ $('suggest-dead').onclick = () => {
     $('dead-status').textContent = text;
   };
   search
-    .run({ type: 'dead', board, size: n })
+    .run({ type: 'dead', board: app.board, size: app.n })
     .then((data) => {
-      if (data.cancelled || activeEpoch !== epoch) return;
+      if (data.cancelled || activeEpoch !== app.epoch) return;
       if (data.error) {
         done(`Không gợi ý được: ${data.error}`);
         return;
       }
-      deadStones = new Set(data.dead);
+      app.deadStones = new Set(data.dead);
       draw();
       done(
         data.dead.length
@@ -676,31 +697,31 @@ $('suggest-dead').onclick = () => {
       );
     })
     .catch(() => {
-      if (activeEpoch === epoch) done('Không tải được bộ gợi ý.');
+      if (activeEpoch === app.epoch) done('Không tải được bộ gợi ý.');
     });
 };
 $('resume-scoring').onclick = () => {
-  while (gameMoves.at(-1)?.point === -1) gameMoves.pop();
+  while (app.gameMoves.at(-1)?.point === -1) app.gameMoves.pop();
   persist();
   resume();
 };
 
 $('analyze-game').onclick = () => {
-  if (busy) return;
+  if (app.busy) return;
   $('analysis-output').textContent = 'Đang tìm các quyết định cần xem lại…';
-  const activeEpoch = epoch;
+  const activeEpoch = app.epoch;
   search
     .run(
       { type: 'review', record: record() },
       {
         onProgress: (data) => {
-          if (activeEpoch === epoch)
+          if (activeEpoch === app.epoch)
             $('analysis-output').textContent = `Đang xem nước ${data.progress}/${data.total}…`;
         },
       }
     )
     .then((data) => {
-      if (data.cancelled || activeEpoch !== epoch) return;
+      if (data.cancelled || activeEpoch !== app.epoch) return;
       if (data.error) {
         $('analysis-output').textContent = data.error;
         return;
@@ -708,7 +729,7 @@ $('analyze-game').onclick = () => {
       $('analysis-output').textContent = analysisSummary(data.findings, pointName);
     })
     .catch((e) => {
-      if (activeEpoch === epoch)
+      if (activeEpoch === app.epoch)
         $('analysis-output').textContent =
           `Không tải được engine phân tích: ${e.message || 'không có chi tiết lỗi'}`;
     });
