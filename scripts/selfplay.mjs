@@ -18,7 +18,8 @@ function mulberry32(seed) {
   };
 }
 const flip = (b) => b.map((c) => (c ? 3 - c : 0));
-const flipHistory = (h) => h.map((s) => [...s].map((c) => (c === '0' ? '0' : String(3 - Number(c)))).join(''));
+const flipHistory = (h) =>
+  h.map((s) => [...s].map((c) => (c === '0' ? '0' : String(3 - Number(c)))).join(''));
 
 // The engines' bot() always plays White; Black asks the same question on the colour-flipped board.
 function pick(engine, board, color, history, random) {
@@ -55,4 +56,6 @@ for (let g = 0; g < total; g++) {
     winner = candidateIsBlack ? play(A, B, g + 1) : play(B, A, g + 1);
   if ((winner === 1) === candidateIsBlack) candidateWins++;
 }
-console.log(`candidate won ${candidateWins}/${total} (${((100 * candidateWins) / total).toFixed(0)}%) on ${n}x${n}`);
+console.log(
+  `candidate won ${candidateWins}/${total} (${((100 * candidateWins) / total).toFixed(0)}%) on ${n}x${n}`
+);

@@ -2,6 +2,7 @@ import { empty, group, move } from './engine.js';
 import { trueEyes } from './reading.js';
 import { stages, buildBank } from './curriculum.js';
 import { renderTerms } from './terms.js';
+import { createReadingClient } from './reading-client.js';
 import { renderToday, renderTopics, renderJournal } from './train-panels.js';
 import {
   coordinate as boardCoordinate,
@@ -52,9 +53,6 @@ let board = [],
   assisted = false,
   attemptStarted = false;
 let epoch = 0,
-  worker = null,
-  requestId = 0,
-  pending = new Map(),
   testResults = [],
   autoPlay = false,
   storageAvailable = true,
@@ -64,6 +62,7 @@ let trace = [],
   hintLevel = 0,
   startedAt = 0;
 const statusMark = { new: '', solved: ' · ✓', retained: ' · ★', due: ' · ↻' };
+const reading = createReadingClient();
 const stageLabels = {
   foundation: 'Nền tảng',
   tactics: 'Nối, cắt và bắt quân',
@@ -235,48 +234,21 @@ function renderTopicStats() {
     showPuzzle();
   });
 }
-function resetWorker() {
-  worker?.terminate();
-  worker = null;
-  for (const resolve of pending.values()) resolve({ status: 'cancelled' });
-  pending.clear();
-}
 function ask(action, point) {
-  if (!worker) {
-    worker = new Worker(new URL('./reading-worker.js', import.meta.url), { type: 'module' });
-    worker.onmessage = ({ data }) => {
-      const resolve = pending.get(data.id);
-      if (resolve) {
-        pending.delete(data.id);
-        resolve(data);
-      }
-    };
-    worker.onerror = () => {
-      for (const resolve of pending.values()) resolve({ status: 'unknown' });
-      pending.clear();
-      worker?.terminate();
-      worker = null;
-    };
-  }
-  return new Promise((resolve) => {
-    const id = ++requestId;
-    pending.set(id, resolve);
-    worker.postMessage({
-      id,
-      action,
-      point,
-      board,
-      size: puzzle.size,
-      target: puzzle.target,
-      remaining,
-      history,
-      goal: puzzle.goal || 'capture',
-    });
+  return reading.ask({
+    action,
+    point,
+    board,
+    size: puzzle.size,
+    target: puzzle.target,
+    remaining,
+    history,
+    goal: puzzle.goal || 'capture',
   });
 }
 function load() {
   epoch++;
-  resetWorker();
+  reading.reset();
   busy = finished = assisted = attemptStarted = autoPlay = false;
   wrong = 0;
   last = selected = -1;

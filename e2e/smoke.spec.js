@@ -178,3 +178,16 @@ test('a finished game offers dead-stone suggestions and analysis through the wor
   await page.locator('#analyze-game').click();
   await expect(page.locator('#analysis-output')).not.toHaveText(/Đang/, { timeout: 60000 });
 });
+
+test('a reading puzzle is checked by the worker and the hint escalates', async ({ page }) => {
+  const errors = noErrors(page);
+  await page.goto('/train.html?stage=reading');
+  await page.locator('#mode-practice').click();
+  await expect(page.locator('#reading-controls')).toBeVisible();
+  await page.locator('#hint').click();
+  await expect(page.locator('#feedback')).not.toBeEmpty({ timeout: 20000 });
+  await expect(page.locator('#hint')).toContainText('2/3');
+  await page.locator('#board button').first().click();
+  await expect(page.locator('#turn')).not.toContainText('Đang kiểm tra', { timeout: 20000 });
+  expect(errors).toEqual([]);
+});
