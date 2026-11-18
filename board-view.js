@@ -68,3 +68,13 @@ export function appendEdgeLabels(button, i, n) {
     button.append(label);
   }
 }
+
+/**
+ * Pixel width for a play board: fits the column and viewport height, never narrower than
+ * 28px per point, then scaled by the zoom factor.
+ * @param {{ n: number, zoom: number, columnWidth: number, viewportHeight: number }} p
+ */
+export function boardPixelWidth({ n, zoom, columnWidth, viewportHeight }) {
+  const min = n * 28;
+  return Math.max(min, Math.min(columnWidth, Math.max(viewportHeight - 250, min))) * zoom;
+}

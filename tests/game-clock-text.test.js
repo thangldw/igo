@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createGameClock, clockLabel } from '../game-clock.js';
 import { scoreSummary, analysisSummary } from '../game-text.js';
+import { boardPixelWidth } from '../board-view.js';
 
 const fakeElement = () => ({ hidden: true, textContent: '', classList: { toggle() {} } });
 
@@ -69,4 +70,11 @@ test('analysisSummary lists findings or explains that none were found', () => {
     text,
     'Nước 3: bạn đi bỏ lượt. Cân nhắc P7; đối thủ có thể đáp P8. Chênh lệch đánh giá: 2.3 đơn vị nội bộ.'
   );
+});
+
+test('boardPixelWidth fits the column and viewport but keeps 28px per point', () => {
+  assert.equal(boardPixelWidth({ n: 9, zoom: 1, columnWidth: 600, viewportHeight: 900 }), 600);
+  assert.equal(boardPixelWidth({ n: 9, zoom: 1, columnWidth: 600, viewportHeight: 700 }), 450);
+  assert.equal(boardPixelWidth({ n: 19, zoom: 1, columnWidth: 300, viewportHeight: 400 }), 532);
+  assert.equal(boardPixelWidth({ n: 9, zoom: 1.5, columnWidth: 400, viewportHeight: 900 }), 600);
 });

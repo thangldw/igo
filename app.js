@@ -38,6 +38,7 @@ import {
   createPoint,
   appendStone,
   appendEdgeLabels,
+  boardPixelWidth,
 } from './board-view.js';
 
 /** @type {(id: string) => any} DOM lookups are by known ids in the page markup. */
@@ -179,8 +180,12 @@ function draw() {
   const root = $('board');
   const zoom = Number($('board-zoom').value) / 100;
   const large = mode === 'game' && (n > 9 || zoom > 1);
-  const column = document.querySelector('.stage-board').clientWidth - 48,
-    width = Math.max(n * 28, Math.min(column, Math.max(window.innerHeight - 250, n * 28))) * zoom;
+  const width = boardPixelWidth({
+    n,
+    zoom,
+    columnWidth: document.querySelector('.stage-board').clientWidth - 48,
+    viewportHeight: window.innerHeight,
+  });
   root.style.minWidth = large ? `${width}px` : '';
   $('play-surface').style.minWidth = large ? `${width + 48}px` : '';
   root.replaceChildren();
