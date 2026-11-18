@@ -17,6 +17,7 @@
     "train.css",
     "train.js",
     "train-panels.js",
+    "train-view.js",
     "curriculum.js",
     "curriculum-questions.js",
     "study-state.js",

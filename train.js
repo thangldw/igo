@@ -2,6 +2,14 @@ import { empty, group, move } from './engine.js';
 import { trueEyes } from './reading.js';
 import { stages, buildBank } from './curriculum.js';
 import { renderTerms } from './terms.js';
+import {
+  shuffle,
+  storageStatusText,
+  testResultText,
+  renderStages,
+  renderTopicSelect,
+  renderProblemSelect,
+} from './train-view.js';
 import { createReadingClient } from './reading-client.js';
 import { renderToday, renderTopics, renderJournal } from './train-panels.js';
 import {
@@ -18,10 +26,8 @@ import {
   recordMiss,
   recordSolve,
   needsReview,
-  studyStats,
   reveal,
   eligibleClean,
-  problemStatus,
   topicStats,
   dailyPlan,
   streakDays,
@@ -61,17 +67,7 @@ let trace = [],
   viewStep = -1,
   hintLevel = 0,
   startedAt = 0;
-const statusMark = { new: '', solved: ' · ✓', retained: ' · ★', due: ' · ↻' };
 const reading = createReadingClient();
-const stageLabels = {
-  foundation: 'Nền tảng',
-  tactics: 'Nối, cắt và bắt quân',
-  reading: 'Sống/chết và đọc trước',
-  strategy: 'Kế hoạch và cuối ván',
-  dan: 'Đọc sâu',
-  dan2: 'Tính điểm và tranh ko',
-  dan3: 'Quyết định trên cả bàn',
-};
 function showPuzzle() {
   const heading = $('test-result').hidden ? $('title') : $('test-result');
   heading.tabIndex = -1;
@@ -92,81 +88,39 @@ function save() {
       storageAvailable = false;
     }
   }
-  $('storage-status').textContent = !storageWritable
-    ? 'Tiến độ cũ không tương thích; chưa ghi đè. Phiên này chỉ lưu trong bộ nhớ.'
-    : storageAvailable
-      ? 'Lưu trên trình duyệt này.'
-      : 'Không lưu được tiến độ tại máy. Giữ tab mở để tiếp tục phiên này.';
-}
-function shuffle(items) {
-  const out = [...items];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
+  $('storage-status').textContent = storageStatusText({
+    writable: storageWritable,
+    available: storageAvailable,
+  });
 }
 function renderProgress() {
-  $('stages').replaceChildren();
-  $('stage-select').replaceChildren();
-  for (const s of stages) {
-    const stats = studyStats(
-        bank.filter((p) => p.stage === s.id),
-        study
-      ),
-      button = document.createElement('button');
-    button.className = s.id === stage ? 'active' : '';
-    button.setAttribute('aria-current', s.id === stage ? 'step' : 'false');
-    const rank = document.createElement('span');
-    rank.textContent = s.name;
-    const option = document.createElement('option');
-    option.value = s.id;
-    option.textContent = `${stages.indexOf(s) + 1}. ${stageLabels[s.id]} · ${s.name}`;
-    $('stage-select').append(option);
-    const name = document.createElement('strong');
-    name.textContent = `${stages.indexOf(s) + 1}. ${stageLabels[s.id]}`;
-    const count = document.createElement('span');
-    count.textContent = `${stats.clean}/${stats.total}${stats.due ? ` · ${stats.due} cần ôn` : ''}`;
-    count.title = `${stats.clean}/${stats.total} bài tự giải`;
-    button.append(name, rank, count);
-    button.onclick = () => {
-      stage = s.id;
-      topic = 'all';
-      rebuild();
-      showPuzzle();
-    };
-    $('stages').append(button);
-  }
-  $('stage-select').value = stage;
-  const active = $('stages').querySelector('.active');
-  if (active) $('stages').scrollLeft = Math.max(0, active.offsetLeft - $('stages').offsetLeft);
-  const total = studyStats(bank, study);
-  $('total').replaceChildren();
-  for (const text of [
-    `${total.solved}/${total.total} đã giải`,
-    `${total.clean} tự giải`,
-    `${total.retained} nhớ qua nhiều ngày`,
-  ]) {
-    const s = document.createElement('span');
-    s.textContent = text;
-    $('total').append(s);
-  }
+  renderStages(
+    { list: $('stages'), select: $('stage-select'), total: $('total') },
+    {
+      stages,
+      bank,
+      study,
+      stage,
+      onPick: (id) => {
+        stage = id;
+        topic = 'all';
+        rebuild();
+        showPuzzle();
+      },
+    }
+  );
   renderTopicStats();
   $('stage-practice').textContent = stageInfo().practice;
   $('stage-focus').textContent = stageInfo().focus;
 }
 function rebuild(preferred) {
   const stageBank = bank.filter((p) => p.stage === stage);
-  $('topic').replaceChildren();
-  for (const name of ['all', ...new Set(stageBank.map((p) => p.topic))]) {
-    const o = document.createElement('option');
-    o.value = name;
-    o.textContent = name === 'all' ? 'Tất cả chủ đề' : name;
-    $('topic').append(o);
-  }
-  if (![...$('topic').options].some((o) => o.value === topic)) topic = 'all';
-  $('topic').value = topic;
-  $('topic').disabled = mode === 'test' || mode === 'today';
+  topic = renderTopicSelect(
+    $('topic'),
+    stageBank.map((p) => p.topic),
+    topic,
+    mode === 'test' || mode === 'today'
+  );
   const candidates = stageBank.filter((p) => topic === 'all' || p.topic === topic);
   queue =
     mode === 'today'
@@ -188,14 +142,7 @@ function rebuild(preferred) {
         queue.findIndex((p) => p.id === preferred)
       )
     : 0;
-  $('problem-select').replaceChildren();
-  queue.forEach((p, i) => {
-    const o = document.createElement('option');
-    o.value = String(i);
-    o.textContent = `${i + 1}. ${p.title}${statusMark[problemStatus(study.records[p.id])]}`;
-    $('problem-select').append(o);
-  });
-  $('problem-select').disabled = mode === 'test' || !queue.length;
+  renderProblemSelect($('problem-select'), queue, study, mode === 'test');
   for (const m of ['today', 'practice', 'review', 'test'])
     $(`mode-${m}`).setAttribute('aria-pressed', String(mode === m));
   renderProgress();
@@ -628,10 +575,8 @@ function next() {
     return;
   }
   if (mode === 'test') {
-    const correct = testResults.filter((r) => r.correct).length;
     $('test-result').hidden = false;
-    $('test-result').textContent =
-      `Kết quả: ${correct}/${queue.length} bài đúng ở lần thử đầu. ${correct >= 8 ? 'Bạn có thể chuyển chặng luyện hoặc kiểm tra lại bằng bộ ngẫu nhiên.' : 'Ưu tiên ôn các bài sai trước khi kiểm tra lại.'} Thời gian trung bình ${Math.round(testResults.reduce((t, r) => t + r.ms, 0) / Math.max(testResults.length, 1) / 1000)} giây/bài. Đây là điểm bài tập, không xác nhận đẳng.`;
+    $('test-result').textContent = testResultText(testResults, queue.length);
     $('next').disabled = true;
     feedback('Phiên kiểm tra đã kết thúc. Chọn một chế độ để bắt đầu phiên khác.');
     return;
