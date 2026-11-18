@@ -27,6 +27,16 @@ for (const dir of manifest.dirs) {
 }
 
 const version = `igo-${hash.digest('hex').slice(0, 12)}`;
+
+// Cache-bust local stylesheet/script references in the built pages with the content hash.
+// Root-absolute references (shared site assets) keep their own owner-managed versions.
+for (const f of manifest.files.filter((name) => name.endsWith('.html'))) {
+  const html = readFileSync(join(out, f), 'utf8').replace(
+    /((?:href|src)="(?!\/|https?:)[^"?]*\.(?:css|js))"/g,
+    `$1?v=${version.slice(4)}"`
+  );
+  writeFileSync(join(out, f), html);
+}
 const sw = readFileSync(join(root, 'sw.js'), 'utf8')
   .replace(/const VERSION = '[^']*';/, `const VERSION = '${version}';`)
   .replace(

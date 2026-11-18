@@ -3,9 +3,10 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: 'e2e',
   webServer: {
-    command: 'python3 -m http.server 4173',
+    // Test the deployable artifact (versioned URLs, generated service worker), not the sources.
+    command: 'node scripts/build.mjs && python3 -m http.server 4173 --directory public',
     url: 'http://localhost:4173',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
   },
   use: {
     serviceWorkers: 'block',
