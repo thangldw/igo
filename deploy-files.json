@@ -49,6 +49,7 @@
     "review.html",
     "review.css",
     "review.js",
+    "review-notes.js",
     "sgf.js",
     "terms.js",
     "game-record.js",

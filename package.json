@@ -11,7 +11,7 @@
     "format:check": "prettier --check .",
     "e2e": "playwright test",
     "check": "npm run lint && npm run typecheck && npm run format:check && npm test",
-    "typecheck": "tsc -p . && tsc -p tsconfig.ui.json"
+    "typecheck": "tsc -p ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -186,7 +186,7 @@ $('suggest-dead').onclick = () => {
   const activeEpoch = app.epoch;
   $('suggest-dead').disabled = true;
   $('dead-status').textContent = 'Đang mô phỏng các ván tiếp theo…';
-  const done = (text) => {
+  const done = (/** @type {string} */ text) => {
     $('suggest-dead').disabled = false;
     $('dead-status').textContent = text;
   };
