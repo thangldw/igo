@@ -7,6 +7,7 @@
     "app.js",
     "lesson-storage.js",
     "lesson-view.js",
+    "page-chrome.js",
     "engine.js",
     "board-view.js",
     "lessons.js",

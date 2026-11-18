@@ -9,8 +9,8 @@ import {
   handicapPoints,
   recordKomi,
 } from './game-record.js';
-import { renderTerms } from './terms.js';
 import { createSearchClient } from './search-client.js';
+import { showLessonChrome, showGameChrome } from './page-chrome.js';
 import {
   renderNavigation,
   renderAnswers,
@@ -248,36 +248,12 @@ function load(i) {
   lineStep = 0;
   candidates = current().lines || [];
   const number = levelLessons().indexOf(current()) + 1;
-  $('chapter').textContent =
-    `${currentLevel().name.toUpperCase()} · BÀI ${number} / ${levelLessons().length}`;
-  $('title').textContent = current().title;
-  $('board-size').textContent = '5 × 5';
-  $('guide-title').textContent = current().heading;
-  $('description').textContent = current().description;
-  $('tip').textContent = current().tip;
-  renderTerms($('terms'), [current().title, current().description, current().tip].join(' '));
-  const url = new URL(location.href);
-  url.searchParams.delete('play');
-  url.searchParams.delete('lesson');
-  url.searchParams.delete('size');
+  const conceptual = showLessonChrome({
+    lesson: current(),
+    chapter: `${currentLevel().name.toUpperCase()} · BÀI ${number} / ${levelLessons().length}`,
+    isFirst: i === 0,
+  });
   saveLessonId(current().id);
-  window.history.replaceState(null, '', url);
-  $('previous').disabled = i === 0;
-  $('previous').hidden = false;
-  $('game-controls').hidden = true;
-  $('size-help').hidden = true;
-  document.querySelector('.workflow-help p').textContent =
-    '1. Chọn bài bên trái. 2. Đọc yêu cầu. 3. Nhấn bàn cờ hoặc chọn đáp án. Làm xong thì bấm “Bài tiếp theo”.';
-  $('next').hidden = true;
-  $('hint').hidden = false;
-  $('retry').hidden = false;
-  const conceptual = current().kind === 'quiz' && !current().setup.length;
-  $('description').hidden = conceptual;
-  $('play-surface').hidden = conceptual;
-  $('concept').hidden = !conceptual;
-  $('concept').textContent = conceptual ? current().description : '';
-  $('board-footer').hidden = conceptual;
-  $('board-size').hidden = conceptual;
   renderAnswers($('answers'), current(), (correct) => {
     if (solved) return;
     if (correct) complete(successText(current()));
@@ -485,38 +461,7 @@ function start(save = true) {
   ended = false;
   captures = [0, 0];
   hinted = solved = false;
-  $('chapter').textContent = `VÁN LUYỆN TẬP${handicap ? ` · CHẤP ${handicap}` : ''}`;
-  $('title').textContent = `Luyện chơi ${n}×${n}`;
-  $('board-size').textContent = `${n} × ${n}`;
-  $('board-size').hidden = false;
-  $('play-surface').hidden = false;
-  $('concept').hidden = true;
-  $('board-footer').hidden = false;
-  $('guide-title').textContent = 'Kết thúc ván';
-  $('description').textContent =
-    'Dễ: tập luật. Cơ bản: máy ưu tiên bắt và cứu quân. Tìm kiếm: máy xét cả cách đối thủ đáp. Máy có thể bỏ lượt; các mức chưa có hạng thi đấu.';
-  const url = new URL(location.href);
-  url.searchParams.delete('lesson');
-  url.searchParams.set('play', '1');
-  url.searchParams.set('size', String(n));
-  window.history.replaceState(null, '', url);
-  $('previous').hidden = true;
-  $('description').hidden = false;
-  $('tip').textContent =
-    'Hai lượt bỏ liên tiếp kết thúc ván. Trước đó hãy chơi tiếp để bắt hết quân chết.';
-  renderTerms($('terms'), $('description').textContent + ' ' + $('tip').textContent);
-  $('answers').replaceChildren();
-  $('game-controls').hidden = false;
-  $('size-help').hidden = false;
-  $('size-help').textContent =
-    n === 9
-      ? '9×9: tập luật và bắt quân.'
-      : `${n}×${n}: ${n === 13 ? 'tập quản lý nhiều nhóm' : 'tập chiến lược toàn bàn'}. Trên màn hình nhỏ, vuốt ngang bàn để xem các cột còn lại. Đổi kích thước chỉ áp dụng khi bấm “Ván mới”. Máy vẫn ở mức luyện cơ bản.`;
-  document.querySelector('.workflow-help p').textContent =
-    'Chọn mức máy, rồi nhấn giao điểm để đặt quân đen. Máy đáp bằng quân trắng. Khi hết nước có ích, bấm “Bỏ lượt”; hai lượt bỏ liên tiếp kết thúc ván.';
-  $('next').hidden = true;
-  $('hint').hidden = true;
-  $('retry').hidden = true;
+  showGameChrome({ n, handicap });
   message(
     handicap
       ? 'Đen đã có sẵn quân chấp; máy (Trắng) đi trước.'
