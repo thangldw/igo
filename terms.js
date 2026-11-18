@@ -133,9 +133,15 @@ export const terms = [
       'Kyu giảm dần khi mạnh lên: 20 kyu → 10 kyu → 1 kyu. Tiếp theo là 1 dan, 2 dan, 3 dan… Điểm xếp hạng dựa vào các ván đấu. Các chặng của app là mục tiêu học, không cấp đẳng.',
   },
 ];
+/** @param {string} text */
 export function matchingTerms(text) {
   return terms.filter((term) => term.match.test(text));
 }
+/**
+ * @param {HTMLDetailsElement} root
+ * @param {string} text
+ * @param {{ disabled?: boolean }} [options]
+ */
 export function renderTerms(root, text, { disabled = false } = {}) {
   root.replaceChildren();
   const matches = matchingTerms(text);

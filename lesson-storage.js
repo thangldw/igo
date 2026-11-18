@@ -3,6 +3,7 @@
 const PROGRESS_KEY = 'igo-progress';
 const LESSON_KEY = 'igo-current-lesson-v1';
 
+/** @param {string} key */
 function read(key) {
   try {
     return localStorage.getItem(key);
@@ -10,6 +11,10 @@ function read(key) {
     return null; // storage blocked or unavailable
   }
 }
+/**
+ * @param {string} key
+ * @param {string} value
+ */
 function write(key, value) {
   try {
     localStorage.setItem(key, value);
@@ -20,6 +25,7 @@ function write(key, value) {
 }
 
 /** Completed lesson ids; migrates the legacy numeric ids and drops unknown ones. */
+/** @param {Array<{ id: string }>} lessons */
 export function loadProgress(lessons) {
   try {
     const stored = JSON.parse(read(PROGRESS_KEY) || '[]');
@@ -35,9 +41,11 @@ export function loadProgress(lessons) {
     return []; // corrupt JSON: start fresh rather than crash
   }
 }
+/** @param {string[]} done */
 export const saveProgress = (done) => write(PROGRESS_KEY, JSON.stringify(done));
 
 export const loadLessonId = () => read(LESSON_KEY);
+/** @param {string} id */
 export const saveLessonId = (id) => write(LESSON_KEY, id);
 
 /** Raw stored value for a key (used for saved games). */

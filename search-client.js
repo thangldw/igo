@@ -2,7 +2,9 @@
 // run() resolves with the worker's final message (which may carry `error`), with
 // { cancelled: true } if superseded or cancelled, and rejects if the worker fails to load.
 export function createSearchClient(url = './search-worker.js') {
+  /** @type {Worker | null} */
   let worker = null,
+    /** @type {{ resolve: (value: any) => void } | null} */ // resolves with the worker's untyped reply
     settle = null;
 
   function cancel() {
@@ -19,6 +21,7 @@ export function createSearchClient(url = './search-worker.js') {
     const mine = new Worker(url, { type: 'module' });
     worker = mine;
     return new Promise((resolve, reject) => {
+      /** @param {(value: any) => void} fn @param {any} value */
       const finish = (fn, value) => {
         if (worker !== mine) return;
         mine.terminate();

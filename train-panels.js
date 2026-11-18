@@ -2,6 +2,13 @@
 // and touch only the container they are given, so they carry no shared page state.
 
 /** "Hôm nay" card: progress towards the daily goal, streak and the last 7 days. */
+/**
+ * @typedef {{ items: unknown[], due: number, done: number, goal: number }} TodayPlan
+ * @typedef {{ topic: string, clean: number, total: number, due: number, weak?: boolean }} TopicStat
+ * @typedef {{ date: string, note: string, url?: string }} JournalGame
+ */
+
+/** @param {HTMLElement} card @param {{ plan: TodayPlan, streak: number, dots: { on?: boolean, today?: boolean, day: string }[] }} data */
 export function renderToday(card, { plan, streak, dots }) {
   const fresh = plan.items.length - plan.due;
   const title = document.createElement('h2'),
@@ -23,6 +30,7 @@ export function renderToday(card, { plan, streak, dots }) {
 }
 
 /** Strong/weak topic list; `onPick(topicStat)` runs when a topic row is clicked. */
+/** @param {HTMLElement} box @param {TopicStat[]} stats @param {(stat: TopicStat) => void} onPick */
 export function renderTopics(box, stats, onPick) {
   box.replaceChildren();
   if (!stats.length) {
@@ -53,6 +61,7 @@ export function renderTopics(box, stats, onPick) {
 }
 
 /** Last ten post-game notes; links are only rendered for http(s) URLs. */
+/** @param {HTMLElement} list @param {JournalGame[]} games */
 export function renderJournal(list, games) {
   list.replaceChildren();
   for (const game of [...games].reverse().slice(0, 10)) {

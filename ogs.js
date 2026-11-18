@@ -1,4 +1,5 @@
 // Import from OGS: the public SGF endpoint sends `access-control-allow-origin: *`, so the browser can fetch it directly.
+/** @param {unknown} input */
 export function parseOgsGameId(input) {
   const text = String(input || '').trim();
   if (/^\d{1,12}$/.test(text)) return text;
@@ -12,7 +13,9 @@ export function parseOgsGameId(input) {
   const m = url.pathname.match(/^\/(?:game(?:\/view)?|api\/v1\/games)\/(\d{1,12})(?:\/sgf)?\/?$/);
   return m ? m[1] : null;
 }
+/** @param {string} id */
 export const ogsSgfUrl = (id) => `https://online-go.com/api/v1/games/${id}/sgf`;
+/** @param {string} id */
 export async function fetchOgsSgf(id, fetchImpl = fetch, limit = 1000000) {
   const response = await fetchImpl(ogsSgfUrl(id), {
     headers: { accept: 'application/x-go-sgf,text/plain' },

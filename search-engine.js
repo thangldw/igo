@@ -1,4 +1,5 @@
 import { botCandidates, move, group, score } from './engine.js';
+/** @param {import('./types.js').Board} b @param {number} n @param {number} color @param {import('./types.js').History} history */
 function candidates(b, n, color, history) {
   if (color === 2) return botCandidates(b, n, history);
   return botCandidates(
@@ -7,6 +8,7 @@ function candidates(b, n, color, history) {
     history.map((s) => [...s].map((c) => (c === '0' ? '0' : String(3 - Number(c)))).join(''))
   );
 }
+/** @param {import('./types.js').Board} b @param {number} n @param {number} color */
 function evaluate(b, n, color) {
   const area = score(b, n, 0);
   let value = area.white - area.black;
@@ -25,7 +27,9 @@ function evaluate(b, n, color) {
     }
   return color === 2 ? value : -value;
 }
+/** @param {import('./types.js').Board} b @param {number} n @param {number} color @param {import('./types.js').History} [history] @param {number} [actual] */
 export function analyzePosition(b, n, color, history = [], actual) {
+  /** @type {{ i: number, value?: number }[]} */
   const top = candidates(b, n, color, history).slice(0, 6);
   if (actual !== undefined && !top.some((x) => x.i === actual)) top.push({ i: actual });
   const options = [];

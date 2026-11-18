@@ -1,10 +1,14 @@
 // DOM helpers shared by the lesson, training and review boards.
 export const COLUMNS = 'ABCDEFGHJKLMNOPQRST';
+/** @type {Record<number, string>} */
 const COLOR_NAME = { 0: 'trống', 1: 'đen', 2: 'trắng' };
 
+/** @param {number} i @param {number} n */
 export const coordinate = (i, n) => `${COLUMNS[i % n]}${n - Math.floor(i / n)}`;
+/** @param {number} value */
 export const colorName = (value) => COLOR_NAME[value] ?? COLOR_NAME[0];
 
+/** @param {number} i @param {number} n */
 export function isStarPoint(i, n) {
   const mid = (n - 1) / 2,
     edge = n === 9 ? 2 : 3,
@@ -20,14 +24,16 @@ export function isStarPoint(i, n) {
   );
 }
 
+/** @param {string} className @param {string | number} [text] */
 export function span(className, text) {
   const el = document.createElement('span');
   el.className = className;
-  if (text !== undefined) el.textContent = text;
+  if (text !== undefined) el.textContent = String(text);
   return el;
 }
 
 /** A board intersection button with edge classes (left/right/top/bottom) and extra classes. */
+/** @param {number} i @param {number} n @param {...string} extraClasses */
 export function createPoint(i, n, ...extraClasses) {
   const button = document.createElement('button');
   button.className = [
@@ -41,6 +47,7 @@ export function createPoint(i, n, ...extraClasses) {
 }
 
 /** Appends a stone span; returns it so callers can attach markers. */
+/** @param {HTMLElement} button @param {number} color @param {boolean} [isLast] */
 export function appendStone(button, color, isLast) {
   const stone = span(`stone ${color === 1 ? 'black' : 'white'} ${isLast ? 'last' : ''}`);
   button.append(stone);
@@ -48,6 +55,7 @@ export function appendStone(button, color, isLast) {
 }
 
 /** Row numbers on the left edge and column letters along the bottom edge. */
+/** @param {HTMLElement} button @param {number} i @param {number} n */
 export function appendEdgeLabels(button, i, n) {
   if (i % n === 0) {
     const label = span('grid-label row-label', n - Math.floor(i / n));

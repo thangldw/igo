@@ -22,10 +22,10 @@ Ván với máy trên bàn 9×9, 13×13 hoặc 19×19; có hai mức cơ bản v
 
 ## Phát triển
 
-- `npm run check`: ESLint, kiểm kiểu (`tsc --checkJs`, phần logic và dữ liệu), Prettier và 83 test đơn vị.
+- `npm run check`: ESLint, kiểm kiểu (`tsc --checkJs`: `noImplicitAny` cho module logic và dữ liệu, chế độ nhẹ hơn cho `app.js`, `train.js`, `review.js`), Prettier và 84 test đơn vị.
 - `npm run e2e`: kiểm thử Playwright trên desktop và mobile (cần Chrome; CI cài Chromium).
 - `npm run build`: tạo `public/` từ `deploy-files.json`, danh sách file triển khai duy nhất. Danh sách precache và phiên bản cache của `sw.js` được sinh từ đây. Thêm file mới thì chỉ cần thêm vào `deploy-files.json`.
-- `board-view.js` dùng chung cho bàn cờ ở ba trang; `lesson-storage.js` gói truy cập localStorage; `train-panels.js` chứa các khối giao diện thuần của trang luyện tập.
+- `board-view.js` dùng chung cho bàn cờ ở ba trang; `lesson-storage.js` gói truy cập localStorage; `train-panels.js` chứa các khối giao diện thuần của trang luyện tập; `search-client.js` và `reading-client.js` bọc worker; `curriculum-questions.js` là ngân hàng câu hỏi; `types.js` chứa typedef dùng chung. `node scripts/selfplay.mjs <engine mới> <engine cũ> [số ván] [cỡ bàn]` cho tỉ lệ thắng khi so hai engine.
 
 ## Luật và giới hạn
 

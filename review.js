@@ -10,7 +10,10 @@ import {
   appendStone,
   appendEdgeLabels,
 } from './board-view.js';
-renderTerms(document.getElementById('terms'), 'SGF, đọc biến, ko, superko, komi, phản bác');
+renderTerms(
+  /** @type {HTMLDetailsElement} */ (document.getElementById('terms')),
+  'SGF, đọc biến, ko, superko, komi, phản bác'
+);
 /** @type {(id: string) => any} DOM lookups are by known ids in the page markup. */
 const $ = (id) => document.getElementById(id),
   KEY = 'igo-sgf-review-v1';

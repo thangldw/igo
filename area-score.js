@@ -1,4 +1,5 @@
 import { neighbors } from './engine.js';
+/** @param {import('./types.js').Board} board @param {number} n @param {number[]} [dead] @param {number} [komi] */
 export function areaScore(board, n, dead = [], komi = 6.5) {
   const b = [...board];
   for (const i of dead) {

@@ -1,5 +1,14 @@
+/**
+ * @typedef {{ attempts: number, solves: number, clean: number, misses: number, streak: number, due: number,
+ *   lastCleanDay: string | null, lastResult: 'clean' | 'assisted' | 'wrong', revealedDay: string | null }} PuzzleRecord
+ */
+/** @typedef {{ date: string, url: string, note: string, stage: string }} GameNote */
+/** @typedef {Record<string, number>} Activity  Solved count per ISO day (YYYY-MM-DD). */
+/** @typedef {{ version: 1, records: Record<string, PuzzleRecord>, games: GameNote[], activity: Activity, goal: number }} StudyState */
+/** @typedef {{ id: string, topic: string, stage: string }} BankItem */
 const DAY = 86400000;
 export const DEFAULT_GOAL = 5;
+/** @returns {StudyState} */
 export const freshStudy = () => ({
   version: 1,
   records: {},
@@ -7,9 +16,20 @@ export const freshStudy = () => ({
   activity: {},
   goal: DEFAULT_GOAL,
 });
+// value is any: it validates untrusted parsed JSON
+/**
+ * @param {any} value
+ * @returns {number}
+ */
 const integer = (value) => (Number.isSafeInteger(value) && value >= 0 ? value : 0);
+/**
+ * @param {string} raw
+ * @param {Iterable<string>} validIds
+ * @returns {StudyState}
+ */
 export function restoreStudy(raw, validIds) {
   try {
+    /** @type {any} untrusted parsed JSON, validated field by field below */
     const parsed = JSON.parse(raw);
     if (parsed?.version !== 1 || !parsed.records || typeof parsed.records !== 'object')
       return freshStudy();
@@ -32,8 +52,10 @@ export function restoreStudy(raw, validIds) {
     if (Array.isArray(parsed.games))
       state.games = parsed.games
         .slice(-100)
-        .filter((g) => g && typeof g.note === 'string' && typeof g.date === 'string')
-        .map((g) => ({
+        .filter(
+          (/** @type {any} */ g) => g && typeof g.note === 'string' && typeof g.date === 'string'
+        )
+        .map((/** @type {any} */ g) => ({
           date: g.date.slice(0, 10),
           url: typeof g.url === 'string' ? g.url.slice(0, 500) : '',
           note: g.note.slice(0, 1000),
@@ -53,6 +75,11 @@ export function restoreStudy(raw, validIds) {
     return freshStudy();
   }
 }
+/**
+ * @param {StudyState} state
+ * @param {string} id
+ * @returns {PuzzleRecord}
+ */
 export function entry(state, id) {
   return (state.records[id] ||= {
     attempts: 0,
@@ -66,9 +93,18 @@ export function entry(state, id) {
     revealedDay: null,
   });
 }
+/**
+ * @param {StudyState} state
+ * @param {string} id
+ */
 export function beginAttempt(state, id) {
   entry(state, id).attempts++;
 }
+/**
+ * @param {StudyState} state
+ * @param {string} id
+ * @param {number} [now]
+ */
 export function recordMiss(state, id, now = Date.now()) {
   const r = entry(state, id);
   r.misses++;
@@ -77,16 +113,33 @@ export function recordMiss(state, id, now = Date.now()) {
   r.due = now;
   r.lastResult = 'wrong';
 }
+/** @param {number} now */
 function localDay(now) {
   const d = new Date(now);
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
+/**
+ * @param {StudyState} state
+ * @param {string} id
+ * @param {number} [now]
+ */
 export function reveal(state, id, now = Date.now()) {
   entry(state, id).revealedDay = localDay(now);
 }
+/**
+ * @param {StudyState} state
+ * @param {string} id
+ * @param {number} [now]
+ */
 export function eligibleClean(state, id, now = Date.now()) {
   return state.records[id]?.revealedDay !== localDay(now);
 }
+/**
+ * @param {StudyState} state
+ * @param {string} id
+ * @param {boolean} clean
+ * @param {number} [now]
+ */
 export function recordSolve(state, id, clean, now = Date.now()) {
   const r = entry(state, id);
   r.solves++;
@@ -109,9 +162,18 @@ export function recordSolve(state, id, clean, now = Date.now()) {
   const days = clean ? [1, 3, 7, 14, 30][Math.min(Math.max(r.streak - 1, 0), 4)] : 1;
   r.due = now + days * DAY;
 }
+/**
+ * @param {PuzzleRecord | undefined} record
+ * @param {number} [now]
+ */
 export function needsReview(record, now = Date.now()) {
   return !!record && (record.lastResult === 'wrong' || record.due <= now);
 }
+/**
+ * @param {BankItem[]} bank
+ * @param {StudyState} state
+ * @param {number} [now]
+ */
 export function studyStats(bank, state, now = Date.now()) {
   return {
     total: bank.length,
@@ -123,18 +185,31 @@ export function studyStats(bank, state, now = Date.now()) {
 }
 
 // Activity: solved problems per local calendar day (zero-padded so keys sort), capped to 90 days.
+/** @param {number} [now] */
 export const isoDay = (now = Date.now()) => {
   const d = new Date(now);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
+/**
+ * @param {StudyState} state
+ * @param {number} [now]
+ */
 export function countActivity(state, now = Date.now()) {
   state.activity ||= {};
   const day = isoDay(now);
   state.activity[day] = integer(state.activity[day]) + 1;
   for (const k of Object.keys(state.activity).sort().slice(0, -90)) delete state.activity[k];
 }
+/**
+ * @param {StudyState} state
+ * @param {number} [now]
+ */
 export const todayCount = (state, now = Date.now()) => integer(state.activity?.[isoDay(now)]);
 // Consecutive active days ending today; a quiet today does not break a streak that ended yesterday.
+/**
+ * @param {StudyState} state
+ * @param {number} [now]
+ */
 export function streakDays(state, now = Date.now()) {
   let count = 0,
     t = now;
@@ -145,6 +220,10 @@ export function streakDays(state, now = Date.now()) {
   }
   return count;
 }
+/**
+ * @param {StudyState} state
+ * @param {number} [now]
+ */
 export function weekDots(state, now = Date.now()) {
   return Array.from({ length: 7 }, (_, i) => {
     const t = now - (6 - i) * DAY;
@@ -152,6 +231,10 @@ export function weekDots(state, now = Date.now()) {
   });
 }
 // Four states: new (never solved), solved (with help or not yet repeated), retained (clean on 2+ days), due (needs review).
+/**
+ * @param {PuzzleRecord | undefined} record
+ * @param {number} [now]
+ */
 export function problemStatus(record, now = Date.now()) {
   if (!record || !record.attempts) return 'new';
   if (needsReview(record, now)) return 'due';
@@ -159,6 +242,11 @@ export function problemStatus(record, now = Date.now()) {
   return record.solves > 0 ? 'solved' : 'new';
 }
 // Topic mastery over problems that were attempted at least once; `weak` flags a low clean rate with enough data.
+/**
+ * @param {BankItem[]} bank
+ * @param {StudyState} state
+ * @param {number} [now]
+ */
 export function topicStats(bank, state, now = Date.now()) {
   const map = new Map();
   for (const p of bank) {
@@ -188,8 +276,15 @@ export function topicStats(bank, state, now = Date.now()) {
     );
 }
 // Today's plan: due reviews first (oldest first, max 3), then fresh problems in curriculum order until the daily goal.
+/**
+ * @param {BankItem[]} bank
+ * @param {StudyState} state
+ * @param {number} [now]
+ * @param {string[]} [stageOrder]
+ */
 export function dailyPlan(bank, state, now = Date.now(), stageOrder = []) {
   const goal = state.goal || DEFAULT_GOAL;
+  /** @param {string} id */
   const rank = (id) => {
     const i = stageOrder.indexOf(id);
     return i < 0 ? 99 : i;

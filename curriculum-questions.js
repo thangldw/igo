@@ -1,6 +1,12 @@
 // Question bank for the multiple-choice training stages (static content).
 const letters = 'ABCDEFGHJKLMNOPQRST';
+/**
+ * @param {number} size
+ * @param {string[]} [black]
+ * @param {string[]} [white]
+ */
 function diagram(size, black = [], white = []) {
+  /** @param {string} coordinate */
   const point = (coordinate) =>
     (size - Number(coordinate.slice(1))) * size + letters.indexOf(coordinate[0]);
   return { size, setup: [...black.map((c) => [point(c), 1]), ...white.map((c) => [point(c), 2])] };
@@ -8,7 +14,20 @@ function diagram(size, black = [], white = []) {
 const opening = diagram(19, ['D4', 'Q16'], ['Q4', 'D16']);
 const flank = diagram(19, ['D4', 'F4', 'Q16'], ['D16', 'Q4', 'Q10']);
 const middle = diagram(19, ['D4', 'F4', 'F6', 'D16'], ['G4', 'G5', 'Q4', 'Q16']);
+/** @typedef {{ size: number, setup: number[][] }} Position */
+/** @type {Array<Position & { id: string, stage: string, topic: string, title: string, prompt: string, choices: string[], answer: number, explanation: string, kind: 'quiz' }>} */
 const questions = [];
+/**
+ * @param {string} stage
+ * @param {string} id
+ * @param {string} topic
+ * @param {string} title
+ * @param {string} prompt
+ * @param {string[]} choices
+ * @param {number} answer
+ * @param {string} explanation
+ * @param {Position} [position]
+ */
 function q(
   stage,
   id,

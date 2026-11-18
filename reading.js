@@ -1,5 +1,6 @@
 import { group, move, neighbors } from './engine.js';
 
+/** @param {import('./types.js').Board} board @param {number} size @param {number} target */
 export function trueEyes(board, size, target) {
   if (board[target] !== 1) return [];
   const stones = new Set(group(board, target, size).stones);
@@ -7,6 +8,7 @@ export function trueEyes(board, size, target) {
     .map((c, i) => i)
     .filter((i) => !board[i] && neighbors(i, size).every((p) => stones.has(p)));
 }
+/** @param {import('./types.js').Board} board @param {number} size @param {number} target @param {string} [goal] */
 export function goalAchieved(board, size, target, goal = 'capture') {
   return goal === 'eyes' ? trueEyes(board, size, target).length >= 2 : board[target] !== 2;
 }
@@ -14,6 +16,7 @@ export function goalAchieved(board, size, target, goal = 'capture') {
 // A bounded adversarial reading test, not a whole-game strength evaluator.
 // Every legal placement is considered. White may also pass. Black must
 // place a stone: passing lets White end the reading game with a second pass.
+/** @param {import('./types.js').Board} start @param {number} size @param {number} target @param {number} depth @param {import('./types.js').History} [startHistory] @param {number} [limit] @param {string} [goal] */
 export function boundedReader(
   start,
   size,
@@ -25,6 +28,7 @@ export function boundedReader(
 ) {
   let nodes = 0;
   const memo = new Map();
+  /** @param {import('./types.js').Board} board @param {number} color @param {number} remaining @param {import('./types.js').History} history @returns {any} */
   function search(board, color, remaining, history) {
     if (goalAchieved(board, size, target, goal)) return { win: true, distance: 0 };
     if (goal === 'eyes' && board[target] !== 1) return { win: false, distance: 0 };
@@ -93,6 +97,7 @@ export function boundedReader(
   };
 }
 
+/** @param {Parameters<typeof boundedReader>} args */
 export function captureReader(...args) {
   return boundedReader(...args);
 }

@@ -4,16 +4,23 @@ export const GAME_KEY = 'igo-game-v1',
 export const DEFAULT_KOMI = 6.5,
   HANDICAP_KOMI = 0.5;
 // Standard handicap points on the star points: corners first, then the sides, then the centre.
+/**
+ * @typedef {{ color: number, point: number }} RecordMove
+ * @typedef {{ version?: number, size: number, moves: RecordMove[], handicap?: number, komi?: number, difficulty?: string }} GameRecord
+ */
+
+/** @param {number} size @param {number} count @returns {number[]} */
 export function handicapPoints(size, count) {
   if (!Number.isInteger(count) || count < 2 || count > 9 || ![9, 13, 19].includes(size)) return [];
   const e = size === 9 ? 2 : 3,
     m = (size - 1) / 2,
     f = size - 1 - e,
-    at = (r, c) => r * size + c;
+    at = (/** @type {number} */ r, /** @type {number} */ c) => r * size + c;
   const corners = [at(e, f), at(f, e), at(f, f), at(e, e)],
     sides = [at(m, e), at(m, f)],
     ends = [at(e, m), at(f, m)],
     centre = at(m, m);
+  /** @type {Record<number, number[]>} */
   const sets = {
     2: [corners[0], corners[1]],
     3: corners.slice(0, 3),
@@ -26,6 +33,7 @@ export function handicapPoints(size, count) {
   };
   return sets[count];
 }
+/** @param {Partial<GameRecord> | null | undefined} record */
 export function recordKomi(record) {
   return Number.isFinite(record?.komi) &&
     record.komi >= -30 &&
@@ -36,6 +44,7 @@ export function recordKomi(record) {
       ? HANDICAP_KOMI
       : DEFAULT_KOMI;
 }
+/** @param {GameRecord} record */
 export function replayRecord(record) {
   if (
     record?.version !== 1 ||
@@ -89,18 +98,23 @@ export function replayRecord(record) {
   }
   return { board, history, last, captures, passes, next, snapshots, ended: passes >= 2 };
 }
+/** @param {GameRecord} record */
 export function recordSgf(record) {
   replayRecord(record);
+  /** @param {unknown} s */
   const escape = (s) => String(s).replace(/\\/g, '\\\\').replace(/\]/g, '\\]');
+  /** @param {number} p */
   const coord = (p) =>
       String.fromCharCode(97 + (p % record.size), 97 + Math.floor(p / record.size)),
     stones = handicapPoints(record.size, record.handicap || 0);
   return (
     `(;FF[4]GM[1]CA[UTF-8]SZ[${record.size}]KM[${recordKomi(record)}]RU[Chinese]PB[Bạn]PW[${escape(record.difficulty || 'Máy luyện tập')}]` +
-    (stones.length ? `HA[${stones.length}]AB${stones.map((p) => `[${coord(p)}]`).join('')}` : '') +
+    (stones.length
+      ? `HA[${stones.length}]AB${stones.map((/** @type {number} */ p) => `[${coord(p)}]`).join('')}`
+      : '') +
     record.moves
       .map(
-        ({ color, point }) =>
+        (/** @type {RecordMove} */ { color, point }) =>
           `;${color === 1 ? 'B' : 'W'}[${point === -1 ? '' : String.fromCharCode(97 + (point % record.size), 97 + Math.floor(point / record.size))}]`
       )
       .join('') +

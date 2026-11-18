@@ -8,18 +8,21 @@
     "checkJs": true,
     "noEmit": true,
     "strict": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "skipLibCheck": true
   },
   "include": ["*.js"],
   "exclude": [
-    "node_modules",
-    "public",
-    "playwright.config.js",
+    "*-worker.js",
+    "app.js",
     "eslint.config.js",
-    "sw.js",
     "footer.js",
+    "node_modules",
+    "playwright.config.js",
+    "public",
     "register-sw.js",
-    "*-worker.js"
+    "review.js",
+    "sw.js",
+    "train.js"
   ]
 }

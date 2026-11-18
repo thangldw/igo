@@ -51,6 +51,7 @@ export const stages = [
 ];
 
 export { questions };
+/** @param {number} depth */
 export function stageForDepth(depth) {
   return depth === 1
     ? 'foundation'
@@ -62,6 +63,9 @@ export function stageForDepth(depth) {
           ? 'strategy'
           : 'dan';
 }
+/**
+ * @param {Array<{ id: string, depth: number, goal?: string, shape?: string, [key: string]: any }>} readingBank  // any: reading-problem records carry extra board fields passed through by spread
+ */
 export function buildBank(readingBank) {
   return [
     ...readingBank.map((p, i) => ({

@@ -2,6 +2,11 @@ import { restoreStudy } from './study-state.js';
 // Portable backup of study progress. The envelope is versioned; the study payload goes through restoreStudy
 // so unknown problem ids and malformed fields are dropped exactly as they are on a normal load.
 export const BACKUP_KIND = 'igo-backup';
+/**
+ * @param {import('./study-state.js').StudyState} study
+ * @param {Record<string, string>} [extras]
+ * @param {Date} [now]
+ */
 export function exportBackup(study, extras = {}, now = new Date()) {
   return JSON.stringify(
     { kind: BACKUP_KIND, version: 1, exportedAt: now.toISOString(), study, extras },
@@ -9,7 +14,12 @@ export function exportBackup(study, extras = {}, now = new Date()) {
     2
   );
 }
+/**
+ * @param {string} text
+ * @param {Iterable<string>} validIds
+ */
 export function parseBackup(text, validIds) {
+  /** @type {any} untrusted parsed JSON, validated below */
   let data;
   try {
     data = JSON.parse(text);
@@ -26,6 +36,7 @@ export function parseBackup(text, validIds) {
   )
     return { ok: false, error: 'Không phải file sao lưu tiến độ Igo.' };
   const study = restoreStudy(JSON.stringify(payload), validIds);
+  /** @type {Record<string, string>} */
   const extras = {};
   if (data.extras && typeof data.extras === 'object')
     for (const [k, v] of Object.entries(data.extras))

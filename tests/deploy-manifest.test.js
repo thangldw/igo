@@ -10,7 +10,10 @@ const sw = read('sw.js');
 const pages = ['index.html', 'train.html', 'review.html'];
 
 function localRefs(file) {
-  const text = read(file),
+  // Ignore comments so JSDoc such as import('./types.js') is not mistaken for a runtime import.
+  const text = read(file)
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, ''),
     refs = new Set();
   for (const m of text.matchAll(/(?:href|src)="\.\/([\w.-]+)(?:\?[^"]*)?"/g)) refs.add(m[1]);
   for (const m of text.matchAll(/(?:from|import)\s*\(?\s*['"]\.\/([\w.-]+)['"]/g)) refs.add(m[1]);

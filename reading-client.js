@@ -1,8 +1,10 @@
 // Request/response client for reading-worker.js. Each request resolves with the worker's reply,
 // `{ status: 'cancelled' }` after reset(), or `{ status: 'unknown' }` if the worker crashes.
 export function createReadingClient() {
+  /** @type {Worker | null} */
   let worker = null,
     nextId = 0;
+  /** @type {Map<number, (value: any) => void>} */ // resolves with the worker's untyped reply
   const pending = new Map();
 
   function reset() {

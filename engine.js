@@ -1,4 +1,6 @@
+/** @param {number} n */
 export const empty = (n) => Array(n * n).fill(0);
+/** @param {number} i @param {number} n */
 export function neighbors(i, n) {
   return [
     i % n > 0 ? i - 1 : -1,
@@ -7,10 +9,11 @@ export function neighbors(i, n) {
     i < n * (n - 1) ? i + n : -1,
   ].filter((x) => x >= 0);
 }
+/** @param {import('./types.js').Board} b @param {number} i @param {number} n */
 export function group(b, i, n) {
   const color = b[i],
     stones = new Set([i]),
-    liberties = new Set(),
+    liberties = /** @type {Set<number>} */ (new Set()),
     queue = [i];
   for (const p of queue)
     for (const q of neighbors(p, n)) {
@@ -22,6 +25,7 @@ export function group(b, i, n) {
     }
   return { stones: [...stones], liberties: [...liberties] };
 }
+/** @param {import('./types.js').Board} b @param {number} i @param {number} color @param {number} n @param {import('./types.js').History} [history] */
 export function move(b, i, color, n, history = []) {
   if (b[i] || i < 0 || i >= b.length) return { error: 'Giao điểm này đã có quân.' };
   const next = [...b];
@@ -41,6 +45,7 @@ export function move(b, i, color, n, history = []) {
     return { error: 'Ko: không được lặp lại thế bàn đã xuất hiện. Hãy đi nơi khác.' };
   return { board: next, captured };
 }
+/** @param {import('./types.js').Board} b @param {number} n */
 export function score(b, n, komi = 6.5) {
   let black = b.filter((x) => x === 1).length,
     white = b.filter((x) => x === 2).length,
@@ -66,6 +71,7 @@ export function score(b, n, komi = 6.5) {
     }
   return { black, white: white + komi, neutral };
 }
+/** @param {import('./types.js').Board} b @param {number} n @param {import('./types.js').History} [history] */
 export function botCandidates(b, n, history = []) {
   const before = score(b, n, 0),
     candidates = [];
@@ -75,7 +81,7 @@ export function botCandidates(b, n, history = []) {
     const own = group(result.board, i, n);
     let rescue = 0,
       pressure = 0;
-    const seen = new Set();
+    const seen = /** @type {Set<number>} */ (new Set());
     for (const q of neighbors(i, n)) {
       if (b[q] === 2 && !seen.has(q)) {
         const g = group(b, q, n);
@@ -103,6 +109,7 @@ export function botCandidates(b, n, history = []) {
   candidates.sort((a, b) => b.value - a.value);
   return candidates;
 }
+/** @param {import('./types.js').Board} b @param {number} n @param {import('./types.js').History} [history] @param {{ difficulty?: string, random?: () => number }} [opts] */
 export function bot(b, n, history = [], { difficulty = 'basic', random = Math.random } = {}) {
   const candidates = botCandidates(b, n, history);
   if (!candidates.length) return null;

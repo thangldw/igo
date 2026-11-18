@@ -3,6 +3,7 @@ import { move, group, neighbors } from './engine.js';
 // (never filling an own eye) and see which colour owns each stone's point most of the time.
 // It is a heuristic suggestion; the player can still toggle any group. Groups in a simple seki (every liberty is a point
 // where neither colour can play without self-atari or capturing) are never suggested.
+/** @param {number} seed */
 export function mulberry32(seed) {
   return () => {
     seed |= 0;
@@ -12,9 +13,11 @@ export function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+/** @param {import('./types.js').Board} b @param {number} i @param {number} color @param {number} n */
 function fillsOwnEye(b, i, color, n) {
   return neighbors(i, n).every((q) => b[q] === color);
 }
+/** @param {import('./types.js').Board} b @param {number} n */
 function ownership(b, n) {
   const owners = Array(b.length).fill(0),
     seen = new Set();
@@ -40,6 +43,7 @@ function ownership(b, n) {
   return owners;
 }
 // Light policy: capture a group in atari if possible, otherwise rescue an own group in atari, otherwise random.
+/** @param {import('./types.js').Board} b @param {number} n @param {number} color */
 function urgentMoves(b, n, color) {
   const capture = new Set(),
     save = new Set(),
@@ -52,6 +56,7 @@ function urgentMoves(b, n, color) {
     }
   return [...capture, ...save];
 }
+/** @param {import('./types.js').Board} start @param {number} n @param {number} toMove @param {() => number} rand */
 function playout(start, n, toMove, rand) {
   let b = start,
     color = toMove,
@@ -90,6 +95,7 @@ function playout(start, n, toMove, rand) {
 }
 // Simple seki: each liberty of the group is a point where neither colour can play without ending in atari, and no
 // capture follows. Seki with ko or outside liberties is not detected; those groups can still be toggled by hand.
+/** @param {import('./types.js').Board} board @param {number} n @param {import('./types.js').Group} g */
 export function inSeki(board, n, g) {
   if (!g.liberties.length) return false;
   return g.liberties.every((p) =>
@@ -99,6 +105,7 @@ export function inSeki(board, n, g) {
     })
   );
 }
+/** @param {import('./types.js').Board} board @param {number} n @param {{ playouts?: number, threshold?: number, seed?: number, toMove?: number }} [opts] */
 export function suggestDead(
   board,
   n,

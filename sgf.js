@@ -2,6 +2,12 @@ import { empty, move, group } from './engine.js';
 const MAX_TEXT = 1000000,
   MAX_NODES = 10000,
   MAX_DEPTH = 128;
+/** @typedef {import('./types.js').Board} Board */
+/** @typedef {{ props: Record<string, string[]>, children: SgfNode[] }} SgfNode */
+/** @typedef {{ root: SgfNode, size: number, komi: number | null, black: string, white: string, result: string, rules: string, nodeCount: number }} SgfGame */
+/** @typedef {{ board: Board, next: number, last: number, count: number, history: string[], comment?: string, node?: SgfNode }} SgfState */
+
+/** @param {string} text @returns {SgfGame} */
 export function parseSgf(text) {
   if (typeof text !== 'string' || text.length > MAX_TEXT)
     throw Error('SGF phải là văn bản tối đa 1 MB.');
@@ -11,6 +17,7 @@ export function parseSgf(text) {
   const skip = () => {
     while (/\s/.test(text[i] || '') && i < text.length) i++;
   };
+  /** @param {string} c */
   const expect = (c) => {
     skip();
     if (text[i++] !== c) throw Error(`SGF sai cú pháp gần ký tự ${i}.`);
@@ -31,15 +38,18 @@ export function parseSgf(text) {
     }
     throw Error('SGF thiếu dấu đóng giá trị ].');
   }
+  /** @param {number} depth @returns {SgfNode} */
   function tree(depth) {
     if (depth > MAX_DEPTH) throw Error('SGF có quá nhiều tầng biến.');
     expect('(');
+    /** @type {SgfNode | null} */
     let first = null,
       last = null;
     skip();
     while (text[i] === ';') {
       i++;
       if (++nodes > MAX_NODES) throw Error('SGF vượt 10.000 nút.');
+      /** @type {SgfNode} */
       const node = { props: {}, children: [] };
       skip();
       while (/[A-Z]/.test(text[i] || '')) {
@@ -71,6 +81,7 @@ export function parseSgf(text) {
   const root = tree(0);
   skip();
   if (i !== text.length) throw Error('Chỉ hỗ trợ một ván SGF mỗi file.');
+  /** @param {string} id */
   const single = (id) => {
     const values = root.props[id];
     if (values && values.length !== 1) throw Error(`${id} cần đúng một giá trị.`);
@@ -97,6 +108,7 @@ export function parseSgf(text) {
     nodeCount: nodes,
   };
 }
+/** @param {string} value @param {number} size @param {boolean} [allowPass] */
 export function sgfPoint(value, size, allowPass = false) {
   if (allowPass && (value === '' || value === 'tt')) return -1;
   if (!/^[a-s]{2}$/.test(value)) throw Error(`Tọa độ SGF không hợp lệ: ${value}.`);
@@ -105,8 +117,9 @@ export function sgfPoint(value, size, allowPass = false) {
   if (col >= size || row >= size) throw Error(`Tọa độ ${value} nằm ngoài bàn.`);
   return row * size + col;
 }
+/** @param {string[] | undefined} values @param {number} size @returns {number[]} */
 function points(values, size) {
-  return (values || []).flatMap((v) => {
+  return (values || []).flatMap((/** @type {string} */ v) => {
     if (!v.includes(':')) return [sgfPoint(v, size)];
     const parts = v.split(':');
     if (parts.length !== 2) throw Error('Vùng setup SGF không hợp lệ.');
@@ -122,6 +135,7 @@ function points(values, size) {
     return out;
   });
 }
+/** @param {{ board: Board, next: number, last?: number, count: number, history: string[] }} previous @param {SgfNode} node @param {number} size @param {boolean} [isRoot] @returns {SgfState} */
 export function applyNode(previous, node, size, isRoot = false) {
   const p = node.props;
   for (const id of ['B', 'W', 'PL'])
@@ -138,11 +152,11 @@ export function applyNode(previous, node, size, isRoot = false) {
     history = previous.history.length ? previous.history.slice(-2) : [board.join('')];
   if (setup) {
     const used = new Set();
-    for (const [id, color] of [
+    for (const [id, color] of /** @type {[string, number][]} */ ([
       ['AE', 0],
       ['AB', 1],
       ['AW', 2],
-    ])
+    ]))
       for (const point of points(p[id], size)) {
         if (used.has(point)) throw Error('Setup chồng lấp tại một điểm.');
         used.add(point);
@@ -182,7 +196,9 @@ export function applyNode(previous, node, size, isRoot = false) {
   }
   return { board, next, last, count, history, comment: (p.C || []).join('\n'), node };
 }
+/** @param {SgfGame} game @param {number[]} [path] @returns {SgfState[]} */
 export function replaySgf(game, path = []) {
+  /** @type {{ board: Board, next: number, last: number, count: number, history: string[] }} */
   let state = { board: empty(game.size), next: 1, last: -1, count: 0, history: [] };
   state = applyNode(state, game.root, game.size, true);
   const frames = [state];
@@ -196,6 +212,7 @@ export function replaySgf(game, path = []) {
   }
   return frames;
 }
+/** @param {SgfGame} game */
 export function validateSgf(game) {
   const initial = applyNode(
     { board: empty(game.size), next: 1, last: -1, count: 0, history: [] },
@@ -211,6 +228,7 @@ export function validateSgf(game) {
   }
   return game;
 }
+/** @param {SgfState} state @param {number} point @param {number} size @returns {SgfState} */
 export function trialMove(state, point, size) {
   const board = state.board;
   if (point === -1)
