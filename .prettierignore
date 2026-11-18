@@ -3,6 +3,5 @@ reading-bank.json
 package-lock.json
 public
 fonts
-*.html
 test-results
 playwright-report

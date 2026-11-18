@@ -1,16 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-const nav = (f) =>
-  readFileSync(new URL(`../${f}`, import.meta.url), 'utf8').match(
-    /<nav class="site-nav"[^>]*>(.*?)<\/nav>/
-  )[1];
-const links = (html) =>
-  [
-    ...html.matchAll(
-      /<a data-nav="(\w+)" href="([^"]+)"( aria-current="page")?><span class="step-num" aria-hidden="true">(\d)<\/span>([^<]+)<\/a>/g
-    ),
-  ].map((m) => ({ key: m[1], href: m[2], current: !!m[3], n: m[4], label: m[5] }));
+import { parseHTML } from 'linkedom';
+
+const PAGES = ['index.html', 'train.html', 'review.html'];
+const doc = (f) => parseHTML(readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).document;
+const links = (f) =>
+  [...doc(f).querySelectorAll('.site-nav a')].map((a) => ({
+    key: a.dataset.nav,
+    href: a.getAttribute('href'),
+    current: a.getAttribute('aria-current') === 'page',
+    n: a.querySelector('.step-num')?.textContent.trim(),
+    label: a.textContent.replace(a.querySelector('.step-num')?.textContent ?? '', '').trim(),
+  }));
 
 test('all pages share one four-item navigation, numbered 1-4 in the same order', () => {
   const expected = [
@@ -19,8 +21,8 @@ test('all pages share one four-item navigation, numbered 1-4 in the same order',
     ['play', './index.html?play=1', 'Chơi với máy'],
     ['review', './review.html', 'Xem lại ván'],
   ];
-  for (const f of ['index.html', 'train.html', 'review.html']) {
-    const l = links(nav(f));
+  for (const f of PAGES) {
+    const l = links(f);
     assert.deepEqual(
       l.map((x) => [x.key, x.href, x.label]),
       expected,
@@ -33,9 +35,10 @@ test('all pages share one four-item navigation, numbered 1-4 in the same order',
     );
   }
 });
+
 test('each page marks exactly its own item as current', () => {
   const current = (f) =>
-    links(nav(f))
+    links(f)
       .filter((x) => x.current)
       .map((x) => x.key);
   assert.deepEqual(current('index.html'), ['learn']);
@@ -44,13 +47,12 @@ test('each page marks exactly its own item as current', () => {
 });
 
 test('support button slot sits in the header between the brand and navigation on every page', () => {
-  for (const f of ['index.html', 'train.html', 'review.html']) {
-    const html = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
-    assert.match(
-      html,
-      /<\/div><div id="supportSlot" class="support-slot"><\/div><nav class="site-nav"/,
-      f
-    );
-    assert.equal((html.match(/id="supportSlot"/g) || []).length, 1, f);
+  for (const f of PAGES) {
+    const d = doc(f);
+    assert.equal(d.querySelectorAll('#supportSlot').length, 1, f);
+    const slot = d.getElementById('supportSlot');
+    assert.equal(slot.parentElement.tagName, 'HEADER', f);
+    assert.equal(slot.nextElementSibling?.className, 'site-nav', f);
+    assert.ok(slot.previousElementSibling, `${f}: brand group precedes the slot`);
   }
 });

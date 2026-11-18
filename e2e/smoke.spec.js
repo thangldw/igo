@@ -74,13 +74,32 @@ test('review page opens', async ({ page }) => {
 
 test.describe('service worker', () => {
   test.use({ serviceWorkers: 'allow' });
-  test('registers and takes control of the page', async ({ page }) => {
+  test('registers, precaches the shell and serves it offline', async ({ page, context }) => {
     await page.goto('/');
-    const scope = await page.evaluate(async () => {
-      const registration = await navigator.serviceWorker.ready;
-      return registration.scope;
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
     });
-    expect(scope).toMatch(/\/$/);
+    // First load is not controlled; reload so the worker serves and caches the page.
+    await page.reload();
+    const cached = await page.evaluate(async () => {
+      const names = await caches.keys();
+      const cache = await caches.open(names[0]);
+      return { names, keys: (await cache.keys()).map((r) => new URL(r.url).pathname) };
+    });
+    expect(cached.names).toHaveLength(1);
+    expect(cached.names[0]).toMatch(/^igo-[0-9a-f]{12}$/);
+    for (const file of [
+      '/app.js',
+      '/engine.js',
+      '/train.js',
+      '/reading-bank.json',
+      '/fonts/BeVietnamPro-Regular.ttf',
+    ])
+      expect(cached.keys, file).toContain(file);
+    await context.setOffline(true);
+    await page.reload();
+    await expect(page.locator('#board button').first()).toBeVisible();
+    await context.setOffline(false);
   });
 });
 

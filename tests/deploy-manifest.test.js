@@ -49,5 +49,23 @@ test('the build generates a service worker that precaches every shipped file', (
     assert.ok(existsSync(new URL(`../public/${f}`, import.meta.url)), `${f} not built`);
   }
   assert.ok(core.includes('./fonts/BeVietnamPro-Regular.ttf'));
+  const version = built.match(/igo-([0-9a-f]{12})/)[1];
+  for (const page of pages) {
+    const html = readFileSync(new URL(`../public/${page}`, import.meta.url), 'utf8');
+    assert.match(
+      html,
+      new RegExp(`href="\\./?style\\.css\\?v=${version}"|href="style\\.css\\?v=${version}"`),
+      `${page} local css is versioned`
+    );
+    assert.ok(html.includes('?v=20261103igo'), `${page} keeps shared root assets untouched`);
+    assert.ok(
+      !/(?:href|src)="(?!\/|https?:)[^"?]*\.(?:css|js)"/.test(html),
+      `${page} has an unversioned local asset`
+    );
+  }
+  assert.ok(
+    !/\?v=/.test(read('index.html').replace(/(?:href|src)="\/[^"]*"/g, '')),
+    'source HTML has no manual local ?v='
+  );
   assert.match(sw, /const CORE = \[\];/, 'source sw.js must keep the placeholder');
 });
