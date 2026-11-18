@@ -191,3 +191,29 @@ test('a reading puzzle is checked by the worker and the hint escalates', async (
   await expect(page.locator('#turn')).not.toContainText('Đang kiểm tra', { timeout: 20000 });
   expect(errors).toEqual([]);
 });
+
+test('quiz lessons accept the right answer, reject wrong ones and unlock "next"', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const ids = await page.locator('#lesson-select option').evaluateAll((o) => o.map((x) => x.value));
+  let quizzes = 0;
+  for (const id of ids) {
+    // The select is hidden on desktop (a list is shown instead), so drive it directly.
+    await page.locator('#lesson-select').evaluate((el, value) => {
+      el.value = value;
+      el.dispatchEvent(new Event('change'));
+    }, id);
+    const answers = page.locator('#answers button');
+    if (!(await answers.count())) continue;
+    quizzes++;
+    for (let k = 0; k < (await answers.count()); k++) {
+      await answers.nth(k).click();
+      if (await page.locator('#next').isVisible()) break;
+      await expect(page.locator('#feedback')).toContainText('Chưa đúng');
+    }
+    await expect(page.locator('#next')).toBeVisible();
+    await expect(page.locator('#feedback')).toContainText('Đúng');
+  }
+  expect(quizzes).toBeGreaterThan(0);
+});

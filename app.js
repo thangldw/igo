@@ -12,6 +12,15 @@ import {
 import { renderTerms } from './terms.js';
 import { createSearchClient } from './search-client.js';
 import {
+  renderNavigation,
+  renderAnswers,
+  successText,
+  introText,
+  nextLabel,
+  turnText,
+  capturedText,
+} from './lesson-view.js';
+import {
   loadProgress,
   saveProgress,
   loadLessonId,
@@ -141,47 +150,32 @@ function message(text, type = '') {
   $('feedback').className = type;
 }
 function navigation() {
-  $('levels').replaceChildren();
-  for (const l of levels) {
-    const button = document.createElement('button');
-    button.textContent = l.name;
-    button.setAttribute('aria-pressed', String(l.id === level));
-    button.onclick = () => {
-      load(lessons.findIndex((item) => item.level === l.id));
-      showLesson();
-    };
-    $('levels').append(button);
-  }
-  $('level-summary').textContent = currentLevel().summary;
-  $('lessons').replaceChildren();
-  $('lesson-select').replaceChildren();
-  levelLessons().forEach((l, index) => {
-    const button = document.createElement('button');
-    button.setAttribute(
-      'aria-current',
-      mode === 'lesson' && l.id === current().id ? 'step' : 'false'
-    );
-    const option = document.createElement('option');
-    option.value = l.id;
-    option.textContent = `${index + 1}. ${l.title}`;
-    $('lesson-select').append(option);
-    button.className = mode === 'lesson' && l.id === current().id ? 'active' : '';
-    const number = document.createElement('span');
-    number.className = 'number';
-    number.textContent = done.includes(l.id) ? '✓' : String(index + 1).padStart(2, '0');
-    button.replaceChildren(number, document.createTextNode(l.title));
-    button.onclick = () => {
-      load(lessons.indexOf(l));
-      showLesson();
-    };
-    $('lessons').append(button);
-  });
-  $('lesson-select').value = current().id;
-  const active = $('lessons').querySelector('.active');
-  if (active) $('lessons').scrollLeft = Math.max(0, active.offsetLeft - $('lessons').offsetLeft);
-  const completed = levelLessons().filter((l) => done.includes(l.id)).length;
-  $('progress-text').textContent = `${completed} / ${levelLessons().length}`;
-  $('progress-bar').style.width = `${(completed / levelLessons().length) * 100}%`;
+  renderNavigation(
+    {
+      levelsBox: $('levels'),
+      summary: $('level-summary'),
+      list: $('lessons'),
+      select: $('lesson-select'),
+      progressText: $('progress-text'),
+      progressBar: $('progress-bar'),
+    },
+    {
+      levels,
+      lessons,
+      level,
+      inLesson: mode === 'lesson',
+      currentId: current().id,
+      done,
+      onLevel: (id) => {
+        load(lessons.findIndex((item) => item.level === id));
+        showLesson();
+      },
+      onLesson: (l) => {
+        load(lessons.indexOf(l));
+        showLesson();
+      },
+    }
+  );
 }
 function draw() {
   const root = $('board');
@@ -222,23 +216,8 @@ function draw() {
     appendEdgeLabels(button, i, n);
     root.append(button);
   }
-  $('turn').textContent =
-    mode === 'lesson'
-      ? current().kind === 'sequence'
-        ? `● Đen đi · Nước ${Math.floor(lineStep / 2) + 1} / ${Math.ceil(current().lines[0].length / 2)}`
-        : '● Bạn đặt quân đen'
-      : ended
-        ? 'Ván đã kết thúc'
-        : busy
-          ? '○ Máy đang đi…'
-          : '● Lượt của bạn';
-  if (solved && mode === 'lesson') $('turn').textContent = '✓ Đã hoàn thành bài';
-  $('captured').textContent =
-    mode === 'lesson'
-      ? current().kind === 'sequence'
-        ? 'Trắng đáp theo chuỗi mẫu'
-        : ''
-      : `Đã bắt: đen ${captures[0]} · trắng ${captures[1]}`;
+  $('turn').textContent = turnText({ mode, lesson: current(), lineStep, solved, ended, busy });
+  $('captured').textContent = capturedText({ mode, lesson: current(), captures });
 }
 function complete(text) {
   solved = true;
@@ -248,12 +227,7 @@ function complete(text) {
   }
   message(text, 'success');
   $('next').hidden = false;
-  const next = lessons[lesson + 1];
-  $('next').textContent = !next
-    ? 'Luyện với máy →'
-    : next.level !== level
-      ? `Sang ${levels.find((l) => l.id === next.level).name.toLowerCase()} →`
-      : 'Bài tiếp theo →';
+  $('next').textContent = nextLabel(lessons[lesson + 1], level, levels);
   navigation();
 }
 function load(i) {
@@ -297,7 +271,6 @@ function load(i) {
   $('next').hidden = true;
   $('hint').hidden = false;
   $('retry').hidden = false;
-  $('answers').replaceChildren();
   const conceptual = current().kind === 'quiz' && !current().setup.length;
   $('description').hidden = conceptual;
   $('play-surface').hidden = conceptual;
@@ -305,38 +278,13 @@ function load(i) {
   $('concept').textContent = conceptual ? current().description : '';
   $('board-footer').hidden = conceptual;
   $('board-size').hidden = conceptual;
-  if (current().answer !== undefined) {
-    const choices =
-      current().choices ||
-      [1, 2, 3, 4].map((v) => `${v} ${current().kind === 'territory' ? 'điểm' : 'khí'}`);
-    choices.forEach((label, index) => {
-      const button = document.createElement('button');
-      button.textContent = label;
-      button.onclick = () => {
-        if (solved) return;
-        const correct = current().choices
-          ? index === current().answer
-          : index + 1 === current().answer;
-        if (correct)
-          complete(
-            current().success ||
-              (current().kind === 'territory'
-                ? 'Đúng! Vùng giữa có 1 điểm đất. Quân trên bàn cũng được tính khi đếm diện tích.'
-                : 'Đúng! Quân giữa bàn có 4 khí.')
-          );
-        else message('Chưa đúng. Kiểm tra lại khí hoặc điều kiện trong đề.', 'error');
-        draw();
-      };
-      $('answers').append(button);
-    });
-  }
-  message(
-    current().kind === 'sequence'
-      ? 'Nghĩ trước cách Trắng đáp rồi đặt quân Đen. Trong bài này, Trắng đi theo chuỗi mẫu.'
-      : conceptual
-        ? 'Chọn đáp án theo tình huống trong đề.'
-        : 'Thử trực tiếp trên bàn cờ.'
-  );
+  renderAnswers($('answers'), current(), (correct) => {
+    if (solved) return;
+    if (correct) complete(successText(current()));
+    else message('Chưa đúng. Kiểm tra lại khí hoặc điều kiện trong đề.', 'error');
+    draw();
+  });
+  message(introText(current(), conceptual));
   navigation();
   draw();
 }
@@ -424,14 +372,7 @@ function click(i, confirmed = false) {
       }, 400);
       return;
     }
-    complete(
-      l.success ||
-        (l.kind === 'place'
-          ? 'Bạn vừa đi nước đầu tiên. Tiếp theo, học cách giữ quân sống.'
-          : l.kind === 'save'
-            ? 'Đúng! Nhóm đen đã nối ra ngoài và có 3 khí.'
-            : `Đúng! Bạn đã bắt ${result.captured} quân trắng.`)
-    );
+    complete(successText(l, result.captured));
     draw();
     return;
   }

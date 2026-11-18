@@ -6,6 +6,7 @@
     "footer.js",
     "app.js",
     "lesson-storage.js",
+    "lesson-view.js",
     "engine.js",
     "board-view.js",
     "lessons.js",
