@@ -10,6 +10,8 @@ import {
   recordKomi,
 } from './game-record.js';
 import { createSearchClient } from './search-client.js';
+import { createGameClock } from './game-clock.js';
+import { scoreSummary, analysisSummary } from './game-text.js';
 import { showLessonChrome, showGameChrome } from './page-chrome.js';
 import {
   renderNavigation,
@@ -64,15 +66,11 @@ let gameMoves = [],
   deadStones = new Set(),
   pendingPoint = -1,
   handicap = 0,
-  komi = 6.5,
-  clockLeft = 0,
-  clockWarned = false;
+  komi = 6.5;
 const pointName = (i) => coordinate(i, n);
 function scoreDetails() {
-  const s = areaScore(board, n, [...deadStones], komi),
-    komiText = String(komi).replace('.', ',');
-  $('score-detail').textContent =
-    `Đen: ${s.blackStones} quân sống + ${s.blackLand} đất = ${s.black}. Trắng: ${s.whiteStones} quân sống + ${s.whiteLand} đất + ${komiText} komi = ${s.white}. Trung lập: ${s.neutral}. Theo dấu quân chết bạn chọn, ${s.black > s.white ? 'Đen' : 'Trắng'} hơn ${Math.abs(s.black - s.white)} điểm.`;
+  const s = areaScore(board, n, [...deadStones], komi);
+  $('score-detail').textContent = scoreSummary(s, komi);
   return s;
 }
 function record() {
@@ -448,8 +446,7 @@ function start(save = true) {
   if (!Number.isFinite(komi)) komi = 6.5;
   board = empty(n);
   for (const p of handicapPoints(n, handicap)) board[p] = 1;
-  clockLeft = Number($('clock-limit').value) || 0;
-  clockWarned = false;
+  clock.reset();
   gameMoves = [];
   $('analysis-output').textContent = '';
   deadStones.clear();
@@ -482,31 +479,15 @@ function finish() {
 $('game-handicap').onchange = () => {
   $('game-komi').value = Number($('game-handicap').value) ? '0.5' : '6.5';
 };
-// Informal clock for the player's own thinking time; it never ends the game.
-function clockText() {
-  const m = Math.floor(clockLeft / 60),
-    s = clockLeft % 60;
-  return `Đồng hồ ${m}:${String(s).padStart(2, '0')}`;
-}
-setInterval(() => {
-  const el = $('game-clock');
-  if (mode !== 'game' || !Number($('clock-limit').value)) {
-    el.hidden = true;
-    return;
-  }
-  el.hidden = false;
-  if (!ended && !busy && document.visibilityState === 'visible' && clockLeft > 0) clockLeft--;
-  el.textContent = clockLeft > 0 ? clockText() : 'Hết giờ (tự đặt)';
-  el.classList.toggle('clock-low', clockLeft <= 30);
-  if (clockLeft === 0 && !clockWarned && !ended) {
-    clockWarned = true;
-    message('Hết giờ do bạn đặt. Ván tập vẫn tiếp tục; đây chỉ là nhắc nhịp suy nghĩ.');
-  }
-}, 1000);
-$('clock-limit').onchange = () => {
-  clockLeft = Number($('clock-limit').value) || 0;
-  clockWarned = false;
-};
+const clock = createGameClock({
+  element: $('game-clock'),
+  getLimit: () => Number($('clock-limit').value),
+  isRunning: () => !busy,
+  onExpire: () =>
+    message('Hết giờ do bạn đặt. Ván tập vẫn tiếp tục; đây chỉ là nhắc nhịp suy nghĩ.'),
+});
+setInterval(() => clock.tick(mode === 'game', ended), 1000);
+$('clock-limit').onchange = () => clock.reset();
 function savedLessonIndex() {
   const i = lessons.findIndex((l) => l.id === loadLessonId());
   return i < 0 ? 0 : i;
@@ -695,7 +676,6 @@ $('analyze-game').onclick = () => {
   if (busy) return;
   $('analysis-output').textContent = 'Đang tìm các quyết định cần xem lại…';
   const activeEpoch = epoch;
-  const label = (p) => (p === -1 ? 'bỏ lượt' : pointName(p));
   search
     .run(
       { type: 'review', record: record() },
@@ -712,14 +692,7 @@ $('analyze-game').onclick = () => {
         $('analysis-output').textContent = data.error;
         return;
       }
-      $('analysis-output').textContent = data.findings.length
-        ? data.findings
-            .map(
-              (f) =>
-                `Nước ${f.move}: bạn đi ${label(f.played)}. Cân nhắc ${label(f.point)}; đối thủ có thể đáp ${label(f.reply)}. Chênh lệch đánh giá: ${f.gap.toFixed(1)} đơn vị nội bộ.`
-            )
-            .join('\n')
-        : 'Engine chưa tìm được nước thay thế tốt hơn trong các nhánh đã xét.';
+      $('analysis-output').textContent = analysisSummary(data.findings, pointName);
     })
     .catch((e) => {
       if (activeEpoch === epoch)

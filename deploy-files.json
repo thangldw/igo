@@ -8,6 +8,8 @@
     "lesson-storage.js",
     "lesson-view.js",
     "page-chrome.js",
+    "game-clock.js",
+    "game-text.js",
     "engine.js",
     "board-view.js",
     "lessons.js",
