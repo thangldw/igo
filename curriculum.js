@@ -1,159 +1,1380 @@
 export const stages = [
-  {id:'foundation',name:'30–20 kyu',focus:'Khí, bắt quân, luật và đếm diện tích',practice:'Chơi 3 ván 9×9. Sau mỗi ván, ghi lại một nhóm mất quân vì thiếu khí.'},
-  {id:'tactics',name:'20–10 kyu',focus:'Đọc hai nước đen, nối/cắt và hình cờ',practice:'Chơi 3 ván 13×13 hoặc 19×19. Xem lại các điểm cắt và nhóm chỉ còn một khí.'},
-  {id:'reading',name:'10–5 kyu',focus:'Đọc các cách đối thủ đáp, chọn hướng đi và giữ nhóm sống',practice:'Chơi 5 ván 19×19 với đối thủ có hạng. Chọn hai quyết định sai mỗi ván để tự đọc lại.'},
-  {id:'strategy',name:'5–1 kyu',focus:'Tấn công, ko, quan tử và lựa chọn toàn bàn',practice:'Chơi 5 ván 19×19. Nhờ người mạnh hơn hoặc công cụ phân tích xem lại nhóm yếu và các nước quan tử lớn.'},
-  {id:'dan',name:'Mục tiêu 1 dan',focus:'Đọc nhiều nước tiếp theo và chọn nước khi ít thời gian',practice:'Duy trì thực chiến 19×19 với đối thủ có điểm xếp hạng ổn định. Theo dõi kết quả và nhờ người mạnh hơn kiểm tra các ván. Hoàn thành bài tập không tự xác nhận 1 dan.'},
-  {id:'dan2',name:'Mục tiêu 2 dan',focus:'Tính điểm cuối ván, tìm nước đối thủ hóa giải và lập kế hoạch',practice:'Xem lại 5 ván 19×19 của bạn trong phòng SGF. Trước khi xem phân tích, ghi hai nước đang cân nhắc và nước phản bác mạnh nhất. Đối chiếu với người mạnh hơn; ghi lỗi lặp lại.'},
-  {id:'dan3',name:'Mục tiêu 3 dan nghiệp dư',focus:'Đếm đe dọa ko, chọn nước trong ván sát điểm và thử chuỗi nước',practice:'Chơi với đối thủ có điểm xếp hạng ổn định trong cùng hệ. Xem lại khai cuộc, trung bàn và quan tử; nhờ người mạnh hơn kiểm tra các kết luận. Theo dõi điểm xếp hạng qua các ván đấu, không suy đẳng từ điểm bài tập.'}
+  {
+    id: 'foundation',
+    name: '30–20 kyu',
+    focus: 'Khí, bắt quân, luật và đếm diện tích',
+    practice: 'Chơi 3 ván 9×9. Sau mỗi ván, ghi lại một nhóm mất quân vì thiếu khí.',
+  },
+  {
+    id: 'tactics',
+    name: '20–10 kyu',
+    focus: 'Đọc hai nước đen, nối/cắt và hình cờ',
+    practice: 'Chơi 3 ván 13×13 hoặc 19×19. Xem lại các điểm cắt và nhóm chỉ còn một khí.',
+  },
+  {
+    id: 'reading',
+    name: '10–5 kyu',
+    focus: 'Đọc các cách đối thủ đáp, chọn hướng đi và giữ nhóm sống',
+    practice:
+      'Chơi 5 ván 19×19 với đối thủ có hạng. Chọn hai quyết định sai mỗi ván để tự đọc lại.',
+  },
+  {
+    id: 'strategy',
+    name: '5–1 kyu',
+    focus: 'Tấn công, ko, quan tử và lựa chọn toàn bàn',
+    practice:
+      'Chơi 5 ván 19×19. Nhờ người mạnh hơn hoặc công cụ phân tích xem lại nhóm yếu và các nước quan tử lớn.',
+  },
+  {
+    id: 'dan',
+    name: 'Mục tiêu 1 dan',
+    focus: 'Đọc nhiều nước tiếp theo và chọn nước khi ít thời gian',
+    practice:
+      'Duy trì thực chiến 19×19 với đối thủ có điểm xếp hạng ổn định. Theo dõi kết quả và nhờ người mạnh hơn kiểm tra các ván. Hoàn thành bài tập không tự xác nhận 1 dan.',
+  },
+  {
+    id: 'dan2',
+    name: 'Mục tiêu 2 dan',
+    focus: 'Tính điểm cuối ván, tìm nước đối thủ hóa giải và lập kế hoạch',
+    practice:
+      'Xem lại 5 ván 19×19 của bạn trong phòng SGF. Trước khi xem phân tích, ghi hai nước đang cân nhắc và nước phản bác mạnh nhất. Đối chiếu với người mạnh hơn; ghi lỗi lặp lại.',
+  },
+  {
+    id: 'dan3',
+    name: 'Mục tiêu 3 dan nghiệp dư',
+    focus: 'Đếm đe dọa ko, chọn nước trong ván sát điểm và thử chuỗi nước',
+    practice:
+      'Chơi với đối thủ có điểm xếp hạng ổn định trong cùng hệ. Xem lại khai cuộc, trung bàn và quan tử; nhờ người mạnh hơn kiểm tra các kết luận. Theo dõi điểm xếp hạng qua các ván đấu, không suy đẳng từ điểm bài tập.',
+  },
 ];
-const letters='ABCDEFGHJKLMNOPQRST';
-function diagram(size, black=[], white=[]) {
-  const point = coordinate => (size-Number(coordinate.slice(1)))*size+letters.indexOf(coordinate[0]);
-  return {size,setup:[...black.map(c=>[point(c),1]),...white.map(c=>[point(c),2])]};
+const letters = 'ABCDEFGHJKLMNOPQRST';
+function diagram(size, black = [], white = []) {
+  const point = (coordinate) =>
+    (size - Number(coordinate.slice(1))) * size + letters.indexOf(coordinate[0]);
+  return { size, setup: [...black.map((c) => [point(c), 1]), ...white.map((c) => [point(c), 2])] };
 }
-const opening=diagram(19,['D4','Q16'],['Q4','D16']);
-const flank=diagram(19,['D4','F4','Q16'],['D16','Q4','Q10']);
-const middle=diagram(19,['D4','F4','F6','D16'],['G4','G5','Q4','Q16']);
-const questions=[];
-function q(stage,id,topic,title,prompt,choices,answer,explanation,position={size:0,setup:[]}) {
-  questions.push({id:`q-${id}`,stage,topic,title,prompt,choices,answer,explanation,kind:'quiz',...position});
+const opening = diagram(19, ['D4', 'Q16'], ['Q4', 'D16']);
+const flank = diagram(19, ['D4', 'F4', 'Q16'], ['D16', 'Q4', 'Q10']);
+const middle = diagram(19, ['D4', 'F4', 'F6', 'D16'], ['G4', 'G5', 'Q4', 'Q16']);
+const questions = [];
+function q(
+  stage,
+  id,
+  topic,
+  title,
+  prompt,
+  choices,
+  answer,
+  explanation,
+  position = { size: 0, setup: [] }
+) {
+  questions.push({
+    id: `q-${id}`,
+    stage,
+    topic,
+    title,
+    prompt,
+    choices,
+    answer,
+    explanation,
+    kind: 'quiz',
+    ...position,
+  });
 }
-q('foundation','diagonal','Khí','Nối chéo có chia sẻ khí?','Hai quân cùng màu chỉ chạm chéo, không có quân nối ngang/dọc. Chúng là một nhóm chưa?',['Đã là một nhóm','Vẫn là hai nhóm'],1,'Chỉ kết nối ngang và dọc tạo thành nhóm. Liên kết chéo có thể bị cắt.',diagram(5,['B3','C2']));
-q('foundation','corner-liberties','Khí','Khí ở góc','Một quân ở A5 trên bàn 5×5 trống có bao nhiêu khí?',['1','2','3','4'],1,'Chỉ có B5 và A4; biên bàn không phải giao điểm trống.',diagram(5,['A5']));
-q('foundation','edge-liberties','Khí','Khí ở biên','Một quân ở C5 trên bàn trống có bao nhiêu khí?',['2','3','4'],1,'B5, D5, C4: 3 khí. Không có giao điểm phía ngoài bàn.',diagram(5,['C5']));
-q('foundation','capture-order','Luật','Thứ tự khi đặt quân','Một nước đen lấp hết khí của nhóm trắng, đồng thời điểm đen đặt ban đầu chưa có khí. Phải kiểm tra gì trước?',['Bắt nhóm trắng hết khí, rồi kiểm tra khí đen','Cấm nước đi ngay vì ban đầu chưa có khí'],0,'Bắt các nhóm đối phương hết khí trước. Nếu sau khi nhấc trắng, nhóm đen có khí, nước đi có thể hợp lệ; vẫn phải kiểm tra lặp thế.');
-q('foundation','area-captures','Đếm điểm','Quân đã bắt có cộng riêng?','Trong cách đếm diện tích của app, điểm bằng quân trên bàn cộng đất. Có cộng thêm số quân đã bắt vào điểm này không?',['Có','Không'],1,'Không cộng riêng tù binh trong cách đếm diện tích. Đừng trộn cách đếm đất với cách đếm diện tích.');
-q('foundation','area-total','Đếm điểm','Một phép đếm nhỏ','Cuối ván: đen có 12 quân sống và 9 điểm đất, trắng có 10 quân sống và 8 điểm đất. Komi 6,5 cho trắng. Ai hơn?',['Đen hơn 3','Trắng hơn 3,5','Hòa'],1,'Đen = 12 + 9 = 21. Trắng = 10 + 8 + 6,5 = 24,5. Trắng hơn 3,5.');
-q('foundation','neutral','Đếm điểm','Vùng giáp cả hai màu','Một vùng trống liên thông chỉ giáp cả quân đen lẫn quân trắng. Với cách đếm diện tích hiện tại, vùng này thuộc ai?',['Đen','Trắng','Không bên nào'],2,'Vùng giáp hai màu là vùng trung lập trong phép đếm vùng của app. Điều này không tự giải quyết quân chết.');
-q('foundation','pass','Luật','Kết thúc ván luyện','Hai bên bỏ lượt liên tiếp. Có thể kết luận bộ đếm hiện tại đã phân xử đúng mọi quân chết chưa?',['Có, bỏ lượt tự xác nhận mọi nhóm sống','Chưa, cần xử lý quân chết hoặc chơi tiếp'],1,'Hai lượt bỏ kết thúc ván, nhưng thuật toán hiện tại không tự phân xử sống/chết. Chơi tiếp để bắt quân chết hoặc nhờ phân xử.');
+q(
+  'foundation',
+  'diagonal',
+  'Khí',
+  'Nối chéo có chia sẻ khí?',
+  'Hai quân cùng màu chỉ chạm chéo, không có quân nối ngang/dọc. Chúng là một nhóm chưa?',
+  ['Đã là một nhóm', 'Vẫn là hai nhóm'],
+  1,
+  'Chỉ kết nối ngang và dọc tạo thành nhóm. Liên kết chéo có thể bị cắt.',
+  diagram(5, ['B3', 'C2'])
+);
+q(
+  'foundation',
+  'corner-liberties',
+  'Khí',
+  'Khí ở góc',
+  'Một quân ở A5 trên bàn 5×5 trống có bao nhiêu khí?',
+  ['1', '2', '3', '4'],
+  1,
+  'Chỉ có B5 và A4; biên bàn không phải giao điểm trống.',
+  diagram(5, ['A5'])
+);
+q(
+  'foundation',
+  'edge-liberties',
+  'Khí',
+  'Khí ở biên',
+  'Một quân ở C5 trên bàn trống có bao nhiêu khí?',
+  ['2', '3', '4'],
+  1,
+  'B5, D5, C4: 3 khí. Không có giao điểm phía ngoài bàn.',
+  diagram(5, ['C5'])
+);
+q(
+  'foundation',
+  'capture-order',
+  'Luật',
+  'Thứ tự khi đặt quân',
+  'Một nước đen lấp hết khí của nhóm trắng, đồng thời điểm đen đặt ban đầu chưa có khí. Phải kiểm tra gì trước?',
+  ['Bắt nhóm trắng hết khí, rồi kiểm tra khí đen', 'Cấm nước đi ngay vì ban đầu chưa có khí'],
+  0,
+  'Bắt các nhóm đối phương hết khí trước. Nếu sau khi nhấc trắng, nhóm đen có khí, nước đi có thể hợp lệ; vẫn phải kiểm tra lặp thế.'
+);
+q(
+  'foundation',
+  'area-captures',
+  'Đếm điểm',
+  'Quân đã bắt có cộng riêng?',
+  'Trong cách đếm diện tích của app, điểm bằng quân trên bàn cộng đất. Có cộng thêm số quân đã bắt vào điểm này không?',
+  ['Có', 'Không'],
+  1,
+  'Không cộng riêng tù binh trong cách đếm diện tích. Đừng trộn cách đếm đất với cách đếm diện tích.'
+);
+q(
+  'foundation',
+  'area-total',
+  'Đếm điểm',
+  'Một phép đếm nhỏ',
+  'Cuối ván: đen có 12 quân sống và 9 điểm đất, trắng có 10 quân sống và 8 điểm đất. Komi 6,5 cho trắng. Ai hơn?',
+  ['Đen hơn 3', 'Trắng hơn 3,5', 'Hòa'],
+  1,
+  'Đen = 12 + 9 = 21. Trắng = 10 + 8 + 6,5 = 24,5. Trắng hơn 3,5.'
+);
+q(
+  'foundation',
+  'neutral',
+  'Đếm điểm',
+  'Vùng giáp cả hai màu',
+  'Một vùng trống liên thông chỉ giáp cả quân đen lẫn quân trắng. Với cách đếm diện tích hiện tại, vùng này thuộc ai?',
+  ['Đen', 'Trắng', 'Không bên nào'],
+  2,
+  'Vùng giáp hai màu là vùng trung lập trong phép đếm vùng của app. Điều này không tự giải quyết quân chết.'
+);
+q(
+  'foundation',
+  'pass',
+  'Luật',
+  'Kết thúc ván luyện',
+  'Hai bên bỏ lượt liên tiếp. Có thể kết luận bộ đếm hiện tại đã phân xử đúng mọi quân chết chưa?',
+  ['Có, bỏ lượt tự xác nhận mọi nhóm sống', 'Chưa, cần xử lý quân chết hoặc chơi tiếp'],
+  1,
+  'Hai lượt bỏ kết thúc ván, nhưng thuật toán hiện tại không tự phân xử sống/chết. Chơi tiếp để bắt quân chết hoặc nhờ phân xử.'
+);
 
-q('tactics','shared','Khí','Khí chung chỉ đếm một lần','Hai quân đen B3 và C3 đứng cạnh nhau trên bàn trống. Cả nhóm có bao nhiêu khí?',['4','5','6','8'],2,'A3, B4, B2, D3, C4, C2: 6 điểm khác nhau.',diagram(5,['B3','C3']));
-q('tactics','self-atari','Hình cờ','Nhận diện tự atari','Sau một nước hợp lệ, nhóm vừa đi chỉ còn một khí. Nếu không có lý do hy sinh hay bắt quân, cần kiểm tra điều gì?',['Nguy cơ đối phương bắt ở khí cuối','Chỉ số quân vừa nối được'],0,'Hợp lệ không đồng nghĩa an toàn. Tự atari cần được đọc đến nước bắt của đối phương.');
-q('tactics','two-eyes','Sống/chết','Một khoảng trống lớn','Một nhóm bao quanh hai điểm trống liền nhau. Có chắc đã có hai mắt riêng không?',['Có, hai điểm là hai mắt','Không, đó có thể chỉ là một không gian mắt'],1,'Hai mắt phải là hai vùng riêng có khả năng bảo vệ nhóm. Số điểm trống không bằng số mắt.');
-q('tactics','double-atari','Chiến thuật','Atari kép chưa phải kết luận','Một nước đưa hai nhóm địch vào atari. Để kết luận sẽ bắt được ít nhất một nhóm, còn phải kiểm tra gì?',['Địch có nước bắt, nối hoặc cứu đồng thời không','Không cần đọc thêm'],0,'Atari kép tạo hai đe dọa, nhưng phản công hoặc nối nhóm có thể hóa giải cả hai.');
-q('tactics','ladder','Đọc biến','Trước khi đuổi thang','Một chuỗi atari dự kiến chạy chéo qua bàn. Điều gì phải kiểm tra ngoài vài nước đầu?',['Các quân nằm trên đường thang và điểm kết thúc','Chỉ khí của quân đầu tiên'],0,'Quân phá thang ở xa có thể giúp nhóm bị đuổi nối ra ngoài. Đọc tới điểm kết thúc hoặc tới kết nối an toàn.',opening);
-q('tactics','net','Đọc biến','Lưới và atari','Có thể dùng một nước không atari để chặn mọi đường thoát của nhóm địch không?',['Không, phải atari ở mọi nước','Có, đó là ý tưởng của lưới'],1,'Lưới có thể bắt bằng chặn lối thoát, thay vì ép theo một chuỗi atari. Phải kiểm tra các đường xuyên lưới.');
-q('tactics','snapback','Chiến thuật','Bắt lại sau hy sinh','Đen hy sinh một quân, trắng bắt, rồi đen bắt ngược ba quân trắng. Thế bàn mới khác mọi thế trước. Có bị cấm chỉ vì bắt lại ngay không?',['Có, mọi bắt lại ngay là ko','Không; vẫn kiểm tra tự sát và lịch sử thế bàn'],1,'Bắt lại ngay không tự động là ko. Snapback lấy nhóm lớn hơn và có thể tạo một thế hoàn toàn khác.');
-q('tactics','corner-capture','Chiến thuật','Bắt hai quân ở góc','Đen đi. Nhóm hai quân trắng ở góc trên bên trái chỉ còn một khí. Nước nào bắt được nhóm này?',['A4','C4','D5'],0,'Hai quân trắng A5 và B5 chỉ còn khí ở A4: B5 giáp C5 và B4 là quân đen, A5 giáp biên. Đen A4 lấp khí cuối nên bắt hai quân; C4 và D5 không chạm khí của nhóm.',diagram(5,['C5','B4'],['A5','B5']));
-q('tactics','star-point','Khai cuộc','Điểm sao ở góc','Trên bàn 19×19, điểm sao ở bốn góc (như D4, Q16) nằm trên đường thứ mấy tính từ cả hai cạnh gần nhất?',['Đường thứ 3','Đường thứ 4','Đường thứ 5'],1,'D4 là cột D (thứ 4) và hàng 4: đường thứ 4 từ cả hai cạnh. Bàn 19×19 có 9 điểm sao: bốn góc, bốn giữa cạnh và thiên nguyên.',diagram(19,['D4','Q16'],['Q4','D16']));
-q('strategy','dame-area','Quan tử','Đặt quân vào điểm trung lập','Trong cách đếm diện tích, một điểm trống giáp cả hai màu không thuộc bên nào. Nếu bạn đặt quân của mình vào đó (không ảnh hưởng nhóm khác), điểm của bạn thay đổi thế nào?',['Không đổi, điểm đó không có giá trị','Tăng 1, vì quân sống trên bàn được tính'],1,'Diện tích gồm quân sống cộng đất. Điểm trung lập ban đầu không được tính cho ai; sau khi đặt quân, quân đó được tính. Vì vậy cách đếm diện tích khác cách đếm đất, nơi điểm này vẫn bằng 0.',diagram(7,['A1','B1','C1','A2','B2','C2','A3','B3','C3','A4','B4','C4','A5','B5','C5','A6','B6','C6','A7','B7','C7'],['E1','F1','G1','E2','F2','G2','E3','F3','G3','E4','F4','G4','E5','F5','G5','E6','F6','G6','E7','F7','G7']));
-q('tactics','corner-efficiency','Toàn bàn','Đất và biên bàn','Trên bàn 19×19 trống, nếu mục tiêu là bao vùng nhỏ bằng ít đường rào nhất, góc có lợi thế gì?',['Hai cạnh bàn làm sẵn một phần ranh giới','Góc được nhân đôi điểm'],0,'Hai cạnh giúp giảm số phía phải bao. Đây là lý do hình học, không phải quy tắc mọi nước khai cuộc đều ở góc.',{size:19,setup:[]});
+q(
+  'tactics',
+  'shared',
+  'Khí',
+  'Khí chung chỉ đếm một lần',
+  'Hai quân đen B3 và C3 đứng cạnh nhau trên bàn trống. Cả nhóm có bao nhiêu khí?',
+  ['4', '5', '6', '8'],
+  2,
+  'A3, B4, B2, D3, C4, C2: 6 điểm khác nhau.',
+  diagram(5, ['B3', 'C3'])
+);
+q(
+  'tactics',
+  'self-atari',
+  'Hình cờ',
+  'Nhận diện tự atari',
+  'Sau một nước hợp lệ, nhóm vừa đi chỉ còn một khí. Nếu không có lý do hy sinh hay bắt quân, cần kiểm tra điều gì?',
+  ['Nguy cơ đối phương bắt ở khí cuối', 'Chỉ số quân vừa nối được'],
+  0,
+  'Hợp lệ không đồng nghĩa an toàn. Tự atari cần được đọc đến nước bắt của đối phương.'
+);
+q(
+  'tactics',
+  'two-eyes',
+  'Sống/chết',
+  'Một khoảng trống lớn',
+  'Một nhóm bao quanh hai điểm trống liền nhau. Có chắc đã có hai mắt riêng không?',
+  ['Có, hai điểm là hai mắt', 'Không, đó có thể chỉ là một không gian mắt'],
+  1,
+  'Hai mắt phải là hai vùng riêng có khả năng bảo vệ nhóm. Số điểm trống không bằng số mắt.'
+);
+q(
+  'tactics',
+  'double-atari',
+  'Chiến thuật',
+  'Atari kép chưa phải kết luận',
+  'Một nước đưa hai nhóm địch vào atari. Để kết luận sẽ bắt được ít nhất một nhóm, còn phải kiểm tra gì?',
+  ['Địch có nước bắt, nối hoặc cứu đồng thời không', 'Không cần đọc thêm'],
+  0,
+  'Atari kép tạo hai đe dọa, nhưng phản công hoặc nối nhóm có thể hóa giải cả hai.'
+);
+q(
+  'tactics',
+  'ladder',
+  'Đọc biến',
+  'Trước khi đuổi thang',
+  'Một chuỗi atari dự kiến chạy chéo qua bàn. Điều gì phải kiểm tra ngoài vài nước đầu?',
+  ['Các quân nằm trên đường thang và điểm kết thúc', 'Chỉ khí của quân đầu tiên'],
+  0,
+  'Quân phá thang ở xa có thể giúp nhóm bị đuổi nối ra ngoài. Đọc tới điểm kết thúc hoặc tới kết nối an toàn.',
+  opening
+);
+q(
+  'tactics',
+  'net',
+  'Đọc biến',
+  'Lưới và atari',
+  'Có thể dùng một nước không atari để chặn mọi đường thoát của nhóm địch không?',
+  ['Không, phải atari ở mọi nước', 'Có, đó là ý tưởng của lưới'],
+  1,
+  'Lưới có thể bắt bằng chặn lối thoát, thay vì ép theo một chuỗi atari. Phải kiểm tra các đường xuyên lưới.'
+);
+q(
+  'tactics',
+  'snapback',
+  'Chiến thuật',
+  'Bắt lại sau hy sinh',
+  'Đen hy sinh một quân, trắng bắt, rồi đen bắt ngược ba quân trắng. Thế bàn mới khác mọi thế trước. Có bị cấm chỉ vì bắt lại ngay không?',
+  ['Có, mọi bắt lại ngay là ko', 'Không; vẫn kiểm tra tự sát và lịch sử thế bàn'],
+  1,
+  'Bắt lại ngay không tự động là ko. Snapback lấy nhóm lớn hơn và có thể tạo một thế hoàn toàn khác.'
+);
+q(
+  'tactics',
+  'corner-capture',
+  'Chiến thuật',
+  'Bắt hai quân ở góc',
+  'Đen đi. Nhóm hai quân trắng ở góc trên bên trái chỉ còn một khí. Nước nào bắt được nhóm này?',
+  ['A4', 'C4', 'D5'],
+  0,
+  'Hai quân trắng A5 và B5 chỉ còn khí ở A4: B5 giáp C5 và B4 là quân đen, A5 giáp biên. Đen A4 lấp khí cuối nên bắt hai quân; C4 và D5 không chạm khí của nhóm.',
+  diagram(5, ['C5', 'B4'], ['A5', 'B5'])
+);
+q(
+  'tactics',
+  'star-point',
+  'Khai cuộc',
+  'Điểm sao ở góc',
+  'Trên bàn 19×19, điểm sao ở bốn góc (như D4, Q16) nằm trên đường thứ mấy tính từ cả hai cạnh gần nhất?',
+  ['Đường thứ 3', 'Đường thứ 4', 'Đường thứ 5'],
+  1,
+  'D4 là cột D (thứ 4) và hàng 4: đường thứ 4 từ cả hai cạnh. Bàn 19×19 có 9 điểm sao: bốn góc, bốn giữa cạnh và thiên nguyên.',
+  diagram(19, ['D4', 'Q16'], ['Q4', 'D16'])
+);
+q(
+  'strategy',
+  'dame-area',
+  'Quan tử',
+  'Đặt quân vào điểm trung lập',
+  'Trong cách đếm diện tích, một điểm trống giáp cả hai màu không thuộc bên nào. Nếu bạn đặt quân của mình vào đó (không ảnh hưởng nhóm khác), điểm của bạn thay đổi thế nào?',
+  ['Không đổi, điểm đó không có giá trị', 'Tăng 1, vì quân sống trên bàn được tính'],
+  1,
+  'Diện tích gồm quân sống cộng đất. Điểm trung lập ban đầu không được tính cho ai; sau khi đặt quân, quân đó được tính. Vì vậy cách đếm diện tích khác cách đếm đất, nơi điểm này vẫn bằng 0.',
+  diagram(
+    7,
+    [
+      'A1',
+      'B1',
+      'C1',
+      'A2',
+      'B2',
+      'C2',
+      'A3',
+      'B3',
+      'C3',
+      'A4',
+      'B4',
+      'C4',
+      'A5',
+      'B5',
+      'C5',
+      'A6',
+      'B6',
+      'C6',
+      'A7',
+      'B7',
+      'C7',
+    ],
+    [
+      'E1',
+      'F1',
+      'G1',
+      'E2',
+      'F2',
+      'G2',
+      'E3',
+      'F3',
+      'G3',
+      'E4',
+      'F4',
+      'G4',
+      'E5',
+      'F5',
+      'G5',
+      'E6',
+      'F6',
+      'G6',
+      'E7',
+      'F7',
+      'G7',
+    ]
+  )
+);
+q(
+  'tactics',
+  'corner-efficiency',
+  'Toàn bàn',
+  'Đất và biên bàn',
+  'Trên bàn 19×19 trống, nếu mục tiêu là bao vùng nhỏ bằng ít đường rào nhất, góc có lợi thế gì?',
+  ['Hai cạnh bàn làm sẵn một phần ranh giới', 'Góc được nhân đôi điểm'],
+  0,
+  'Hai cạnh giúp giảm số phía phải bao. Đây là lý do hình học, không phải quy tắc mọi nước khai cuộc đều ở góc.',
+  { size: 19, setup: [] }
+);
 
-q('reading','race','Đọc biến','Đua bắt đơn giản',"Đen và Trắng có hai nhóm đang đua bắt nhau. Nhóm Đen có 3 khí, nhóm Trắng có 2 khí. Hai nhóm không có mắt, không dùng chung khí, không thể nối ra ngoài; không có ko hay nước hy sinh làm thay đổi số khí.\n\nĐen đi trước. Mỗi bên chỉ lấp một khí của đối thủ mỗi lượt. Ai bắt trước?",['Đen','Trắng','Chắc chắn seki'],0,"1. Đen lấp một khí của Trắng: Trắng còn 1 khí.\n2. Trắng lấp một khí của Đen: Đen còn 2 khí.\n3. Đen lấp khí cuối của Trắng và bắt nhóm Trắng.\n\nĐen bắt trước. Với mắt, khí chung hoặc nước nối, phải đọc lại thay vì dùng phép đếm này.");
-q('reading','shared-race','Đọc biến','Khi không dùng phép trừ khí','Hai nhóm có khí chung và một bên có mắt. Có nên chỉ lấy số khí ngoài trừ nhau để kết luận không?',['Có, luôn đúng','Không, phải đọc thứ tự lấp khí và mắt'],1,'Khí chung, mắt, nối, ko và nước hy sinh thay đổi thứ tự bắt. Phép đếm đơn giản cần đúng điều kiện áp dụng.');
-q('reading','ladder-breaker','Đọc biến','Quân phá thang thay đổi','Biến thang lúc đầu bắt được. Đối phương vừa đặt thêm một quân đúng đường chạy của thang. Lần tới bạn có thể dùng nguyên kết luận cũ không?',['Có, thang đã được chứng minh','Không, phải đọc lại tới quân mới'],1,'Kết quả đọc thuộc một thế bàn cụ thể. Quân mới có thể cho nhóm chạy nối ra hoặc phản atari.',flank);
-q('reading','miai','Sống/chết','Hai lựa chọn tương đương',"Có hai điểm A và B: đi vào một trong hai đều tạo mắt thứ hai cho nhóm. Đối thủ chỉ chiếm được một điểm; không thể đe dọa bắt ngay hoặc phá cả hai.\n\nBạn có bắt buộc tạo mắt thứ hai ngay không?",['Không bắt buộc: có thể đáp ở điểm còn lại','Có, luôn phải tự chiếm cả hai'],0,"Không bắt buộc theo các điều kiện đã cho. Nếu đối thủ chiếm A, bạn đi B; nếu họ chiếm B, bạn đi A. Hai lựa chọn thay thế được cho nhau gọi là miai. Trong ván thật, phải kiểm tra đối thủ có cách phá cả hai không.");
-q('reading','false-eye','Sống/chết','Đọc mắt giả','Một điểm trống trông như mắt, nhưng quân bao quanh nó thuộc nhiều nhóm và có thể bị atari ép lấp điểm đó. Cách kiểm tra đúng là gì?',['Đếm nó như mắt thật ngay','Đọc liên kết và các nước bắt ép nhóm bao quanh'],1,'Mắt thật phụ thuộc hình và liên kết của các quân bao quanh. Chỉ một điểm trống bị bao chưa đủ.');
-q('reading','weak-group','Toàn bàn','Ưu tiên nhóm yếu','Một nhóm của bạn đang bị cắt, chưa có mắt và bị địch bao quanh; nhóm khác đã sống chắc. Khi giá trị các vùng tương đương, nên kiểm tra gì trước?',['Phòng thủ hoặc đường chạy cho nhóm yếu','Gia cố nhóm đã sống chắc'],0,'Nhóm yếu có thể mất quân, mất đất và trao địch tiên thủ. Tuy nhiên có thể hy sinh nếu đổi lại đủ lợi ích.',middle);
-q('reading','direction','Toàn bàn','Tránh đuổi về phía yếu','Giả định có hai hướng tấn công tương đương về đất. A đuổi địch vào nhóm yếu của bạn; B đuổi về nhóm mạnh của bạn. Hướng nào ít rủi ro hơn?',['A','B'],1,'B tận dụng quân mạnh làm hậu thuẫn. A có thể khiến nhóm yếu của bạn chịu phản công. Đây là lựa chọn theo giả định, không là nước tối ưu được AI xác nhận.',flank);
-q('reading','score-estimate','Đếm điểm','Không quên komi','Đếm diện tích: đen 147, trắng 140, trung lập 74 trên bàn 19×19. Komi 6,5 cho trắng. Ai hơn?',['Đen 0,5','Đen 7','Trắng 0,5'],0,'Trắng = 146,5; đen = 147. Đen hơn 0,5. 147 + 140 + 74 = 361.');
-q('reading','tenuki','Toàn bàn','Đi nơi khác có mất gì?','Bạn muốn bỏ qua nước địch để đi điểm lớn. Câu hỏi đầu tiên nên là gì?',['Nếu bỏ qua, địch thực sự đe dọa mất bao nhiêu và có giết nhóm không?','Nước địch có tên joseki không?'],0,'Đánh giá hậu quả của việc không đáp. Tên mẫu không thay thế đọc chiến thuật và so sánh toàn bàn.',opening);
+q(
+  'reading',
+  'race',
+  'Đọc biến',
+  'Đua bắt đơn giản',
+  'Đen và Trắng có hai nhóm đang đua bắt nhau. Nhóm Đen có 3 khí, nhóm Trắng có 2 khí. Hai nhóm không có mắt, không dùng chung khí, không thể nối ra ngoài; không có ko hay nước hy sinh làm thay đổi số khí.\n\nĐen đi trước. Mỗi bên chỉ lấp một khí của đối thủ mỗi lượt. Ai bắt trước?',
+  ['Đen', 'Trắng', 'Chắc chắn seki'],
+  0,
+  '1. Đen lấp một khí của Trắng: Trắng còn 1 khí.\n2. Trắng lấp một khí của Đen: Đen còn 2 khí.\n3. Đen lấp khí cuối của Trắng và bắt nhóm Trắng.\n\nĐen bắt trước. Với mắt, khí chung hoặc nước nối, phải đọc lại thay vì dùng phép đếm này.'
+);
+q(
+  'reading',
+  'shared-race',
+  'Đọc biến',
+  'Khi không dùng phép trừ khí',
+  'Hai nhóm có khí chung và một bên có mắt. Có nên chỉ lấy số khí ngoài trừ nhau để kết luận không?',
+  ['Có, luôn đúng', 'Không, phải đọc thứ tự lấp khí và mắt'],
+  1,
+  'Khí chung, mắt, nối, ko và nước hy sinh thay đổi thứ tự bắt. Phép đếm đơn giản cần đúng điều kiện áp dụng.'
+);
+q(
+  'reading',
+  'ladder-breaker',
+  'Đọc biến',
+  'Quân phá thang thay đổi',
+  'Biến thang lúc đầu bắt được. Đối phương vừa đặt thêm một quân đúng đường chạy của thang. Lần tới bạn có thể dùng nguyên kết luận cũ không?',
+  ['Có, thang đã được chứng minh', 'Không, phải đọc lại tới quân mới'],
+  1,
+  'Kết quả đọc thuộc một thế bàn cụ thể. Quân mới có thể cho nhóm chạy nối ra hoặc phản atari.',
+  flank
+);
+q(
+  'reading',
+  'miai',
+  'Sống/chết',
+  'Hai lựa chọn tương đương',
+  'Có hai điểm A và B: đi vào một trong hai đều tạo mắt thứ hai cho nhóm. Đối thủ chỉ chiếm được một điểm; không thể đe dọa bắt ngay hoặc phá cả hai.\n\nBạn có bắt buộc tạo mắt thứ hai ngay không?',
+  ['Không bắt buộc: có thể đáp ở điểm còn lại', 'Có, luôn phải tự chiếm cả hai'],
+  0,
+  'Không bắt buộc theo các điều kiện đã cho. Nếu đối thủ chiếm A, bạn đi B; nếu họ chiếm B, bạn đi A. Hai lựa chọn thay thế được cho nhau gọi là miai. Trong ván thật, phải kiểm tra đối thủ có cách phá cả hai không.'
+);
+q(
+  'reading',
+  'false-eye',
+  'Sống/chết',
+  'Đọc mắt giả',
+  'Một điểm trống trông như mắt, nhưng quân bao quanh nó thuộc nhiều nhóm và có thể bị atari ép lấp điểm đó. Cách kiểm tra đúng là gì?',
+  ['Đếm nó như mắt thật ngay', 'Đọc liên kết và các nước bắt ép nhóm bao quanh'],
+  1,
+  'Mắt thật phụ thuộc hình và liên kết của các quân bao quanh. Chỉ một điểm trống bị bao chưa đủ.'
+);
+q(
+  'reading',
+  'weak-group',
+  'Toàn bàn',
+  'Ưu tiên nhóm yếu',
+  'Một nhóm của bạn đang bị cắt, chưa có mắt và bị địch bao quanh; nhóm khác đã sống chắc. Khi giá trị các vùng tương đương, nên kiểm tra gì trước?',
+  ['Phòng thủ hoặc đường chạy cho nhóm yếu', 'Gia cố nhóm đã sống chắc'],
+  0,
+  'Nhóm yếu có thể mất quân, mất đất và trao địch tiên thủ. Tuy nhiên có thể hy sinh nếu đổi lại đủ lợi ích.',
+  middle
+);
+q(
+  'reading',
+  'direction',
+  'Toàn bàn',
+  'Tránh đuổi về phía yếu',
+  'Giả định có hai hướng tấn công tương đương về đất. A đuổi địch vào nhóm yếu của bạn; B đuổi về nhóm mạnh của bạn. Hướng nào ít rủi ro hơn?',
+  ['A', 'B'],
+  1,
+  'B tận dụng quân mạnh làm hậu thuẫn. A có thể khiến nhóm yếu của bạn chịu phản công. Đây là lựa chọn theo giả định, không là nước tối ưu được AI xác nhận.',
+  flank
+);
+q(
+  'reading',
+  'score-estimate',
+  'Đếm điểm',
+  'Không quên komi',
+  'Đếm diện tích: đen 147, trắng 140, trung lập 74 trên bàn 19×19. Komi 6,5 cho trắng. Ai hơn?',
+  ['Đen 0,5', 'Đen 7', 'Trắng 0,5'],
+  0,
+  'Trắng = 146,5; đen = 147. Đen hơn 0,5. 147 + 140 + 74 = 361.'
+);
+q(
+  'reading',
+  'tenuki',
+  'Toàn bàn',
+  'Đi nơi khác có mất gì?',
+  'Bạn muốn bỏ qua nước địch để đi điểm lớn. Câu hỏi đầu tiên nên là gì?',
+  [
+    'Nếu bỏ qua, địch thực sự đe dọa mất bao nhiêu và có giết nhóm không?',
+    'Nước địch có tên joseki không?',
+  ],
+  0,
+  'Đánh giá hậu quả của việc không đáp. Tên mẫu không thay thế đọc chiến thuật và so sánh toàn bàn.',
+  opening
+);
 
-q('strategy','sente','Quan tử',"Khi nào giữ được lượt chủ động?","Cuối ván, bạn đi một nước lấy 3 điểm. Đối thủ có thể đi nơi khác mà không mất thêm gì đáng kể. Nước này có phải tiên thủ — khiến đối thủ cần đáp để bạn giữ quyền chọn chỗ đi tiếp — không?",['Có','Không'],1,"Không. Đi trước chỉ là thứ tự lượt. Tiên thủ (sente) là khi đối thủ cần đáp vì bỏ qua sẽ chịu thiệt hại đủ lớn. Trong tình huống này, họ có thể đi nơi khác.");
-q('strategy','gote-order','Quan tử','Chọn vùng lấy được nhiều điểm hơn',"Cuối ván có hai vùng A và B, không ảnh hưởng lẫn nhau. Đi ở một vùng xong thì đối thủ được chọn chỗ đi tiếp: đây là hậu thủ. Không có ko hoặc nước tiếp nào khác. Theo cùng một cách tính, A có giá trị 8 điểm, B có giá trị 5 điểm. Nên chọn vùng nào trước?",['A','B'],0,"Chọn A vì 8 lớn hơn 5. Kết luận dựa trên việc cả hai vùng đều nhường lượt chủ động và dùng cùng cách tính điểm.");
-q('strategy','swing','Quan tử','Độ chênh giữa hai kết quả',"Nếu Đen đi trước ở vùng này, Đen hơn Trắng 4 điểm. Nếu Trắng đi trước, Trắng hơn Đen 4 điểm. Chuyển từ kết quả thứ hai sang kết quả thứ nhất làm cách biệt có lợi cho Đen tăng bao nhiêu?",['4','8','16'],1,"Từ Đen kém 4 sang Đen hơn 4: tăng 4 + 4 = 8 điểm. Viết bằng phép trừ: (+4) − (−4) = 8.");
-q('strategy','ko-size','Ko','Đe dọa chưa đủ lớn','Ko có giá trị 12 điểm theo cùng thước đo. Đe dọa của bạn nếu bị bỏ qua chỉ tạo thêm 3 điểm, không ảnh hưởng sống/chết hay tiên thủ. Đối phương có bắt buộc đáp không?',['Có, cứ là đe dọa ko phải đáp','Không; họ có thể nhường 3 để giữ ko'],1,'Đối phương có thể chấp nhận thiệt hại nhỏ để thắng ko lớn. Phải tính cả chi phí tạo và đáp đe dọa.');
-q('strategy','ko-local','Ko','Kết quả địa phương và toàn bàn','Một bài sống/chết chỉ cho nhóm có thể sống bằng ko. Có được kết luận nhóm sống chắc trong ván thật không?',['Có','Không: còn phụ thuộc đe dọa ko và giá trị toàn bàn'],1,'Ko là kết quả có điều kiện. Khả năng thắng ko không nằm trọn trong sơ đồ địa phương.');
-q('strategy','invasion','Toàn bàn','Xâm nhập hay giảm đất?','Địch có khung rộng nhưng chưa kín. Giả định xâm nhập sâu tạo nhóm không đường chạy; giảm đất từ ngoài giữ nhóm bạn nối an toàn. Bạn ưu tiên kiểm tra phương án nào để hạn chế rủi ro?',['Giảm đất từ ngoài','Luôn xâm nhập sâu'],0,'Giảm đất giữ liên lạc có thể tránh tạo nhóm yếu. Cần so phần đất nhường với lợi ích và các biến thực tế.',opening);
-q('strategy','attack-profit','Toàn bàn','Lợi ích của tấn công','Địch chạy thoát nhưng bạn xây được đất vững và gia cố nhóm yếu mà không trả giá lớn. Có nhất thiết coi tấn công thất bại vì chưa bắt được quân không?',['Có','Không'],1,'Tấn công có thể nhằm tạo đất, ảnh hưởng hoặc gia cố nhóm. Bắt quân chỉ là một loại lợi ích.',middle);
-q('strategy','sacrifice','Chiến thuật','Đừng cứu mọi quân','Cứu 2 quân nhỏ mất 4 nước nhường lượt chủ động và làm nhóm lớn của bạn yếu đi; bỏ 2 quân cho bạn cơ hội cứu nhóm lớn. Nên đánh giá thế nào?',['Cứu mọi quân đã đặt','So lợi ích toàn bàn và giá trị nhóm lớn'],1,'Quân đã đặt là chi phí đã bỏ ra. Chọn theo hậu quả tiếp theo, không theo số quân muốn giữ bằng mọi giá.');
-q('strategy','joseki','Toàn bàn','Mẫu đúng, hướng sai',"Một chuỗi nước ở góc cho kết quả cân bằng tại chỗ; chuỗi quen thuộc này gọi là joseki. Nhưng trong ván hiện tại, hướng quân của bạn tạo ra gặp quân địch mạnh, còn nhóm bạn cần hỗ trợ nằm phía khác. Nên làm gì?",["Cứ theo mẫu góc vì nó quen thuộc", "So các cách chơi góc với thế cả bàn"],1,"Một mẫu góc cân bằng chưa chắc phù hợp mọi bàn. So hướng phát triển và nhóm nào cần giúp trước khi chọn chuỗi.",flank);
-q('strategy','aji','Chiến thuật','Giữ khả năng về sau',"Một quân của bạn hiện chưa cứu được, nhưng còn có thể giúp cắt quân địch hoặc tạo đe dọa ko sau này. Trước khi đi một nước làm mất các khả năng ấy, nên cân nhắc gì?",['Khả năng khai thác về sau (aji)','Chỉ kết quả bắt ngay'],0,"Cân nhắc khả năng khai thác về sau, gọi là aji. Một quân tưởng như hết giá trị vẫn có thể tạo đe dọa hoặc phối hợp với quân mới. So lợi ích giữ khả năng đó với rủi ro.");
+q(
+  'strategy',
+  'sente',
+  'Quan tử',
+  'Khi nào giữ được lượt chủ động?',
+  'Cuối ván, bạn đi một nước lấy 3 điểm. Đối thủ có thể đi nơi khác mà không mất thêm gì đáng kể. Nước này có phải tiên thủ — khiến đối thủ cần đáp để bạn giữ quyền chọn chỗ đi tiếp — không?',
+  ['Có', 'Không'],
+  1,
+  'Không. Đi trước chỉ là thứ tự lượt. Tiên thủ (sente) là khi đối thủ cần đáp vì bỏ qua sẽ chịu thiệt hại đủ lớn. Trong tình huống này, họ có thể đi nơi khác.'
+);
+q(
+  'strategy',
+  'gote-order',
+  'Quan tử',
+  'Chọn vùng lấy được nhiều điểm hơn',
+  'Cuối ván có hai vùng A và B, không ảnh hưởng lẫn nhau. Đi ở một vùng xong thì đối thủ được chọn chỗ đi tiếp: đây là hậu thủ. Không có ko hoặc nước tiếp nào khác. Theo cùng một cách tính, A có giá trị 8 điểm, B có giá trị 5 điểm. Nên chọn vùng nào trước?',
+  ['A', 'B'],
+  0,
+  'Chọn A vì 8 lớn hơn 5. Kết luận dựa trên việc cả hai vùng đều nhường lượt chủ động và dùng cùng cách tính điểm.'
+);
+q(
+  'strategy',
+  'swing',
+  'Quan tử',
+  'Độ chênh giữa hai kết quả',
+  'Nếu Đen đi trước ở vùng này, Đen hơn Trắng 4 điểm. Nếu Trắng đi trước, Trắng hơn Đen 4 điểm. Chuyển từ kết quả thứ hai sang kết quả thứ nhất làm cách biệt có lợi cho Đen tăng bao nhiêu?',
+  ['4', '8', '16'],
+  1,
+  'Từ Đen kém 4 sang Đen hơn 4: tăng 4 + 4 = 8 điểm. Viết bằng phép trừ: (+4) − (−4) = 8.'
+);
+q(
+  'strategy',
+  'ko-size',
+  'Ko',
+  'Đe dọa chưa đủ lớn',
+  'Ko có giá trị 12 điểm theo cùng thước đo. Đe dọa của bạn nếu bị bỏ qua chỉ tạo thêm 3 điểm, không ảnh hưởng sống/chết hay tiên thủ. Đối phương có bắt buộc đáp không?',
+  ['Có, cứ là đe dọa ko phải đáp', 'Không; họ có thể nhường 3 để giữ ko'],
+  1,
+  'Đối phương có thể chấp nhận thiệt hại nhỏ để thắng ko lớn. Phải tính cả chi phí tạo và đáp đe dọa.'
+);
+q(
+  'strategy',
+  'ko-local',
+  'Ko',
+  'Kết quả địa phương và toàn bàn',
+  'Một bài sống/chết chỉ cho nhóm có thể sống bằng ko. Có được kết luận nhóm sống chắc trong ván thật không?',
+  ['Có', 'Không: còn phụ thuộc đe dọa ko và giá trị toàn bàn'],
+  1,
+  'Ko là kết quả có điều kiện. Khả năng thắng ko không nằm trọn trong sơ đồ địa phương.'
+);
+q(
+  'strategy',
+  'invasion',
+  'Toàn bàn',
+  'Xâm nhập hay giảm đất?',
+  'Địch có khung rộng nhưng chưa kín. Giả định xâm nhập sâu tạo nhóm không đường chạy; giảm đất từ ngoài giữ nhóm bạn nối an toàn. Bạn ưu tiên kiểm tra phương án nào để hạn chế rủi ro?',
+  ['Giảm đất từ ngoài', 'Luôn xâm nhập sâu'],
+  0,
+  'Giảm đất giữ liên lạc có thể tránh tạo nhóm yếu. Cần so phần đất nhường với lợi ích và các biến thực tế.',
+  opening
+);
+q(
+  'strategy',
+  'attack-profit',
+  'Toàn bàn',
+  'Lợi ích của tấn công',
+  'Địch chạy thoát nhưng bạn xây được đất vững và gia cố nhóm yếu mà không trả giá lớn. Có nhất thiết coi tấn công thất bại vì chưa bắt được quân không?',
+  ['Có', 'Không'],
+  1,
+  'Tấn công có thể nhằm tạo đất, ảnh hưởng hoặc gia cố nhóm. Bắt quân chỉ là một loại lợi ích.',
+  middle
+);
+q(
+  'strategy',
+  'sacrifice',
+  'Chiến thuật',
+  'Đừng cứu mọi quân',
+  'Cứu 2 quân nhỏ mất 4 nước nhường lượt chủ động và làm nhóm lớn của bạn yếu đi; bỏ 2 quân cho bạn cơ hội cứu nhóm lớn. Nên đánh giá thế nào?',
+  ['Cứu mọi quân đã đặt', 'So lợi ích toàn bàn và giá trị nhóm lớn'],
+  1,
+  'Quân đã đặt là chi phí đã bỏ ra. Chọn theo hậu quả tiếp theo, không theo số quân muốn giữ bằng mọi giá.'
+);
+q(
+  'strategy',
+  'joseki',
+  'Toàn bàn',
+  'Mẫu đúng, hướng sai',
+  'Một chuỗi nước ở góc cho kết quả cân bằng tại chỗ; chuỗi quen thuộc này gọi là joseki. Nhưng trong ván hiện tại, hướng quân của bạn tạo ra gặp quân địch mạnh, còn nhóm bạn cần hỗ trợ nằm phía khác. Nên làm gì?',
+  ['Cứ theo mẫu góc vì nó quen thuộc', 'So các cách chơi góc với thế cả bàn'],
+  1,
+  'Một mẫu góc cân bằng chưa chắc phù hợp mọi bàn. So hướng phát triển và nhóm nào cần giúp trước khi chọn chuỗi.',
+  flank
+);
+q(
+  'strategy',
+  'aji',
+  'Chiến thuật',
+  'Giữ khả năng về sau',
+  'Một quân của bạn hiện chưa cứu được, nhưng còn có thể giúp cắt quân địch hoặc tạo đe dọa ko sau này. Trước khi đi một nước làm mất các khả năng ấy, nên cân nhắc gì?',
+  ['Khả năng khai thác về sau (aji)', 'Chỉ kết quả bắt ngay'],
+  0,
+  'Cân nhắc khả năng khai thác về sau, gọi là aji. Một quân tưởng như hết giá trị vẫn có thể tạo đe dọa hoặc phối hợp với quân mới. So lợi ích giữ khả năng đó với rủi ro.'
+);
 
-q('dan','verify-reading','Đọc biến','Đối phương không đáp theo ý mình','Bạn tìm được một chuỗi thắng nếu địch đáp A, nhưng chưa kiểm tra B và nước bỏ lượt. Có đủ để kết luận chắc chắn bắt được nhóm, dù đối thủ chọn cách đáp nào không?',['Đủ','Chưa đủ'],1,'Một chuỗi thắng chỉ cho biết kết quả khi đối thủ đáp theo chuỗi đó. Muốn biết chắc bắt được nhóm, phải kiểm tra những cách họ đáp khác.');
-q('dan','capture-deadline','Đọc biến','Giới hạn của bài đọc',"App kiểm tra một thế 5×5 và xác nhận Đen có thể bắt nhóm mục tiêu trong tối đa 11 lượt của cả hai bên, dù Trắng đáp cách nào. Luật bài không cho lặp lại bất kỳ thế bàn cũ nào. Kết quả này cho biết điều gì?",["Người giải chắc chắn có sức chơi 1 dan", "Thế cụ thể này có cách bắt trong giới hạn đã nêu"],1,"Chỉ xác nhận lời giải của thế này trong số lượt cho phép. Nó không đánh giá khả năng khai cuộc, chọn kế hoạch cả bàn hay đẳng của người giải.");
-q('dan','ko-count','Ko','Chuẩn bị đe dọa để tranh ko',"Bạn và đối thủ tranh ko — thế bắt qua bắt lại không được bắt lại ngay. Bạn có 1 nước ở nơi khác khiến đối thủ cần đáp; đối thủ có 3. Các đe dọa đều đủ lớn và những điều kiện khác như nhau. Bạn nên chuẩn bị thế nào?",['Tìm thêm đe dọa hoặc phương án tránh ko, tính lại toàn bàn','Cứ bắt lại vì bạn khởi động ko'],0,"Tìm thêm đe dọa dùng được hoặc một cách tránh cuộc tranh ko. Nếu hết đe dọa trước, bạn có thể phải nhường ko. Không chỉ đếm số lượng: phải kiểm tra giá trị và hậu quả từng nước.");
-q('dan','reverse-sente','Quan tử','So điểm bằng cùng một cách tính',"Bạn ghi giá trị hai vùng đều là 6, nhưng vùng A được tính từ lợi ích một nước, còn vùng B được tính từ kết quả cả chuỗi. A nhường lượt chủ động; B ngăn một chuỗi buộc đáp của đối thủ. Có thể coi hai vùng bằng nhau chỉ vì cùng số 6 không?",["Có", "Không, phải tính lại bằng cùng một cách"],1,"Không. Hai số chỉ so được khi cùng đo một thứ. Hãy tính kết quả cả chuỗi và ai được đi nơi khác sau đó, rồi mới so hai vùng.");
-q('dan','threat-cost','Ko','Chi phí tự tạo đe dọa','Đe dọa ko làm địch mất 10 nếu bỏ qua, nhưng khi họ đáp, chính bạn phải bỏ 8 điểm vốn giữ được. Có thể coi nó là đe dọa miễn phí không?',['Có','Không'],1,'Phải tính chi phí dùng đe dọa, không chỉ thiệt hại nếu đối phương bỏ qua.');
-q('dan','end-score','Đếm điểm','Tính điểm cuối ván','Bàn 19×19, không trung lập hay quân chết: đen 190 diện tích, trắng 171. Komi 6,5. Kết quả?',['Đen hơn 12,5','Đen hơn 19','Trắng hơn 6,5'],0,'Trắng = 177,5. Đen hơn 12,5. Tổng diện tích trước komi là 361.');
-q('dan','seki-area','Đếm điểm','Điểm trong sống chung',"Hai nhóm sống chung (seki): bên tự lấp khí chung trước sẽ bị bắt. Ở phần đang xét, Đen có 2 quân sống và 3 điểm trống là khí chung giáp cả hai màu.\n\nTheo cách đếm diện tích — quân sống trên bàn cộng đất — Đen được cộng bao nhiêu ở phần này?",["2 điểm từ quân; không cộng 3 khí chung", "5 điểm", "0 vì quân trong seki không được tính"],0,"Đen được 2 điểm từ 2 quân sống. Ba điểm khí chung giáp cả hai màu không là đất riêng của Đen. Đây là cách đếm diện tích, không phải cách đếm đất kiểu Nhật.");
-q('dan','time-management','Thực chiến','Thiếu thời gian đọc',"Bạn đã dùng hết thời gian chính và đang dùng thời gian phụ cho từng lượt (byo-yomi). Một nhóm lớn chỉ còn 1 khí, tức đang bị atari. Bạn chưa nghĩ xong cuộc tấn công, nhưng đã kiểm tra được một nước nối cứu nhóm. Nếu không còn đủ thời gian đọc thêm, nên ưu tiên gì?",['Đọc đe dọa trực tiếp, ưu tiên kết quả đã xác nhận nếu không đủ thời gian','Chọn nước đẹp nhất dù chưa kiểm tra'],0,'Quản lý thời gian là một phần thực chiến. Giảm biến chưa xác nhận khi hậu quả mất nhóm lớn.');
-q('dan','review-method','Thực chiến','Xem lại một ván thua','Bạn muốn biến một sai lầm thành bài tập. Dữ liệu hữu ích nhất là gì?',['Thế trước sai lầm, các nước đang cân nhắc, nước đối thủ hóa giải kế hoạch và kết quả đọc','Chỉ kết quả thua bao nhiêu điểm'],0,'Lưu thế và quyết định giúp tái giải mà không nhìn đáp án. Kết quả ván riêng lẻ không giải thích nguyên nhân.');
-q('dan','rank-proof','Thực chiến','Khi nào xác nhận mục tiêu?','Bạn giải hết bộ bài tập ở app. Bằng chứng nào cần bổ sung để đánh giá sức chơi 1 dan?',['Số bài đã bấm hoàn thành','Kết quả thực chiến với đối thủ có hạng trong cùng hệ thống xếp hạng'],1,'Trình độ cần được đánh giá qua kết quả đấu với người có hạng. Các nền tảng và hệ thống xếp hạng có thể khác nhau; app không tự cấp đẳng.');
+q(
+  'dan',
+  'verify-reading',
+  'Đọc biến',
+  'Đối phương không đáp theo ý mình',
+  'Bạn tìm được một chuỗi thắng nếu địch đáp A, nhưng chưa kiểm tra B và nước bỏ lượt. Có đủ để kết luận chắc chắn bắt được nhóm, dù đối thủ chọn cách đáp nào không?',
+  ['Đủ', 'Chưa đủ'],
+  1,
+  'Một chuỗi thắng chỉ cho biết kết quả khi đối thủ đáp theo chuỗi đó. Muốn biết chắc bắt được nhóm, phải kiểm tra những cách họ đáp khác.'
+);
+q(
+  'dan',
+  'capture-deadline',
+  'Đọc biến',
+  'Giới hạn của bài đọc',
+  'App kiểm tra một thế 5×5 và xác nhận Đen có thể bắt nhóm mục tiêu trong tối đa 11 lượt của cả hai bên, dù Trắng đáp cách nào. Luật bài không cho lặp lại bất kỳ thế bàn cũ nào. Kết quả này cho biết điều gì?',
+  ['Người giải chắc chắn có sức chơi 1 dan', 'Thế cụ thể này có cách bắt trong giới hạn đã nêu'],
+  1,
+  'Chỉ xác nhận lời giải của thế này trong số lượt cho phép. Nó không đánh giá khả năng khai cuộc, chọn kế hoạch cả bàn hay đẳng của người giải.'
+);
+q(
+  'dan',
+  'ko-count',
+  'Ko',
+  'Chuẩn bị đe dọa để tranh ko',
+  'Bạn và đối thủ tranh ko — thế bắt qua bắt lại không được bắt lại ngay. Bạn có 1 nước ở nơi khác khiến đối thủ cần đáp; đối thủ có 3. Các đe dọa đều đủ lớn và những điều kiện khác như nhau. Bạn nên chuẩn bị thế nào?',
+  ['Tìm thêm đe dọa hoặc phương án tránh ko, tính lại toàn bàn', 'Cứ bắt lại vì bạn khởi động ko'],
+  0,
+  'Tìm thêm đe dọa dùng được hoặc một cách tránh cuộc tranh ko. Nếu hết đe dọa trước, bạn có thể phải nhường ko. Không chỉ đếm số lượng: phải kiểm tra giá trị và hậu quả từng nước.'
+);
+q(
+  'dan',
+  'reverse-sente',
+  'Quan tử',
+  'So điểm bằng cùng một cách tính',
+  'Bạn ghi giá trị hai vùng đều là 6, nhưng vùng A được tính từ lợi ích một nước, còn vùng B được tính từ kết quả cả chuỗi. A nhường lượt chủ động; B ngăn một chuỗi buộc đáp của đối thủ. Có thể coi hai vùng bằng nhau chỉ vì cùng số 6 không?',
+  ['Có', 'Không, phải tính lại bằng cùng một cách'],
+  1,
+  'Không. Hai số chỉ so được khi cùng đo một thứ. Hãy tính kết quả cả chuỗi và ai được đi nơi khác sau đó, rồi mới so hai vùng.'
+);
+q(
+  'dan',
+  'threat-cost',
+  'Ko',
+  'Chi phí tự tạo đe dọa',
+  'Đe dọa ko làm địch mất 10 nếu bỏ qua, nhưng khi họ đáp, chính bạn phải bỏ 8 điểm vốn giữ được. Có thể coi nó là đe dọa miễn phí không?',
+  ['Có', 'Không'],
+  1,
+  'Phải tính chi phí dùng đe dọa, không chỉ thiệt hại nếu đối phương bỏ qua.'
+);
+q(
+  'dan',
+  'end-score',
+  'Đếm điểm',
+  'Tính điểm cuối ván',
+  'Bàn 19×19, không trung lập hay quân chết: đen 190 diện tích, trắng 171. Komi 6,5. Kết quả?',
+  ['Đen hơn 12,5', 'Đen hơn 19', 'Trắng hơn 6,5'],
+  0,
+  'Trắng = 177,5. Đen hơn 12,5. Tổng diện tích trước komi là 361.'
+);
+q(
+  'dan',
+  'seki-area',
+  'Đếm điểm',
+  'Điểm trong sống chung',
+  'Hai nhóm sống chung (seki): bên tự lấp khí chung trước sẽ bị bắt. Ở phần đang xét, Đen có 2 quân sống và 3 điểm trống là khí chung giáp cả hai màu.\n\nTheo cách đếm diện tích — quân sống trên bàn cộng đất — Đen được cộng bao nhiêu ở phần này?',
+  ['2 điểm từ quân; không cộng 3 khí chung', '5 điểm', '0 vì quân trong seki không được tính'],
+  0,
+  'Đen được 2 điểm từ 2 quân sống. Ba điểm khí chung giáp cả hai màu không là đất riêng của Đen. Đây là cách đếm diện tích, không phải cách đếm đất kiểu Nhật.'
+);
+q(
+  'dan',
+  'time-management',
+  'Thực chiến',
+  'Thiếu thời gian đọc',
+  'Bạn đã dùng hết thời gian chính và đang dùng thời gian phụ cho từng lượt (byo-yomi). Một nhóm lớn chỉ còn 1 khí, tức đang bị atari. Bạn chưa nghĩ xong cuộc tấn công, nhưng đã kiểm tra được một nước nối cứu nhóm. Nếu không còn đủ thời gian đọc thêm, nên ưu tiên gì?',
+  [
+    'Đọc đe dọa trực tiếp, ưu tiên kết quả đã xác nhận nếu không đủ thời gian',
+    'Chọn nước đẹp nhất dù chưa kiểm tra',
+  ],
+  0,
+  'Quản lý thời gian là một phần thực chiến. Giảm biến chưa xác nhận khi hậu quả mất nhóm lớn.'
+);
+q(
+  'dan',
+  'review-method',
+  'Thực chiến',
+  'Xem lại một ván thua',
+  'Bạn muốn biến một sai lầm thành bài tập. Dữ liệu hữu ích nhất là gì?',
+  [
+    'Thế trước sai lầm, các nước đang cân nhắc, nước đối thủ hóa giải kế hoạch và kết quả đọc',
+    'Chỉ kết quả thua bao nhiêu điểm',
+  ],
+  0,
+  'Lưu thế và quyết định giúp tái giải mà không nhìn đáp án. Kết quả ván riêng lẻ không giải thích nguyên nhân.'
+);
+q(
+  'dan',
+  'rank-proof',
+  'Thực chiến',
+  'Khi nào xác nhận mục tiêu?',
+  'Bạn giải hết bộ bài tập ở app. Bằng chứng nào cần bổ sung để đánh giá sức chơi 1 dan?',
+  [
+    'Số bài đã bấm hoàn thành',
+    'Kết quả thực chiến với đối thủ có hạng trong cùng hệ thống xếp hạng',
+  ],
+  1,
+  'Trình độ cần được đánh giá qua kết quả đấu với người có hạng. Các nền tảng và hệ thống xếp hạng có thể khác nhau; app không tự cấp đẳng.'
+);
 
 // These finite models have explicit assumptions; no engine-derived rank labels.
-for(let i=0;i<8;i++) {
-  const a=6+i*2,b=3+i,margin=i*2+1;
-  q('dan2',`yose-independent-${i}`,'Quan tử',`Lấy vùng nào trước? · ${i+1}`,
+for (let i = 0; i < 8; i++) {
+  const a = 6 + i * 2,
+    b = 3 + i,
+    margin = i * 2 + 1;
+  q(
+    'dan2',
+    `yose-independent-${i}`,
+    'Quan tử',
+    `Lấy vùng nào trước? · ${i + 1}`,
     `Cuối ván chỉ còn hai vùng A và B. Đi ở một vùng xong thì đối thủ được chọn vùng còn lại; không có ko hay nước tiếp nào khác.\n\nA = ${a}, B = ${b}: nếu bạn lấy một vùng, cách biệt điểm có lợi cho bạn tăng đúng số đó. Đen đi trước.\n\nSo hai cách: Đen lấy A rồi Trắng lấy B; hoặc Đen lấy B rồi Trắng lấy A. Cách lấy A trước giúp kết quả của Đen tốt hơn bao nhiêu điểm?`,
-    [`${a-b} điểm`,`${2*(a-b)} điểm`,`${a+b} điểm`],1,
-    `Cách 1 — Đen lấy A, Trắng lấy B: Đen thêm ${a}, rồi Trắng thêm ${b}. Cách biệt có lợi cho Đen thay đổi ${a} − ${b} = ${a-b}.\n\nCách 2 — Đen lấy B, Trắng lấy A: ${b} − ${a} = ${b-a}.\n\nCách 1 tốt hơn cách 2: (${a-b}) − (${b-a}) = ${2*(a-b)} điểm. Đây là so hai kết quả cuối, không chỉ lấy ${a} − ${b}.`);
-  const threats=1+i,opp=threats+1;
-  const koSteps=[];
-  for(let k=1;k<=threats;k++){
-    koSteps.push(`${koSteps.length+1}. Trắng dùng đe dọa thứ ${k} → Đen đáp → Trắng lấy ko.`);
-    koSteps.push(`${koSteps.length+1}. Đen dùng đe dọa thứ ${k} → Trắng đáp → Đen lấy lại ko.`);
+    [`${a - b} điểm`, `${2 * (a - b)} điểm`, `${a + b} điểm`],
+    1,
+    `Cách 1 — Đen lấy A, Trắng lấy B: Đen thêm ${a}, rồi Trắng thêm ${b}. Cách biệt có lợi cho Đen thay đổi ${a} − ${b} = ${a - b}.\n\nCách 2 — Đen lấy B, Trắng lấy A: ${b} − ${a} = ${b - a}.\n\nCách 1 tốt hơn cách 2: (${a - b}) − (${b - a}) = ${2 * (a - b)} điểm. Đây là so hai kết quả cuối, không chỉ lấy ${a} − ${b}.`
+  );
+  const threats = 1 + i,
+    opp = threats + 1;
+  const koSteps = [];
+  for (let k = 1; k <= threats; k++) {
+    koSteps.push(`${koSteps.length + 1}. Trắng dùng đe dọa thứ ${k} → Đen đáp → Trắng lấy ko.`);
+    koSteps.push(`${koSteps.length + 1}. Đen dùng đe dọa thứ ${k} → Trắng đáp → Đen lấy lại ko.`);
   }
-  koSteps.push(`${koSteps.length+1}. Trắng dùng đe dọa cuối → Đen đáp → Trắng lấy ko.`);
-  koSteps.push(`${koSteps.length+1}. Đen hết đe dọa nên phải nhường; Trắng giữ ko và kết thúc cuộc tranh ko.`);
-  q('dan3',`ko-budget-${i}`,'Ko',`Đếm đe dọa ko · ${i+1}`,
+  koSteps.push(`${koSteps.length + 1}. Trắng dùng đe dọa cuối → Đen đáp → Trắng lấy ko.`);
+  koSteps.push(
+    `${koSteps.length + 1}. Đen hết đe dọa nên phải nhường; Trắng giữ ko và kết thúc cuộc tranh ko.`
+  );
+  q(
+    'dan3',
+    `ko-budget-${i}`,
+    'Ko',
+    `Đếm đe dọa ko · ${i + 1}`,
     `Ko là thế bắt qua bắt lại, nhưng không được bắt lại ngay. Muốn quay lại lấy ko, bạn đi nơi khác trước, thường bằng một đe dọa khiến đối thủ phải đáp.\n\nTình huống:\n• Đen vừa lấy ko. Trắng có ${opp} đe dọa dùng được; Đen có ${threats}.\n• Mỗi đe dọa chỉ dùng một lần. Đối thủ luôn đáp vì bỏ qua sẽ thiệt hại lớn hơn nhường ko.\n• Đáp một đe dọa không làm mất đe dọa khác. Không có đe dọa mới xuất hiện.\n\nAi cuối cùng giữ được ko?`,
-    ['Đen, vì đang giữ ko','Trắng','Không thể xác định từ các điều kiện trên'],1,
-    koSteps.join('\n')+'\n\nĐây là bài đếm với các điều kiện đã cho. Trong ván thật, còn phải so giá trị từng đe dọa và kiểm tra nó còn dùng được sau mỗi nước đáp.');
-  q('dan3',`safe-yose-${i}`,'Quan tử',`Ván sát điểm · ${i+1}`,
+    ['Đen, vì đang giữ ko', 'Trắng', 'Không thể xác định từ các điều kiện trên'],
+    1,
+    koSteps.join('\n') +
+      '\n\nĐây là bài đếm với các điều kiện đã cho. Trong ván thật, còn phải so giá trị từng đe dọa và kiểm tra nó còn dùng được sau mỗi nước đáp.'
+  );
+  q(
+    'dan3',
+    `safe-yose-${i}`,
+    'Quan tử',
+    `Ván sát điểm · ${i + 1}`,
     `Đen đang hơn ${margin} điểm, đã cộng điểm bù cho Trắng (komi). Cuối ván chỉ còn một vùng lấy điểm:\n• Đen lấy vùng này thì cách biệt có lợi cho Đen tăng ${a}.\n• Trắng lấy vùng này thì cách biệt có lợi cho Đen giảm ${b}.\n\nMọi nhóm đã sống; không có ko hay nước tiếp nào khác. Đen đến lượt nhưng bỏ lượt, nên Trắng lấy vùng còn lại.\n\nLấy điểm Đen trừ điểm Trắng, kết quả cuối là bao nhiêu? Số dương nghĩa là Đen hơn; số âm nghĩa là Trắng hơn.`,
-    [`${margin-b}`,`${margin+a}`,`${margin}`],0,
-    `Trắng lấy vùng còn lại, nên điểm Đen trừ điểm Trắng là ${margin} − ${b} = ${margin-b}. ${margin-b>0?`Đen vẫn hơn ${margin-b} điểm.`:margin-b<0?`Trắng hơn ${b-margin} điểm.`:"Hai bên bằng điểm."}\n\nĐen bỏ lượt dù vẫn còn chỗ lấy điểm. Vì thế, đừng chỉ nhìn ai đang dẫn trước khi các nước cuối ván được chơi xong.`);
+    [`${margin - b}`, `${margin + a}`, `${margin}`],
+    0,
+    `Trắng lấy vùng còn lại, nên điểm Đen trừ điểm Trắng là ${margin} − ${b} = ${margin - b}. ${margin - b > 0 ? `Đen vẫn hơn ${margin - b} điểm.` : margin - b < 0 ? `Trắng hơn ${b - margin} điểm.` : 'Hai bên bằng điểm.'}\n\nĐen bỏ lượt dù vẫn còn chỗ lấy điểm. Vì thế, đừng chỉ nhìn ai đang dẫn trước khi các nước cuối ván được chơi xong.`
+  );
 }
-q('dan2','reading-refutation','Đọc biến','Nước hay có thể bị hóa giải',"Nước A cho lợi ích lớn nếu Trắng đáp X, nhưng Trắng có thể đáp Y hợp lệ và bắt nhóm Đen. Nước B cho lợi ích nhỏ hơn nhưng đã kiểm tra rằng nhóm Đen sống trước mọi cách đáp. Nếu mục tiêu là giữ nhóm sống chắc, chọn gì?",["A vì có một chuỗi thắng lớn", "B vì A vẫn có cách bị bắt", "A vì đối thủ ít khi tìm được Y"],1,"Chọn B theo mục tiêu giữ nhóm sống. Chỉ cần một cách đáp bắt được nhóm là đủ bác bỏ kết luận “A cứu nhóm chắc”.");
-q('dan2','attack-direction-2','Toàn bàn','Tấn công hai nhóm yếu','Có thể cắt hai nhóm yếu của địch nhưng chính nhóm cắt của bạn chỉ có một khí và không có biến thoát. Không có hy sinh có lợi đã đọc. Cần làm gì trước?',['Cắt ngay vì hai mục tiêu','Kiểm tra an toàn nhóm cắt và phương án giữ liên lạc'],1,'Hai nhóm yếu tạo tiềm năng tấn công kép, nhưng quân thực hiện phải chịu được phản công. Số mục tiêu không đủ để chọn nước. ',middle);
-q('dan2','settled-versus-potential','Toàn bàn','Đất chắc và tiềm năng','Đen có 40 điểm chắc và khung có thể thành 30; Trắng có 55 chắc. Khung Đen chưa kiểm tra các biến xâm nhập. Có đủ để kết luận Đen hơn 15 trước komi không?',['Có: 40+30−55','Chưa; 30 là tiềm năng chưa xác nhận'],1,'Phân biệt đất chắc với khả năng phát triển. Đọc giảm đất/xâm nhập và tính komi trước khi chọn kế hoạch.',flank);
-q('dan2','joseki-context-2','Toàn bàn','Đổi đất lấy ảnh hưởng','Biến A cho thêm đất góc nhưng làm nhóm biên của bạn yếu. Biến B ít đất góc hơn, nối nhóm biên và hướng ảnh hưởng vào vùng còn trống. Có đủ dữ kiện khẳng định A tốt hơn vì nhiều đất không?',['Có','Chưa; cần so chi phí cứu nhóm và giá trị ảnh hưởng'],1,'Định giá kết quả cả bàn. Không có lời giải tối ưu duy nhất khi chưa nêu thế cụ thể và các cách đối thủ đáp lại.',flank);
-q('dan2','seki-not-two-eyes','Sống/chết','Sống không nhất thiết hai mắt','Hai nhóm không có hai mắt riêng. Mỗi bên đi vào khí chung trước đều bị bắt; không có nước phá seki, ko hoặc kết nối bên ngoài. Theo các điều kiện này, hai nhóm có sống không?',['Cả hai chết vì thiếu hai mắt','Cả hai sống chung'],1,'Seki cho phép sống mà không có hai mắt riêng. Bài tạo hai mắt của app chỉ kiểm tra một cách giữ nhóm sống, không xét mọi kiểu sống khác.');
-q('dan2','reverse-sente-model','Quan tử','Chặn một chuỗi tiên thủ',"Cuối ván có hai vùng không ảnh hưởng lẫn nhau:\n• Vùng A: bên lấy trước có lợi 8 điểm, rồi nhường lượt chọn chỗ đi tiếp.\n• Vùng B: Đen đi trước thì có lợi 2 điểm; nếu Trắng đi trước, Đen buộc đáp và mất 12 điểm. Sau chuỗi đó, Đen lấy A.\n\nSo hai cách: Đen lấy A rồi Trắng lấy B; hoặc Đen lấy B rồi Trắng lấy A. Cách nào tốt hơn cho Đen?",['Đen A trước','Đen B trước','Bằng nhau'],0,"Cách 1 — A trước: Đen được 8 rồi mất 12, nên thay đổi là 8 − 12 = −4.\nCách 2 — B trước: Đen được 2 rồi Trắng lấy 8, nên thay đổi là 2 − 8 = −6.\n\n−4 tốt hơn −6: chọn A trước, tốt hơn 2 điểm. Hãy so kết quả cả chuỗi thay vì chỉ nhìn ai buộc ai đáp.");
-q('dan2','ko-threat-dependence','Ko','Đừng đếm hai lần một đe dọa','Hai đe dọa A và B dùng chung một nhóm địch. Sau khi địch đáp A, B không còn gây thiệt hại. Có thể tính chúng thành hai đe dọa độc lập không?',['Có','Không'],1,'Đáp một đe dọa có thể xóa đe dọa khác. Sau mỗi nước đáp, hãy đếm lại những đe dọa còn dùng được.');
-q('dan2','miai-destruction','Sống/chết','Một nước phá cả hai cách tạo mắt',"A hoặc B đều có thể tạo mắt thứ hai. Nhưng đối thủ có một nước vừa chiếm A vừa đưa nhóm bạn vào atari (chỉ còn 1 khí). Bạn buộc phải nối, rồi B không còn tạo mắt được. Có thể kết luận nhóm sống chắc vì có hai lựa chọn A/B không?",['Có','Không'],1,"Không. Hai lựa chọn chỉ bảo vệ được nhóm khi đối thủ không thể phá cả hai trong một chuỗi nước. Tình huống này đã cho một cách phá đồng thời.");
-q('dan2','review-candidates','Thực chiến','Đối chiếu quyết định','Bạn nhập SGF và thấy nước đã chơi. Trước khi xem lời bình hoặc AI, nên ghi gì?',['Hai nước tôi cân nhắc, lý do chọn và cách đối thủ có thể hóa giải','Chỉ nhớ nước đã chơi'],0,'Ghi trước để biết bạn tự nghĩ được gì, thay vì chỉ nhận ra đáp án sau khi xem. Phòng xem ván cho phép thử chuỗi nước, nhưng không xác nhận đó là cách tốt nhất.');
-q('dan2','rating-system','Thực chiến','So hạng giữa hệ thống','Bạn có 2 dan ở hệ A, đối thủ có 2 dan ở hệ B. Chưa có dữ liệu đối chiếu hai hệ. Có thể coi hai sức chơi bằng nhau chính xác không?',['Có','Không'],1,'Hạng phụ thuộc hệ thống tính điểm và nhóm người chơi trong đó. Theo dõi tiến bộ trong cùng hệ rồi mới đối chiếu bằng dữ liệu.');
-q('dan3','sacrifice-compensation','Toàn bàn','Bỏ nhóm nhỏ để có kết quả tốt hơn',"Bạn cân nhắc cứu hay bỏ một nhóm nhỏ. Đã tính đủ quân bị bắt, đất và tất cả nước đáp; không còn tranh ko hay khả năng khai thác về sau.\n• Cứu nhóm: cách biệt có lợi cho Đen giảm 6 điểm.\n• Bỏ nhóm: cách biệt có lợi cho Đen tăng 4 điểm.\n\nCách nào tốt hơn cho Đen?",['Cứu vì quân đã đặt','Hy sinh: hơn phương án cứu 10 điểm'],1,"Bỏ nhóm tốt hơn. So hai kết quả: (+4) − (−6) = 10 điểm. Kết luận này chỉ đúng vì đề đã tính đủ chi phí mất nhóm và mọi nước tiếp theo.",middle);
-q('dan3','sente-no-answer','Quan tử','Đối thủ đi nơi khác thay vì đáp','Bạn định giá một chuỗi là tiên thủ vì thường được đáp. Trong thế hiện tại, đối thủ có thể đi nơi khác (tenuki) để cứu nhóm lớn hơn, còn bạn không có nước tiếp gây thiệt hại đáng kể. Cần cập nhật gì?',['Vẫn coi đó là nước buộc đáp vì thường gặp','Tính lại giá trị và quyền chủ động trong thế hiện tại'],1,'Muốn giữ lượt chủ động, nước của bạn phải khiến đối thủ cần đáp trong thế hiện tại. Việc họ thường đáp mẫu này không có nghĩa lần nào cũng cần đáp.');
-q('dan3','ko-exit','Ko','Thoát ko khi đang dẫn',"Bạn có hai cách trong một cuộc tranh ko:\n• Nhường ko rồi đi chỗ khác: đã kiểm tra rằng bạn thắng 2 điểm.\n• Tiếp tục tranh: có thể thắng 12 hoặc thua 8 điểm; các đe dọa chưa được kiểm tra hết.\n\nNếu ưu tiên kết quả thắng đã xác nhận, bạn chọn gì?",['Phương án thắng chắc 2','Tiếp tục vì có thể thắng 12'],0,'Chọn kết quả đã xác nhận khi tiêu chí là bảo đảm thắng. Không suy ra quy tắc luôn tránh ko khi dẫn điểm.');
-q('dan3','aji-keshi','Chiến thuật','Giúp đối thủ sửa điểm yếu',"Bạn đi một nước khiến đối thủ phải nối quân. Nước này không giúp bạn lấy đất, cứu nhóm hay tạo đe dọa; ngược lại, điểm cắt bạn định dùng về sau biến mất. Có thể coi nước này có lợi chỉ vì đối thủ đã đáp không?",["Có, buộc đối thủ đáp luôn có lợi", "Không, bạn có thể đã giúp đối thủ sửa điểm yếu"],1,"Không. Một nước được đáp vẫn có thể làm đối thủ mạnh hơn. Tự xóa cơ hội khai thác điểm yếu về sau gọi là aji-keshi. So thế trước và sau trao đổi để biết mình được gì, mất gì.");
-q('dan3','reading-horizon','Đọc biến','Thử một chuỗi chưa đủ để kết luận','Công cụ thử biến cho phép đặt quân hợp lệ nhưng chưa tính mọi đáp. Bạn đặt một chuỗi 15 nước và bắt được nhóm. Điều gì đã được chứng minh?',['Chắc chắn bắt được nhóm, dù đối thủ đáp cách nào','Chỉ kết quả của chuỗi cụ thể này'],1,'Trình xem SGF kiểm tra đặt quân/bắt quân, không tìm đáp tối ưu. Chuỗi bạn tự thử cần được kiểm tra thêm với người mạnh hơn hoặc công cụ phân tích.');
-q('dan3','estimate-range','Toàn bàn','Ước tính: có thể thắng hoặc thua',"Đã tính điểm bù cho Trắng (komi), phần đất chắc cho Đen hơn 3 điểm. Một vùng chưa ổn định có thể khiến cách biệt có lợi cho Đen giảm 8 hoặc tăng 4 điểm.\n\nKết quả có thể nằm trong khoảng nào? Số dương là Đen hơn; số âm là Trắng hơn.",['−5 đến +7','+3 đến +7','Đen chắc thắng 3'],0,"Xấu nhất cho Đen: 3 − 8 = −5, tức Trắng hơn 5.\nTốt nhất cho Đen: 3 + 4 = 7, tức Đen hơn 7.\n\nKhoảng là −5 đến +7. Đen chưa chắc thắng vì vùng chưa ổn định vẫn có thể đảo kết quả.",opening);
-q('dan3','independent-proof','Đọc biến','Kiểm tra lời giải tự viết','Bạn đã đọc A→B→C rồi nhớ chuỗi đó. Lần ôn kế tiếp, để kiểm tra thực sự hiểu, nên làm gì?',['Chép lại chuỗi ngay','Giấu lời giải, xét các đáp khác và tìm phản bác'],1,'Khả năng tái hiện một biến khác khả năng kiểm tra mọi đáp. Ghi nước phản bác mạnh nhất và điều kiện áp dụng.');
-q('dan3','rank3-evidence','Thực chiến','Bằng chứng mục tiêu 3 dan','Bạn đạt 10/10 kiểm tra trong mục tiêu 3 dan. Điều nào hợp lý?',['App chứng nhận tôi là 3 dan','Tôi giải đúng bộ câu hỏi này; cần kết quả đấu thực tế để biết sức chơi'],1,'Chưa có dữ liệu cho thấy điểm bài này tương ứng sức chơi 3 dan. Điểm bài tập và số bài đã làm không xác nhận đẳng của bạn.');
+q(
+  'dan2',
+  'reading-refutation',
+  'Đọc biến',
+  'Nước hay có thể bị hóa giải',
+  'Nước A cho lợi ích lớn nếu Trắng đáp X, nhưng Trắng có thể đáp Y hợp lệ và bắt nhóm Đen. Nước B cho lợi ích nhỏ hơn nhưng đã kiểm tra rằng nhóm Đen sống trước mọi cách đáp. Nếu mục tiêu là giữ nhóm sống chắc, chọn gì?',
+  ['A vì có một chuỗi thắng lớn', 'B vì A vẫn có cách bị bắt', 'A vì đối thủ ít khi tìm được Y'],
+  1,
+  'Chọn B theo mục tiêu giữ nhóm sống. Chỉ cần một cách đáp bắt được nhóm là đủ bác bỏ kết luận “A cứu nhóm chắc”.'
+);
+q(
+  'dan2',
+  'attack-direction-2',
+  'Toàn bàn',
+  'Tấn công hai nhóm yếu',
+  'Có thể cắt hai nhóm yếu của địch nhưng chính nhóm cắt của bạn chỉ có một khí và không có biến thoát. Không có hy sinh có lợi đã đọc. Cần làm gì trước?',
+  ['Cắt ngay vì hai mục tiêu', 'Kiểm tra an toàn nhóm cắt và phương án giữ liên lạc'],
+  1,
+  'Hai nhóm yếu tạo tiềm năng tấn công kép, nhưng quân thực hiện phải chịu được phản công. Số mục tiêu không đủ để chọn nước. ',
+  middle
+);
+q(
+  'dan2',
+  'settled-versus-potential',
+  'Toàn bàn',
+  'Đất chắc và tiềm năng',
+  'Đen có 40 điểm chắc và khung có thể thành 30; Trắng có 55 chắc. Khung Đen chưa kiểm tra các biến xâm nhập. Có đủ để kết luận Đen hơn 15 trước komi không?',
+  ['Có: 40+30−55', 'Chưa; 30 là tiềm năng chưa xác nhận'],
+  1,
+  'Phân biệt đất chắc với khả năng phát triển. Đọc giảm đất/xâm nhập và tính komi trước khi chọn kế hoạch.',
+  flank
+);
+q(
+  'dan2',
+  'joseki-context-2',
+  'Toàn bàn',
+  'Đổi đất lấy ảnh hưởng',
+  'Biến A cho thêm đất góc nhưng làm nhóm biên của bạn yếu. Biến B ít đất góc hơn, nối nhóm biên và hướng ảnh hưởng vào vùng còn trống. Có đủ dữ kiện khẳng định A tốt hơn vì nhiều đất không?',
+  ['Có', 'Chưa; cần so chi phí cứu nhóm và giá trị ảnh hưởng'],
+  1,
+  'Định giá kết quả cả bàn. Không có lời giải tối ưu duy nhất khi chưa nêu thế cụ thể và các cách đối thủ đáp lại.',
+  flank
+);
+q(
+  'dan2',
+  'seki-not-two-eyes',
+  'Sống/chết',
+  'Sống không nhất thiết hai mắt',
+  'Hai nhóm không có hai mắt riêng. Mỗi bên đi vào khí chung trước đều bị bắt; không có nước phá seki, ko hoặc kết nối bên ngoài. Theo các điều kiện này, hai nhóm có sống không?',
+  ['Cả hai chết vì thiếu hai mắt', 'Cả hai sống chung'],
+  1,
+  'Seki cho phép sống mà không có hai mắt riêng. Bài tạo hai mắt của app chỉ kiểm tra một cách giữ nhóm sống, không xét mọi kiểu sống khác.'
+);
+q(
+  'dan2',
+  'reverse-sente-model',
+  'Quan tử',
+  'Chặn một chuỗi tiên thủ',
+  'Cuối ván có hai vùng không ảnh hưởng lẫn nhau:\n• Vùng A: bên lấy trước có lợi 8 điểm, rồi nhường lượt chọn chỗ đi tiếp.\n• Vùng B: Đen đi trước thì có lợi 2 điểm; nếu Trắng đi trước, Đen buộc đáp và mất 12 điểm. Sau chuỗi đó, Đen lấy A.\n\nSo hai cách: Đen lấy A rồi Trắng lấy B; hoặc Đen lấy B rồi Trắng lấy A. Cách nào tốt hơn cho Đen?',
+  ['Đen A trước', 'Đen B trước', 'Bằng nhau'],
+  0,
+  'Cách 1 — A trước: Đen được 8 rồi mất 12, nên thay đổi là 8 − 12 = −4.\nCách 2 — B trước: Đen được 2 rồi Trắng lấy 8, nên thay đổi là 2 − 8 = −6.\n\n−4 tốt hơn −6: chọn A trước, tốt hơn 2 điểm. Hãy so kết quả cả chuỗi thay vì chỉ nhìn ai buộc ai đáp.'
+);
+q(
+  'dan2',
+  'ko-threat-dependence',
+  'Ko',
+  'Đừng đếm hai lần một đe dọa',
+  'Hai đe dọa A và B dùng chung một nhóm địch. Sau khi địch đáp A, B không còn gây thiệt hại. Có thể tính chúng thành hai đe dọa độc lập không?',
+  ['Có', 'Không'],
+  1,
+  'Đáp một đe dọa có thể xóa đe dọa khác. Sau mỗi nước đáp, hãy đếm lại những đe dọa còn dùng được.'
+);
+q(
+  'dan2',
+  'miai-destruction',
+  'Sống/chết',
+  'Một nước phá cả hai cách tạo mắt',
+  'A hoặc B đều có thể tạo mắt thứ hai. Nhưng đối thủ có một nước vừa chiếm A vừa đưa nhóm bạn vào atari (chỉ còn 1 khí). Bạn buộc phải nối, rồi B không còn tạo mắt được. Có thể kết luận nhóm sống chắc vì có hai lựa chọn A/B không?',
+  ['Có', 'Không'],
+  1,
+  'Không. Hai lựa chọn chỉ bảo vệ được nhóm khi đối thủ không thể phá cả hai trong một chuỗi nước. Tình huống này đã cho một cách phá đồng thời.'
+);
+q(
+  'dan2',
+  'review-candidates',
+  'Thực chiến',
+  'Đối chiếu quyết định',
+  'Bạn nhập SGF và thấy nước đã chơi. Trước khi xem lời bình hoặc AI, nên ghi gì?',
+  ['Hai nước tôi cân nhắc, lý do chọn và cách đối thủ có thể hóa giải', 'Chỉ nhớ nước đã chơi'],
+  0,
+  'Ghi trước để biết bạn tự nghĩ được gì, thay vì chỉ nhận ra đáp án sau khi xem. Phòng xem ván cho phép thử chuỗi nước, nhưng không xác nhận đó là cách tốt nhất.'
+);
+q(
+  'dan2',
+  'rating-system',
+  'Thực chiến',
+  'So hạng giữa hệ thống',
+  'Bạn có 2 dan ở hệ A, đối thủ có 2 dan ở hệ B. Chưa có dữ liệu đối chiếu hai hệ. Có thể coi hai sức chơi bằng nhau chính xác không?',
+  ['Có', 'Không'],
+  1,
+  'Hạng phụ thuộc hệ thống tính điểm và nhóm người chơi trong đó. Theo dõi tiến bộ trong cùng hệ rồi mới đối chiếu bằng dữ liệu.'
+);
+q(
+  'dan3',
+  'sacrifice-compensation',
+  'Toàn bàn',
+  'Bỏ nhóm nhỏ để có kết quả tốt hơn',
+  'Bạn cân nhắc cứu hay bỏ một nhóm nhỏ. Đã tính đủ quân bị bắt, đất và tất cả nước đáp; không còn tranh ko hay khả năng khai thác về sau.\n• Cứu nhóm: cách biệt có lợi cho Đen giảm 6 điểm.\n• Bỏ nhóm: cách biệt có lợi cho Đen tăng 4 điểm.\n\nCách nào tốt hơn cho Đen?',
+  ['Cứu vì quân đã đặt', 'Hy sinh: hơn phương án cứu 10 điểm'],
+  1,
+  'Bỏ nhóm tốt hơn. So hai kết quả: (+4) − (−6) = 10 điểm. Kết luận này chỉ đúng vì đề đã tính đủ chi phí mất nhóm và mọi nước tiếp theo.',
+  middle
+);
+q(
+  'dan3',
+  'sente-no-answer',
+  'Quan tử',
+  'Đối thủ đi nơi khác thay vì đáp',
+  'Bạn định giá một chuỗi là tiên thủ vì thường được đáp. Trong thế hiện tại, đối thủ có thể đi nơi khác (tenuki) để cứu nhóm lớn hơn, còn bạn không có nước tiếp gây thiệt hại đáng kể. Cần cập nhật gì?',
+  [
+    'Vẫn coi đó là nước buộc đáp vì thường gặp',
+    'Tính lại giá trị và quyền chủ động trong thế hiện tại',
+  ],
+  1,
+  'Muốn giữ lượt chủ động, nước của bạn phải khiến đối thủ cần đáp trong thế hiện tại. Việc họ thường đáp mẫu này không có nghĩa lần nào cũng cần đáp.'
+);
+q(
+  'dan3',
+  'ko-exit',
+  'Ko',
+  'Thoát ko khi đang dẫn',
+  'Bạn có hai cách trong một cuộc tranh ko:\n• Nhường ko rồi đi chỗ khác: đã kiểm tra rằng bạn thắng 2 điểm.\n• Tiếp tục tranh: có thể thắng 12 hoặc thua 8 điểm; các đe dọa chưa được kiểm tra hết.\n\nNếu ưu tiên kết quả thắng đã xác nhận, bạn chọn gì?',
+  ['Phương án thắng chắc 2', 'Tiếp tục vì có thể thắng 12'],
+  0,
+  'Chọn kết quả đã xác nhận khi tiêu chí là bảo đảm thắng. Không suy ra quy tắc luôn tránh ko khi dẫn điểm.'
+);
+q(
+  'dan3',
+  'aji-keshi',
+  'Chiến thuật',
+  'Giúp đối thủ sửa điểm yếu',
+  'Bạn đi một nước khiến đối thủ phải nối quân. Nước này không giúp bạn lấy đất, cứu nhóm hay tạo đe dọa; ngược lại, điểm cắt bạn định dùng về sau biến mất. Có thể coi nước này có lợi chỉ vì đối thủ đã đáp không?',
+  ['Có, buộc đối thủ đáp luôn có lợi', 'Không, bạn có thể đã giúp đối thủ sửa điểm yếu'],
+  1,
+  'Không. Một nước được đáp vẫn có thể làm đối thủ mạnh hơn. Tự xóa cơ hội khai thác điểm yếu về sau gọi là aji-keshi. So thế trước và sau trao đổi để biết mình được gì, mất gì.'
+);
+q(
+  'dan3',
+  'reading-horizon',
+  'Đọc biến',
+  'Thử một chuỗi chưa đủ để kết luận',
+  'Công cụ thử biến cho phép đặt quân hợp lệ nhưng chưa tính mọi đáp. Bạn đặt một chuỗi 15 nước và bắt được nhóm. Điều gì đã được chứng minh?',
+  ['Chắc chắn bắt được nhóm, dù đối thủ đáp cách nào', 'Chỉ kết quả của chuỗi cụ thể này'],
+  1,
+  'Trình xem SGF kiểm tra đặt quân/bắt quân, không tìm đáp tối ưu. Chuỗi bạn tự thử cần được kiểm tra thêm với người mạnh hơn hoặc công cụ phân tích.'
+);
+q(
+  'dan3',
+  'estimate-range',
+  'Toàn bàn',
+  'Ước tính: có thể thắng hoặc thua',
+  'Đã tính điểm bù cho Trắng (komi), phần đất chắc cho Đen hơn 3 điểm. Một vùng chưa ổn định có thể khiến cách biệt có lợi cho Đen giảm 8 hoặc tăng 4 điểm.\n\nKết quả có thể nằm trong khoảng nào? Số dương là Đen hơn; số âm là Trắng hơn.',
+  ['−5 đến +7', '+3 đến +7', 'Đen chắc thắng 3'],
+  0,
+  'Xấu nhất cho Đen: 3 − 8 = −5, tức Trắng hơn 5.\nTốt nhất cho Đen: 3 + 4 = 7, tức Đen hơn 7.\n\nKhoảng là −5 đến +7. Đen chưa chắc thắng vì vùng chưa ổn định vẫn có thể đảo kết quả.',
+  opening
+);
+q(
+  'dan3',
+  'independent-proof',
+  'Đọc biến',
+  'Kiểm tra lời giải tự viết',
+  'Bạn đã đọc A→B→C rồi nhớ chuỗi đó. Lần ôn kế tiếp, để kiểm tra thực sự hiểu, nên làm gì?',
+  ['Chép lại chuỗi ngay', 'Giấu lời giải, xét các đáp khác và tìm phản bác'],
+  1,
+  'Khả năng tái hiện một biến khác khả năng kiểm tra mọi đáp. Ghi nước phản bác mạnh nhất và điều kiện áp dụng.'
+);
+q(
+  'dan3',
+  'rank3-evidence',
+  'Thực chiến',
+  'Bằng chứng mục tiêu 3 dan',
+  'Bạn đạt 10/10 kiểm tra trong mục tiêu 3 dan. Điều nào hợp lý?',
+  [
+    'App chứng nhận tôi là 3 dan',
+    'Tôi giải đúng bộ câu hỏi này; cần kết quả đấu thực tế để biết sức chơi',
+  ],
+  1,
+  'Chưa có dữ liệu cho thấy điểm bài này tương ứng sức chơi 3 dan. Điểm bài tập và số bài đã làm không xác nhận đẳng của bạn.'
+);
 
-q('reading','tesuji-edge-1','Tesuji','Tesuji ở biên · 1','Đen đi. Nhóm trắng chứa A1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A2","B2","B3"],0,'Chỉ A2 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B2 và B3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["C5","D5","E5","C2","E2","C1","F1"],["B6","E6","A5","A3","F3","A1","B1"]));
-q('reading','tesuji-edge-2','Tesuji','Tesuji ở biên · 2','Đen đi. Nhóm trắng chứa E1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["E2","F2","B3"],1,'Chỉ F2 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước E2 và B3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["B5","B4","A3","E3","B2","C2","D2","D1"],["C6","E6","F4","D3","F3","E1","F1"]));
-q('reading','tesuji-edge-3','Tesuji','Tesuji ở biên · 3','Đen đi. Nhóm trắng chứa A2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A4","A1","B1"],2,'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["C6","E5","B4","A3","B3","F3","C2","D2"],["C3","D3","A2","B2","F2","C1","F1"]));
-q('reading','tesuji-edge-4','Tesuji','Tesuji ở biên · 4','Đen đi. Nhóm trắng chứa A6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["B5","F2","A5"],2,'Chỉ A5 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B5 và F2 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["D6","C5","E5","C4","F4","C2","F1"],["A6","B6","C6","A4","E4","B3","E3","D2"]));
-q('reading','tesuji-edge-5','Tesuji','Tesuji ở biên · 5','Đen đi. Nhóm trắng chứa E1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["D1","A4","E2"],0,'Chỉ D1 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E2 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["E6","E5","F5","B3","D3","F3","C2","F2"],["C6","C4","A3","B2","C1","E1","F1"]));
-q('reading','tesuji-edge-6','Tesuji','Tesuji ở biên · 6','Đen đi. Nhóm trắng chứa A2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["D5","B1","A1"],1,'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và D5 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["B5","E5","A3","B3","C3","F3","C2","E1"],["F6","C5","B4","E3","A2","B2","C1"]));
-q('tactics','yose-count-1','Yose','Đếm diện tích sau khi chia biên','Bàn 7×7, không komi, đếm diện tích. Biên giới đã xong, hàng trống giữa hai bên là điểm trung lập. Ai hơn và hơn bao nhiêu?',['Đen hơn 13','Trắng hơn 13','Trắng hơn 14'],1,'Đen: 7 quân + 9 điểm đất = 16. Trắng: 10 quân + 19 điểm đất = 29. Trắng hơn 13; 4 điểm trung lập không tính cho ai.',diagram(7,['A4','B4','C4','D4','D3','D2','D1'],['A6','B6','C6','D6','E6','E5','E4','E3','E2','E1']));
-q('reading','yose-count-2','Yose','Cùng biên, thêm komi','Bàn 7×7, đếm diện tích, komi 6,5 cho Trắng. Đen có 15 điểm (7 quân + 8 đất), Trắng 29 điểm trước komi. Ai hơn và hơn bao nhiêu?',['Trắng hơn 20,5','Trắng hơn 14','Đen hơn 7,5'],0,'Trắng 29 + 6,5 = 35,5; Đen 15. Chênh 20,5 cho Trắng. Komi cộng sau khi đếm diện tích, không cộng quân đã bắt.',diagram(7,['A3','B3','C3','D3','E3','E2','E1'],['A5','B5','C5','D5','E5','F5','F4','F3','F2','F1']));
-q('tactics','opening-line-3-4','Khai cuộc','Đường thứ ba và thứ tư','Trong khai cuộc trên bàn 19×19, so với đường thứ ba, đường thứ tư thường nghiêng về điều gì?',['Ảnh hưởng ra trung tâm, nhưng đất ở biên kém chắc hơn','Đất chắc hơn nhưng ít ảnh hưởng hơn','Không khác gì nhau'],0,'Đường thứ ba lấy đất chắc ở biên; đường thứ tư để lại một khoảng hở dưới quân nhưng hướng ảnh hưởng ra giữa. Đây là xu hướng, không phải luật.');
-q('reading','tesuji-edge-7','Tesuji','Tesuji ở biên · 7','Đen đi. Nhóm trắng chứa A6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A4","B6","C2"],0,'Chỉ A4 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B6 và C2 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["F6","B5","D5","E5","C4","B3","C3","F2"],["A6","A5","A3","E3","D2","E2","A1"]));
-q('reading','tesuji-edge-8','Tesuji','Tesuji ở biên · 8','Đen đi. Nhóm trắng chứa A2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["B2","B1","F4"],1,'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B2 và F4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["A6","C6","F6","A5","E5","A3","B3","E3"],["D6","D5","A2","F2","A1","C1","E1"]));
-q('reading','tesuji-edge-9','Tesuji','Tesuji ở biên · 9','Đen đi. Nhóm trắng chứa D1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A4","E2","F2"],2,'Chỉ F2 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E2 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["D6","E6","F6","B5","C5","C4","D4","D2","C1"],["B6","F5","F3","D1","E1","F1"]));
-q('tactics','tesuji-edge-10','Tesuji','Tesuji ở biên · 10','Đen đi. Nhóm trắng chứa E5 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["F6","A4","E6"],2,'Chỉ E6 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F6 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["C5","D5","B4","C4","E4","F4","C2","F2","C1"],["D6","E5","F5","E3","A2","D1"]));
-q('tactics','tesuji-edge-11','Tesuji','Tesuji ở biên · 11','Đen đi. Nhóm trắng chứa B6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A5","E6","A6"],0,'Chỉ A5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A6 và E6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["C6","C5","B4","E4","C3","A2","D1"],["B6","F6","B5","A4","D4","F3","B1","C1"]));
-q('tactics','tesuji-edge-12','Tesuji','Tesuji ở biên · 12','Đen đi. Nhóm trắng chứa A6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["D5","B5","B6"],1,'Chỉ B5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước B6 và D5 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["C6","E5","A4","A3","E3","E2","B1","D1"],["A6","A5","C5","B4","D4","D3","F2"]));
-q('tactics','tesuji-edge-13','Tesuji','Tesuji ở biên · 13','Đen đi. Nhóm trắng chứa E2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["F2","F1","A3"],0,'Chỉ F2 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F1 và A3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["D6","C5","D5","E5","F5","C3","E3","D2","D1"],["A5","D4","B3","F3","E2","E1"]));
-q('tactics','tesuji-edge-14','Tesuji','Tesuji ở biên · 14','Đen đi. Nhóm trắng chứa A3 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A1","B1","D6"],1,'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và D6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["B6","C6","D5","A4","B3","D3","E3","C2"],["E5","F5","A3","A2","B2","C1"]));
-q('tactics','tesuji-edge-15','Tesuji','Tesuji ở biên · 15','Đen đi. Nhóm trắng chứa B2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A6","A1","A2"],2,'Chỉ A2 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và A6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["C6","B4","E4","B3","C2","F2","C1"],["B6","F5","F4","A3","E3","B2","B1","E1"]));
-q('reading','tesuji-edge-16','Tesuji','Tesuji ở biên · 16','Đen đi. Nhóm trắng chứa D6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["E5","B6","F5"],2,'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E5 và B6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["A6","C6","D5","B4","D3","A2","E2","E1"],["D6","E6","F6","C4","F4","D1"]));
-q('tactics','tesuji-edge-17','Tesuji','Tesuji ở biên · 17','Đen đi. Nhóm trắng chứa E6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["F5","A1","F6"],0,'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F6 và A1 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["A6","D6","A5","D5","E4","A2","F2","B1","F1"],["E6","C5","E5","F4","F3","C2"]));
-q('reading','tesuji-edge-18','Tesuji','Tesuji ở biên · 18','Đen đi. Nhóm trắng chứa D6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["A6","F5","E5"],1,'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E5 và A6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["C6","D5","B4","C4","B3","B2","A1","B1"],["D6","E6","F6","A4","F4","F2"]));
-q('reading','tesuji-edge-19','Tesuji','Tesuji ở biên · 19','Đen đi. Nhóm trắng chứa F6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["E6","E5","C1"],0,'Chỉ E6 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E5 và C1 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["A5","E4","F3","B2","D1","E1"],["B6","D6","F6","F5","B4","F4","A3","D3","E2"]));
-q('tactics','tesuji-edge-20','Tesuji','Tesuji ở biên · 20','Đen đi. Nhóm trắng chứa E6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',["F6","F5","A3"],1,'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F6 và A3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',diagram(6,["D6","D5","E4","D3","E3","C2","E2","B1"],["E6","E5","F4","B3","A2","E1","F1"]));
-q('tactics','yose-count-gen-1','Yose','Đếm diện tích · 1','Bàn 7×7, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Trắng hơn 12,5","Đen hơn 12,5","Trắng hơn 7"],0,'Đen: 14 điểm. Trắng: 21 điểm + komi 5,5 = 26,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 14 điểm trung lập không thuộc bên nào.',diagram(7,["B7","B6","B5","B4","A3","B3","B2","B1"],["E7","E6","E5","E4","E3","E2","E1"]));
-q('reading','yose-count-gen-2','Yose','Đếm diện tích · 2','Bàn 9×9, đếm diện tích, komi 6,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Đen hơn 15,5","Trắng hơn 15,5","Trắng hơn 9"],1,'Đen: 18 điểm. Trắng: 27 điểm + komi 6,5 = 33,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 36 điểm trung lập không thuộc bên nào.',diagram(9,["B9","B8","B7","B6","B5","B4","B3","B2","B1"],["G9","G8","J8","G7","G6","G5","G4","G3","G2","G1"]));
-q('tactics','yose-count-gen-3','Yose','Đếm diện tích · 3','Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Đen hơn 18","Trắng hơn 12,5","Đen hơn 12,5"],2,'Đen: 36 điểm. Trắng: 18 điểm + komi 5,5 = 23,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 27 điểm trung lập không thuộc bên nào.',diagram(9,["D9","D8","D7","D6","D5","A4","D4","D3","D2","D1"],["H9","H8","H7","J7","H6","H5","J5","H4","H3","H2","H1"]));
-q('reading','yose-count-gen-4','Yose','Đếm diện tích · 4','Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Đen hơn 5,5","Hòa","Trắng hơn 5,5"],2,'Đen: 27 điểm. Trắng: 27 điểm + komi 5,5 = 32,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 27 điểm trung lập không thuộc bên nào.',diagram(9,["C9","C8","C7","C6","C5","C4","C3","C2","B1","C1"],["G9","G8","G7","G6","G5","G4","G3","G2","G1"]));
-q('tactics','yose-count-gen-5','Yose','Đếm diện tích · 5','Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Đen hơn 3,5","Trắng hơn 3,5","Đen hơn 9"],0,'Đen: 36 điểm. Trắng: 27 điểm + komi 5,5 = 32,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 18 điểm trung lập không thuộc bên nào.',diagram(9,["D9","A8","D8","D7","B6","D6","D5","D4","D3","D2","D1"],["G9","G8","G7","G6","G5","G4","G3","G2","H2","G1"]));
-q('reading','yose-count-gen-6','Yose','Đếm diện tích · 6','Bàn 7×7, đếm diện tích, komi 6,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Trắng hơn 0,5","Đen hơn 0,5","Đen hơn 7"],1,'Đen: 21 điểm. Trắng: 14 điểm + komi 6,5 = 20,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 14 điểm trung lập không thuộc bên nào.',diagram(7,["C7","C6","C5","C4","C3","C2","A1","C1"],["F7","F6","F5","F4","F3","F2","G2","F1"]));
-q('tactics','yose-count-gen-7','Yose','Đếm diện tích · 7','Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Đen hơn 18","Trắng hơn 12,5","Đen hơn 12,5"],2,'Đen: 36 điểm. Trắng: 18 điểm + komi 5,5 = 23,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 27 điểm trung lập không thuộc bên nào.',diagram(9,["D9","D8","D7","D6","D5","D4","D3","D2","D1"],["H9","H8","H7","H6","H5","H4","H3","H2","J2","H1"]));
-q('reading','yose-count-gen-8','Yose','Đếm diện tích · 8','Bàn 7×7, đếm diện tích, komi 7,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',["Đen hơn 14,5","Trắng hơn 7","Trắng hơn 14,5"],2,'Đen: 14 điểm. Trắng: 21 điểm + komi 7,5 = 28,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 14 điểm trung lập không thuộc bên nào.',diagram(7,["B7","A6","B6","B5","B4","A3","B3","B2","A1","B1"],["E7","E6","E5","E4","E3","E2","E1"]));
+q(
+  'reading',
+  'tesuji-edge-1',
+  'Tesuji',
+  'Tesuji ở biên · 1',
+  'Đen đi. Nhóm trắng chứa A1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A2', 'B2', 'B3'],
+  0,
+  'Chỉ A2 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B2 và B3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(6, ['C5', 'D5', 'E5', 'C2', 'E2', 'C1', 'F1'], ['B6', 'E6', 'A5', 'A3', 'F3', 'A1', 'B1'])
+);
+q(
+  'reading',
+  'tesuji-edge-2',
+  'Tesuji',
+  'Tesuji ở biên · 2',
+  'Đen đi. Nhóm trắng chứa E1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['E2', 'F2', 'B3'],
+  1,
+  'Chỉ F2 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước E2 và B3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['B5', 'B4', 'A3', 'E3', 'B2', 'C2', 'D2', 'D1'],
+    ['C6', 'E6', 'F4', 'D3', 'F3', 'E1', 'F1']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-3',
+  'Tesuji',
+  'Tesuji ở biên · 3',
+  'Đen đi. Nhóm trắng chứa A2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A4', 'A1', 'B1'],
+  2,
+  'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['C6', 'E5', 'B4', 'A3', 'B3', 'F3', 'C2', 'D2'],
+    ['C3', 'D3', 'A2', 'B2', 'F2', 'C1', 'F1']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-4',
+  'Tesuji',
+  'Tesuji ở biên · 4',
+  'Đen đi. Nhóm trắng chứa A6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['B5', 'F2', 'A5'],
+  2,
+  'Chỉ A5 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B5 và F2 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['D6', 'C5', 'E5', 'C4', 'F4', 'C2', 'F1'],
+    ['A6', 'B6', 'C6', 'A4', 'E4', 'B3', 'E3', 'D2']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-5',
+  'Tesuji',
+  'Tesuji ở biên · 5',
+  'Đen đi. Nhóm trắng chứa E1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['D1', 'A4', 'E2'],
+  0,
+  'Chỉ D1 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E2 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['E6', 'E5', 'F5', 'B3', 'D3', 'F3', 'C2', 'F2'],
+    ['C6', 'C4', 'A3', 'B2', 'C1', 'E1', 'F1']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-6',
+  'Tesuji',
+  'Tesuji ở biên · 6',
+  'Đen đi. Nhóm trắng chứa A2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['D5', 'B1', 'A1'],
+  1,
+  'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và D5 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['B5', 'E5', 'A3', 'B3', 'C3', 'F3', 'C2', 'E1'],
+    ['F6', 'C5', 'B4', 'E3', 'A2', 'B2', 'C1']
+  )
+);
+q(
+  'tactics',
+  'yose-count-1',
+  'Yose',
+  'Đếm diện tích sau khi chia biên',
+  'Bàn 7×7, không komi, đếm diện tích. Biên giới đã xong, hàng trống giữa hai bên là điểm trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Đen hơn 13', 'Trắng hơn 13', 'Trắng hơn 14'],
+  1,
+  'Đen: 7 quân + 9 điểm đất = 16. Trắng: 10 quân + 19 điểm đất = 29. Trắng hơn 13; 4 điểm trung lập không tính cho ai.',
+  diagram(
+    7,
+    ['A4', 'B4', 'C4', 'D4', 'D3', 'D2', 'D1'],
+    ['A6', 'B6', 'C6', 'D6', 'E6', 'E5', 'E4', 'E3', 'E2', 'E1']
+  )
+);
+q(
+  'reading',
+  'yose-count-2',
+  'Yose',
+  'Cùng biên, thêm komi',
+  'Bàn 7×7, đếm diện tích, komi 6,5 cho Trắng. Đen có 15 điểm (7 quân + 8 đất), Trắng 29 điểm trước komi. Ai hơn và hơn bao nhiêu?',
+  ['Trắng hơn 20,5', 'Trắng hơn 14', 'Đen hơn 7,5'],
+  0,
+  'Trắng 29 + 6,5 = 35,5; Đen 15. Chênh 20,5 cho Trắng. Komi cộng sau khi đếm diện tích, không cộng quân đã bắt.',
+  diagram(
+    7,
+    ['A3', 'B3', 'C3', 'D3', 'E3', 'E2', 'E1'],
+    ['A5', 'B5', 'C5', 'D5', 'E5', 'F5', 'F4', 'F3', 'F2', 'F1']
+  )
+);
+q(
+  'tactics',
+  'opening-line-3-4',
+  'Khai cuộc',
+  'Đường thứ ba và thứ tư',
+  'Trong khai cuộc trên bàn 19×19, so với đường thứ ba, đường thứ tư thường nghiêng về điều gì?',
+  [
+    'Ảnh hưởng ra trung tâm, nhưng đất ở biên kém chắc hơn',
+    'Đất chắc hơn nhưng ít ảnh hưởng hơn',
+    'Không khác gì nhau',
+  ],
+  0,
+  'Đường thứ ba lấy đất chắc ở biên; đường thứ tư để lại một khoảng hở dưới quân nhưng hướng ảnh hưởng ra giữa. Đây là xu hướng, không phải luật.'
+);
+q(
+  'reading',
+  'tesuji-edge-7',
+  'Tesuji',
+  'Tesuji ở biên · 7',
+  'Đen đi. Nhóm trắng chứa A6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A4', 'B6', 'C2'],
+  0,
+  'Chỉ A4 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B6 và C2 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['F6', 'B5', 'D5', 'E5', 'C4', 'B3', 'C3', 'F2'],
+    ['A6', 'A5', 'A3', 'E3', 'D2', 'E2', 'A1']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-8',
+  'Tesuji',
+  'Tesuji ở biên · 8',
+  'Đen đi. Nhóm trắng chứa A2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['B2', 'B1', 'F4'],
+  1,
+  'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước B2 và F4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['A6', 'C6', 'F6', 'A5', 'E5', 'A3', 'B3', 'E3'],
+    ['D6', 'D5', 'A2', 'F2', 'A1', 'C1', 'E1']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-9',
+  'Tesuji',
+  'Tesuji ở biên · 9',
+  'Đen đi. Nhóm trắng chứa D1 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A4', 'E2', 'F2'],
+  2,
+  'Chỉ F2 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E2 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['D6', 'E6', 'F6', 'B5', 'C5', 'C4', 'D4', 'D2', 'C1'],
+    ['B6', 'F5', 'F3', 'D1', 'E1', 'F1']
+  )
+);
+q(
+  'tactics',
+  'tesuji-edge-10',
+  'Tesuji',
+  'Tesuji ở biên · 10',
+  'Đen đi. Nhóm trắng chứa E5 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['F6', 'A4', 'E6'],
+  2,
+  'Chỉ E6 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F6 và A4 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['C5', 'D5', 'B4', 'C4', 'E4', 'F4', 'C2', 'F2', 'C1'],
+    ['D6', 'E5', 'F5', 'E3', 'A2', 'D1']
+  )
+);
+q(
+  'tactics',
+  'tesuji-edge-11',
+  'Tesuji',
+  'Tesuji ở biên · 11',
+  'Đen đi. Nhóm trắng chứa B6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A5', 'E6', 'A6'],
+  0,
+  'Chỉ A5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A6 và E6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['C6', 'C5', 'B4', 'E4', 'C3', 'A2', 'D1'],
+    ['B6', 'F6', 'B5', 'A4', 'D4', 'F3', 'B1', 'C1']
+  )
+);
+q(
+  'tactics',
+  'tesuji-edge-12',
+  'Tesuji',
+  'Tesuji ở biên · 12',
+  'Đen đi. Nhóm trắng chứa A6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['D5', 'B5', 'B6'],
+  1,
+  'Chỉ B5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước B6 và D5 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['C6', 'E5', 'A4', 'A3', 'E3', 'E2', 'B1', 'D1'],
+    ['A6', 'A5', 'C5', 'B4', 'D4', 'D3', 'F2']
+  )
+);
+q(
+  'tactics',
+  'tesuji-edge-13',
+  'Tesuji',
+  'Tesuji ở biên · 13',
+  'Đen đi. Nhóm trắng chứa E2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['F2', 'F1', 'A3'],
+  0,
+  'Chỉ F2 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F1 và A3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['D6', 'C5', 'D5', 'E5', 'F5', 'C3', 'E3', 'D2', 'D1'],
+    ['A5', 'D4', 'B3', 'F3', 'E2', 'E1']
+  )
+);
+q(
+  'tactics',
+  'tesuji-edge-14',
+  'Tesuji',
+  'Tesuji ở biên · 14',
+  'Đen đi. Nhóm trắng chứa A3 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A1', 'B1', 'D6'],
+  1,
+  'Chỉ B1 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và D6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(6, ['B6', 'C6', 'D5', 'A4', 'B3', 'D3', 'E3', 'C2'], ['E5', 'F5', 'A3', 'A2', 'B2', 'C1'])
+);
+q(
+  'tactics',
+  'tesuji-edge-15',
+  'Tesuji',
+  'Tesuji ở biên · 15',
+  'Đen đi. Nhóm trắng chứa B2 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A6', 'A1', 'A2'],
+  2,
+  'Chỉ A2 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước A1 và A6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['C6', 'B4', 'E4', 'B3', 'C2', 'F2', 'C1'],
+    ['B6', 'F5', 'F4', 'A3', 'E3', 'B2', 'B1', 'E1']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-16',
+  'Tesuji',
+  'Tesuji ở biên · 16',
+  'Đen đi. Nhóm trắng chứa D6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['E5', 'B6', 'F5'],
+  2,
+  'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E5 và B6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(6, ['A6', 'C6', 'D5', 'B4', 'D3', 'A2', 'E2', 'E1'], ['D6', 'E6', 'F6', 'C4', 'F4', 'D1'])
+);
+q(
+  'tactics',
+  'tesuji-edge-17',
+  'Tesuji',
+  'Tesuji ở biên · 17',
+  'Đen đi. Nhóm trắng chứa E6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['F5', 'A1', 'F6'],
+  0,
+  'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F6 và A1 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['A6', 'D6', 'A5', 'D5', 'E4', 'A2', 'F2', 'B1', 'F1'],
+    ['E6', 'C5', 'E5', 'F4', 'F3', 'C2']
+  )
+);
+q(
+  'reading',
+  'tesuji-edge-18',
+  'Tesuji',
+  'Tesuji ở biên · 18',
+  'Đen đi. Nhóm trắng chứa D6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['A6', 'F5', 'E5'],
+  1,
+  'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E5 và A6 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(6, ['C6', 'D5', 'B4', 'C4', 'B3', 'B2', 'A1', 'B1'], ['D6', 'E6', 'F6', 'A4', 'F4', 'F2'])
+);
+q(
+  'reading',
+  'tesuji-edge-19',
+  'Tesuji',
+  'Tesuji ở biên · 19',
+  'Đen đi. Nhóm trắng chứa F6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 3 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['E6', 'E5', 'C1'],
+  0,
+  'Chỉ E6 thắng khi Trắng đáp mọi cách (đã đọc đủ 5 lượt). Nước E5 và C1 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['A5', 'E4', 'F3', 'B2', 'D1', 'E1'],
+    ['B6', 'D6', 'F6', 'F5', 'B4', 'F4', 'A3', 'D3', 'E2']
+  )
+);
+q(
+  'tactics',
+  'tesuji-edge-20',
+  'Tesuji',
+  'Tesuji ở biên · 20',
+  'Đen đi. Nhóm trắng chứa E6 chỉ còn 2 khí. Nước nào bắt được nhóm trong 2 nước của Đen, dù Trắng đáp tốt nhất? Có thể có nước tự đưa quân vào atari.',
+  ['F6', 'F5', 'A3'],
+  1,
+  'Chỉ F5 thắng khi Trắng đáp mọi cách (đã đọc đủ 3 lượt). Nước F6 và A3 không bắt được nhóm trong số nước này. Quân hy sinh có thể là cách duy nhất khóa đường thoát.',
+  diagram(
+    6,
+    ['D6', 'D5', 'E4', 'D3', 'E3', 'C2', 'E2', 'B1'],
+    ['E6', 'E5', 'F4', 'B3', 'A2', 'E1', 'F1']
+  )
+);
+q(
+  'tactics',
+  'yose-count-gen-1',
+  'Yose',
+  'Đếm diện tích · 1',
+  'Bàn 7×7, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Trắng hơn 12,5', 'Đen hơn 12,5', 'Trắng hơn 7'],
+  0,
+  'Đen: 14 điểm. Trắng: 21 điểm + komi 5,5 = 26,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 14 điểm trung lập không thuộc bên nào.',
+  diagram(
+    7,
+    ['B7', 'B6', 'B5', 'B4', 'A3', 'B3', 'B2', 'B1'],
+    ['E7', 'E6', 'E5', 'E4', 'E3', 'E2', 'E1']
+  )
+);
+q(
+  'reading',
+  'yose-count-gen-2',
+  'Yose',
+  'Đếm diện tích · 2',
+  'Bàn 9×9, đếm diện tích, komi 6,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Đen hơn 15,5', 'Trắng hơn 15,5', 'Trắng hơn 9'],
+  1,
+  'Đen: 18 điểm. Trắng: 27 điểm + komi 6,5 = 33,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 36 điểm trung lập không thuộc bên nào.',
+  diagram(
+    9,
+    ['B9', 'B8', 'B7', 'B6', 'B5', 'B4', 'B3', 'B2', 'B1'],
+    ['G9', 'G8', 'J8', 'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'G1']
+  )
+);
+q(
+  'tactics',
+  'yose-count-gen-3',
+  'Yose',
+  'Đếm diện tích · 3',
+  'Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Đen hơn 18', 'Trắng hơn 12,5', 'Đen hơn 12,5'],
+  2,
+  'Đen: 36 điểm. Trắng: 18 điểm + komi 5,5 = 23,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 27 điểm trung lập không thuộc bên nào.',
+  diagram(
+    9,
+    ['D9', 'D8', 'D7', 'D6', 'D5', 'A4', 'D4', 'D3', 'D2', 'D1'],
+    ['H9', 'H8', 'H7', 'J7', 'H6', 'H5', 'J5', 'H4', 'H3', 'H2', 'H1']
+  )
+);
+q(
+  'reading',
+  'yose-count-gen-4',
+  'Yose',
+  'Đếm diện tích · 4',
+  'Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Đen hơn 5,5', 'Hòa', 'Trắng hơn 5,5'],
+  2,
+  'Đen: 27 điểm. Trắng: 27 điểm + komi 5,5 = 32,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 27 điểm trung lập không thuộc bên nào.',
+  diagram(
+    9,
+    ['C9', 'C8', 'C7', 'C6', 'C5', 'C4', 'C3', 'C2', 'B1', 'C1'],
+    ['G9', 'G8', 'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'G1']
+  )
+);
+q(
+  'tactics',
+  'yose-count-gen-5',
+  'Yose',
+  'Đếm diện tích · 5',
+  'Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Đen hơn 3,5', 'Trắng hơn 3,5', 'Đen hơn 9'],
+  0,
+  'Đen: 36 điểm. Trắng: 27 điểm + komi 5,5 = 32,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 18 điểm trung lập không thuộc bên nào.',
+  diagram(
+    9,
+    ['D9', 'A8', 'D8', 'D7', 'B6', 'D6', 'D5', 'D4', 'D3', 'D2', 'D1'],
+    ['G9', 'G8', 'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'H2', 'G1']
+  )
+);
+q(
+  'reading',
+  'yose-count-gen-6',
+  'Yose',
+  'Đếm diện tích · 6',
+  'Bàn 7×7, đếm diện tích, komi 6,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Trắng hơn 0,5', 'Đen hơn 0,5', 'Đen hơn 7'],
+  1,
+  'Đen: 21 điểm. Trắng: 14 điểm + komi 6,5 = 20,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 14 điểm trung lập không thuộc bên nào.',
+  diagram(
+    7,
+    ['C7', 'C6', 'C5', 'C4', 'C3', 'C2', 'A1', 'C1'],
+    ['F7', 'F6', 'F5', 'F4', 'F3', 'F2', 'G2', 'F1']
+  )
+);
+q(
+  'tactics',
+  'yose-count-gen-7',
+  'Yose',
+  'Đếm diện tích · 7',
+  'Bàn 9×9, đếm diện tích, komi 5,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Đen hơn 18', 'Trắng hơn 12,5', 'Đen hơn 12,5'],
+  2,
+  'Đen: 36 điểm. Trắng: 18 điểm + komi 5,5 = 23,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 27 điểm trung lập không thuộc bên nào.',
+  diagram(
+    9,
+    ['D9', 'D8', 'D7', 'D6', 'D5', 'D4', 'D3', 'D2', 'D1'],
+    ['H9', 'H8', 'H7', 'H6', 'H5', 'H4', 'H3', 'H2', 'J2', 'H1']
+  )
+);
+q(
+  'reading',
+  'yose-count-gen-8',
+  'Yose',
+  'Đếm diện tích · 8',
+  'Bàn 7×7, đếm diện tích, komi 7,5 cho Trắng. Các cột đã xong; điểm trống giữa hai bên là trung lập. Ai hơn và hơn bao nhiêu?',
+  ['Đen hơn 14,5', 'Trắng hơn 7', 'Trắng hơn 14,5'],
+  2,
+  'Đen: 14 điểm. Trắng: 21 điểm + komi 7,5 = 28,5. Quân thêm trong đất của mình không đổi điểm vì quân thay chỗ đất. 14 điểm trung lập không thuộc bên nào.',
+  diagram(
+    7,
+    ['B7', 'A6', 'B6', 'B5', 'B4', 'A3', 'B3', 'B2', 'A1', 'B1'],
+    ['E7', 'E6', 'E5', 'E4', 'E3', 'E2', 'E1']
+  )
+);
 
-export {questions};
-export function stageForDepth(depth) { return depth === 1 ? 'foundation' : depth === 3 ? 'tactics' : depth === 5 ? 'reading' : depth === 7 ? 'strategy' : 'dan'; }
+export { questions };
+export function stageForDepth(depth) {
+  return depth === 1
+    ? 'foundation'
+    : depth === 3
+      ? 'tactics'
+      : depth === 5
+        ? 'reading'
+        : depth === 7
+          ? 'strategy'
+          : 'dan';
+}
 export function buildBank(readingBank) {
-  return [...readingBank.map((p,i)=>({
-    ...p,id:p.id,kind:'reading',stage:p.goal==='eyes'?(p.depth===1?'tactics':p.depth===3?'reading':p.depth===5?'strategy':'dan'):stageForDepth(p.depth),topic:p.shape==='tactical'?'Đọc biến':'Sống/chết',
-    title:p.goal==='eyes'?`Tạo hai mắt · ${i+1}`:p.shape==='tactical'?`Tìm cách bắt nhóm Trắng · ${i+1}`:`Ngăn nhóm Trắng sống · ${i+1}`,
-    prompt:p.goal==='eyes'?`Bạn cầm Đen và đi trước. Tạo hai mắt thật riêng cho nhóm có dấu tam giác trong ${Math.ceil(p.depth/2)} nước của bạn (tổng ${p.depth} lượt của hai bên). Trắng có thể đi bất kỳ điểm hợp lệ nào hoặc bỏ lượt.`:`Bạn cầm Đen và đi trước. Bắt nhóm Trắng có dấu tam giác trong ${Math.ceil(p.depth/2)} nước của bạn (tổng ${p.depth} lượt của hai bên). Trắng có thể đi bất kỳ điểm hợp lệ nào hoặc bỏ lượt.`,
-    explanation:p.goal==='eyes'?'Mục tiêu là hai điểm trống riêng, mỗi điểm chỉ giáp quân của cùng nhóm đen được đánh dấu. Với luật cấm tự sát, đối thủ không thể lấp một mắt để bắt nhóm còn mắt kia. App kiểm tra các cách đáp trong số lượt cho phép. Kết quả bài không đánh giá sức chơi cả ván.':'App kiểm tra các cách đặt quân của hai bên và bỏ lượt của Trắng trên bàn bài tập. Không được đặt quân để lặp lại bất kỳ thế bàn cũ nào. Bạn phải bắt nhóm trong số lượt cho phép; kết quả không đánh giá cuộc tranh ko cả bàn 19×19 hoặc xếp hạng bạn.'
-  })),...questions];
+  return [
+    ...readingBank.map((p, i) => ({
+      ...p,
+      id: p.id,
+      kind: 'reading',
+      stage:
+        p.goal === 'eyes'
+          ? p.depth === 1
+            ? 'tactics'
+            : p.depth === 3
+              ? 'reading'
+              : p.depth === 5
+                ? 'strategy'
+                : 'dan'
+          : stageForDepth(p.depth),
+      topic: p.shape === 'tactical' ? 'Đọc biến' : 'Sống/chết',
+      title:
+        p.goal === 'eyes'
+          ? `Tạo hai mắt · ${i + 1}`
+          : p.shape === 'tactical'
+            ? `Tìm cách bắt nhóm Trắng · ${i + 1}`
+            : `Ngăn nhóm Trắng sống · ${i + 1}`,
+      prompt:
+        p.goal === 'eyes'
+          ? `Bạn cầm Đen và đi trước. Tạo hai mắt thật riêng cho nhóm có dấu tam giác trong ${Math.ceil(p.depth / 2)} nước của bạn (tổng ${p.depth} lượt của hai bên). Trắng có thể đi bất kỳ điểm hợp lệ nào hoặc bỏ lượt.`
+          : `Bạn cầm Đen và đi trước. Bắt nhóm Trắng có dấu tam giác trong ${Math.ceil(p.depth / 2)} nước của bạn (tổng ${p.depth} lượt của hai bên). Trắng có thể đi bất kỳ điểm hợp lệ nào hoặc bỏ lượt.`,
+      explanation:
+        p.goal === 'eyes'
+          ? 'Mục tiêu là hai điểm trống riêng, mỗi điểm chỉ giáp quân của cùng nhóm đen được đánh dấu. Với luật cấm tự sát, đối thủ không thể lấp một mắt để bắt nhóm còn mắt kia. App kiểm tra các cách đáp trong số lượt cho phép. Kết quả bài không đánh giá sức chơi cả ván.'
+          : 'App kiểm tra các cách đặt quân của hai bên và bỏ lượt của Trắng trên bàn bài tập. Không được đặt quân để lặp lại bất kỳ thế bàn cũ nào. Bạn phải bắt nhóm trong số lượt cho phép; kết quả không đánh giá cuộc tranh ko cả bàn 19×19 hoặc xếp hạng bạn.',
+    })),
+    ...questions,
+  ];
 }

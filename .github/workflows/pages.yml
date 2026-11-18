@@ -23,13 +23,12 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
-      - run: npm test
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
-      - run: |
-          mkdir -p public
-          cp index.html style.css workspace.css footer.js app.js engine.js lessons.js train.html train.css train.js curriculum.js study-state.js symmetry.js backup.js dead-stones.js ogs.js manifest.webmanifest register-sw.js sw.js icon.svg icon-192.png icon-512.png reading.js reading-worker.js reading-bank.json review.html review.css review.js sgf.js terms.js game-record.js area-score.js search-engine.js search-worker.js public/
-          cp -R fonts public/
-          touch public/.nojekyll
+      - run: node scripts/build.mjs
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: public

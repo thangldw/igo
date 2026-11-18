@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true
+  },
+  "include": ["*.js"],
+  "exclude": [
+    "node_modules",
+    "public",
+    "playwright.config.js",
+    "eslint.config.js",
+    "sw.js",
+    "footer.js",
+    "register-sw.js",
+    "*-worker.js"
+  ]
+}
