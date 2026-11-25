@@ -554,9 +554,11 @@ body[data-mode='game'] #board-size {
   margin: 0 auto;
   padding: 0 var(--home-gutter);
 }
-.resume-home main,
-.resume-home .learn-main {
+/* The page body is a flex column; auto margins would shrink <main> to its content, so give it the full row. */
+.resume-home main {
   flex: 1 0 auto;
+  box-sizing: border-box;
+  width: 100%;
 }
 @media (max-width: 900px) {
   .app-bar {
