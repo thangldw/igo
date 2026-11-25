@@ -26,11 +26,10 @@ function scoreDetails() {
 
 export function draw() {
   const root = $('board');
-  const zoom = Number($('board-zoom').value) / 100;
-  const large = app.mode === 'game' && (app.n > 9 || zoom > 1);
+  const large = app.mode === 'game' && app.n > 9;
   const width = boardPixelWidth({
     n: app.n,
-    zoom,
+    zoom: 1,
     columnWidth: document.querySelector('.stage-board').clientWidth - 48,
     viewportHeight: window.innerHeight,
   });
