@@ -165,8 +165,6 @@ $('review-game').onclick = () => {
   else message('Không chuyển được ván. Hãy tải SGF và mở ở Xem lại ván.', 'error');
 };
 
-$('board-zoom').oninput = draw;
-
 $('confirm-point').onclick = () => {
   if (app.pendingPoint >= 0) click(app.pendingPoint, true);
 };

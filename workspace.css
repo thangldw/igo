@@ -572,3 +572,43 @@ body[data-mode='game'] #board-size {
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
+
+/* Vs. computer controls: setup selects in a two-column grid, actions grouped, options last. */
+#game-controls {
+  display: grid;
+  gap: 16px;
+}
+#game-controls .ctl-setup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+#game-controls .ctl-setup label {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+#game-controls .ctl-setup select {
+  width: 100%;
+}
+#game-controls .ctl-setup label:nth-child(1),
+#game-controls .ctl-setup label:nth-child(2),
+#game-controls .ctl-setup label:nth-child(5) {
+  grid-column: 1 / -1;
+}
+#game-controls .ctl-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #d1d7c9);
+}
+#game-controls .ctl-actions #review-game {
+  grid-column: 1 / -1;
+}
+#game-controls .ctl-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}

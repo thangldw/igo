@@ -105,69 +105,67 @@
             <details id="terms" class="term-help"></details>
             <div id="concept" class="concept" hidden></div>
             <div id="game-controls" hidden>
-              <label for="game-size"
-                >Bàn cờ
-                <select id="game-size">
-                  <option value="9">9×9 · tập luật</option>
-                  <option value="13">13×13 · bước chuyển tiếp</option>
-                  <option value="19">19×19 · bàn chuẩn</option>
-                </select></label
-              ><label for="bot-level"
-                >Mức máy
-                <select id="bot-level">
-                  <option value="easy">Dễ · mới học</option>
-                  <option value="search">Tìm kiếm · xét cách đối thủ đáp</option>
-                  <option value="basic">Cơ bản · ưu tiên bắt và cứu quân</option>
-                </select></label
-              ><label for="game-handicap"
-                >Chấp
-                <select id="game-handicap">
-                  <option value="0">Không chấp</option>
-                  <option value="2">2 quân</option>
-                  <option value="3">3 quân</option>
-                  <option value="4">4 quân</option>
-                  <option value="5">5 quân</option>
-                  <option value="6">6 quân</option>
-                  <option value="7">7 quân</option>
-                  <option value="8">8 quân</option>
-                  <option value="9">9 quân</option>
-                </select></label
-              ><label for="game-komi"
-                >Komi
-                <select id="game-komi">
-                  <option value="6.5" selected>6,5 (không chấp)</option>
-                  <option value="7.5">7,5</option>
-                  <option value="5.5">5,5</option>
-                  <option value="3.5">3,5</option>
-                  <option value="0.5">0,5 (có chấp)</option>
-                  <option value="0">0</option>
-                </select></label
-              ><label for="clock-limit"
-                >Đồng hồ của bạn
-                <select id="clock-limit">
-                  <option value="0">Tắt</option>
-                  <option value="300">5 phút</option>
-                  <option value="600">10 phút</option>
-                  <option value="1200">20 phút</option>
-                  <option value="1800">30 phút</option>
-                </select></label
-              ><button id="pass">Bỏ lượt</button><button id="undo">Lùi lượt</button
-              ><button id="new-game">Ván mới</button><button id="export-game">Tải SGF</button
-              ><button id="review-game">Xem lại ván này →</button
-              ><label
-                >Độ phóng
-                <input
-                  id="board-zoom"
-                  type="range"
-                  min="100"
-                  max="180"
-                  step="20"
-                  value="100" /></label
-              ><label><input id="confirm-move" type="checkbox" /> Xác nhận trước khi đặt</label
-              ><button id="confirm-point" hidden>Đặt quân ở điểm đã chọn</button
-              ><button id="cancel-point" hidden>Hủy chọn</button
-              ><span id="game-save-status" role="status"></span
-              ><label><input type="checkbox" id="show-liberties" /> Hiện khí khi chọn quân</label>
+              <div class="ctl-setup">
+                <label for="game-size"
+                  >Bàn cờ
+                  <select id="game-size">
+                    <option value="9">9×9 · tập luật</option>
+                    <option value="13">13×13 · bước chuyển tiếp</option>
+                    <option value="19">19×19 · bàn chuẩn</option>
+                  </select></label
+                ><label for="bot-level"
+                  >Mức máy
+                  <select id="bot-level">
+                    <option value="easy">Dễ · mới học</option>
+                    <option value="search">Tìm kiếm · xét cách đối thủ đáp</option>
+                    <option value="basic">Cơ bản · ưu tiên bắt và cứu quân</option>
+                  </select></label
+                ><label for="game-handicap"
+                  >Chấp
+                  <select id="game-handicap">
+                    <option value="0">Không chấp</option>
+                    <option value="2">2 quân</option>
+                    <option value="3">3 quân</option>
+                    <option value="4">4 quân</option>
+                    <option value="5">5 quân</option>
+                    <option value="6">6 quân</option>
+                    <option value="7">7 quân</option>
+                    <option value="8">8 quân</option>
+                    <option value="9">9 quân</option>
+                  </select></label
+                ><label for="game-komi"
+                  >Komi
+                  <select id="game-komi">
+                    <option value="6.5" selected>6,5 (không chấp)</option>
+                    <option value="7.5">7,5</option>
+                    <option value="5.5">5,5</option>
+                    <option value="3.5">3,5</option>
+                    <option value="0.5">0,5 (có chấp)</option>
+                    <option value="0">0</option>
+                  </select></label
+                ><label for="clock-limit"
+                  >Đồng hồ của bạn
+                  <select id="clock-limit">
+                    <option value="0">Tắt</option>
+                    <option value="300">5 phút</option>
+                    <option value="600">10 phút</option>
+                    <option value="1200">20 phút</option>
+                    <option value="1800">30 phút</option>
+                  </select></label
+                >
+              </div>
+              <div class="ctl-actions">
+                <button id="pass">Bỏ lượt</button><button id="undo">Lùi lượt</button
+                ><button id="new-game">Ván mới</button><button id="export-game">Tải SGF</button
+                ><button id="review-game">Xem lại ván này →</button>
+              </div>
+              <div class="ctl-options">
+                <label><input id="confirm-move" type="checkbox" /> Xác nhận trước khi đặt</label
+                ><label><input type="checkbox" id="show-liberties" /> Hiện khí khi chọn quân</label
+                ><button id="confirm-point" hidden>Đặt quân ở điểm đã chọn</button
+                ><button id="cancel-point" hidden>Hủy chọn</button
+                ><span id="game-save-status" role="status"></span>
+              </div>
             </div>
             <section id="scoring-panel" hidden>
               <h3>Kiểm tra điểm cuối ván</h3>
