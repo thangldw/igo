@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta
@@ -7,11 +7,13 @@
       content="default-src &#x27;self&#x27;; script-src &#x27;self&#x27;; style-src &#x27;self&#x27;; img-src &#x27;self&#x27; data:; font-src &#x27;self&#x27;; connect-src &#x27;self&#x27; https://online-go.com; worker-src &#x27;self&#x27;; manifest-src &#x27;self&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;self&#x27;; form-action &#x27;self&#x27;"
     />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#1d4ed8" />
     <title>Igo — Luyện cờ vây từ nhập môn đến nâng cao</title>
-    <link rel="stylesheet" href="/css/tokens.css?v=20261103igo" />
+    <link rel="stylesheet" href="/css/icons.css?v=20260714" />
+    <link rel="stylesheet" href="/css/tokens.css?v=20261102b" />
+    <link rel="stylesheet" href="/css/site-shell.css?v=20261011vi" />
+    <link rel="stylesheet" href="/css/homepage.css?v=20261125-apps" />
     <link rel="stylesheet" href="./style.css" />
-    <link rel="stylesheet" href="/css/compact-footer.css?v=20261103footer" />
     <link rel="stylesheet" href="/css/support-dialog.css?v=20261006all" />
     <script defer src="/js/support-dialog.js?v=20261106-i18n"></script>
     <link
@@ -21,36 +23,43 @@
       type="font/woff2"
       crossorigin
     />
-    <link rel="stylesheet" href="/css/app-brand.css?v=20261006brand" />
     <link rel="stylesheet" href="./workspace.css" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <script type="module" src="./register-sw.js"></script>
   </head>
-  <body>
+  <body class="site-page resume-home">
     <a class="skip-link" href="#main">Bỏ qua menu, tới nội dung</a>
-    <header class="site-header">
-      <div class="app-owner-group">
-        <a class="site-brand app-owner-brand" href="/" aria-label="Trang chủ Thang Luu"
-          ><span class="site-brand-mark" aria-hidden="true">t:&gt;</span
-          ><span aria-hidden="true">thang<span class="site-brand-dot">.</span></span></a
-        ><a class="brand app-owner-title" href="./" aria-label="Igo · trang bắt đầu"
+    <header class="site-header home-header" id="siteHeader">
+      <div class="site-shell-inner">
+        <a class="site-brand" href="/" aria-label="Trang chủ Thang Luu"
+          ><span class="site-brand-mark" aria-hidden="true">t:&gt;</span><span>Thang Luu</span></a
+        >
+        <nav class="site-nav" aria-label="Điều hướng trang">
+          <a href="/apps/" data-site-nav="apps">Ứng dụng</a
+          ><a href="/community/" data-site-nav="community">Cộng đồng</a>
+        </nav>
+        <div class="header-actions"><span id="supportSlot"></span></div>
+      </div>
+    </header>
+    <div class="app-bar">
+      <div class="app-bar-inner">
+        <a class="brand app-owner-title" href="./" aria-label="Igo · trang bắt đầu"
           >igo<span>囲碁</span></a
         >
+        <nav class="app-steps" aria-label="Các bước học Igo">
+          <a data-nav="learn" href="./index.html" aria-current="page"
+            ><span class="step-num" aria-hidden="true">1</span>Học cách chơi</a
+          ><a data-nav="train" href="./train.html"
+            ><span class="step-num" aria-hidden="true">2</span>Luyện bài tập</a
+          ><a data-nav="play" href="./index.html?play=1"
+            ><span class="step-num" aria-hidden="true">3</span>Chơi với máy</a
+          ><a data-nav="review" href="./review.html"
+            ><span class="step-num" aria-hidden="true">4</span>Xem lại ván</a
+          >
+        </nav>
       </div>
-      <div id="supportSlot" class="support-slot"></div>
-      <nav class="site-nav" aria-label="Điều hướng chính">
-        <a data-nav="learn" href="./index.html" aria-current="page"
-          ><span class="step-num" aria-hidden="true">1</span>Học cách chơi</a
-        ><a data-nav="train" href="./train.html"
-          ><span class="step-num" aria-hidden="true">2</span>Luyện bài tập</a
-        ><a data-nav="play" href="./index.html?play=1"
-          ><span class="step-num" aria-hidden="true">3</span>Chơi với máy</a
-        ><a data-nav="review" href="./review.html"
-          ><span class="step-num" aria-hidden="true">4</span>Xem lại ván</a
-        >
-      </nav>
-    </header>
+    </div>
     <main id="main" tabindex="-1" class="learn-main">
       <aside>
         <h1 class="page-title">Học cách chơi</h1>
@@ -220,13 +229,10 @@
       </section>
     </main>
 
-    <footer class="compact-footer">
+    <footer class="home-foot">
       <p class="footer-signature">
-        <span
-          ><strong translate="no">Igo</strong> © <span data-footer-year>2026</span>
-          <a href="/">thang.</a></span
-        >
-        <span lang="en" translate="no">crafted with care. stay steadfast, stay free</span>
+        <span>Làm việc bằng sự tận tâm, vững vàng, tự do</span>
+        <span>© <span data-footer-year>2026</span> Thang Luu</span>
       </p>
     </footer>
     <script defer src="./footer.js"></script>

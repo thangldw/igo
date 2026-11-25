@@ -465,13 +465,13 @@ body > .support-floating-trigger {
 
 /* Four-step navigation: equal columns with the step number above the label on narrow screens. */
 @media (max-width: 560px) {
-  .site-nav {
+  .app-steps {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     width: 100%;
     gap: 0;
   }
-  .site-nav a {
+  .app-steps a {
     flex-direction: column;
     gap: 3px;
     padding: 6px 2px;
@@ -482,7 +482,7 @@ body > .support-floating-trigger {
   }
 }
 @media (max-width: 560px) {
-  .site-nav .step-num {
+  .app-steps .step-num {
     flex: none;
     width: 22px;
     height: 22px;
@@ -490,64 +490,23 @@ body > .support-floating-trigger {
     font-size: 11px;
   }
 }
-
-/* Shared "support" button lives in the header, just before step 1 of the navigation (via the shared #supportSlot hook). */
-.site-header .support-slot {
-  display: flex;
-  align-items: center;
-  flex: none;
-}
-.site-header .support-slot .support-floating-trigger {
-  position: static;
-  z-index: auto;
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  white-space: nowrap;
-}
 @media (max-width: 900px) {
-  .site-header .site-nav {
+  .app-bar .app-steps {
     order: 3;
     flex: 1 0 100%;
   }
-  .site-header .support-slot {
-    margin-left: auto;
-  }
 }
 @media (max-width: 560px) {
-  .site-header {
+  .app-bar {
     flex-wrap: wrap;
-  }
-  .site-header .app-owner-group {
-    flex: 0 1 auto;
-    min-width: 0;
-  }
-  .site-header .support-slot {
-    flex: 0 1 auto;
-    min-width: 0;
-  }
-  .site-header .support-slot .support-floating-trigger {
-    min-height: 40px;
-    max-width: 112px;
-    padding: 4px 10px;
-    font-size: 12px;
-    line-height: 1.2;
-    white-space: normal;
-    text-align: center;
   }
 }
 /* Very narrow phones (≤359px): drop the kanji subtitle and tighten the nav so brand + support button + four steps still fit. */
 @media (max-width: 359px) {
-  .site-header .app-owner-title span {
+  .app-bar .app-owner-title span {
     display: none;
   }
-  .site-header .support-slot .support-floating-trigger {
-    max-width: 100px;
-    font-size: 11px;
-    padding: 4px 8px;
-  }
-  .site-nav a {
+  .app-steps a {
     font-size: 11px;
     padding: 6px 0;
   }
@@ -565,4 +524,42 @@ body[data-mode='game'] .side-lessons {
 }
 body[data-mode='game'] #board-size {
   display: none;
+}
+
+/* App row under the shared site header: product name on the left, the four study steps on the right. */
+.app-bar {
+  position: sticky;
+  top: 68px;
+  z-index: 9;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-raised, #fff);
+}
+.resume-home {
+  /* Match the workspace column so the shared header lines up with the page content. */
+  --home-width: 1288px;
+}
+.app-bar-inner {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  max-width: calc(var(--home-width) + 2 * var(--home-gutter));
+  margin: 0 auto;
+  padding: 0 var(--home-gutter);
+}
+.resume-home main,
+.resume-home .learn-main {
+  flex: 1 0 auto;
+}
+@media (max-width: 900px) {
+  .app-bar {
+    position: static;
+  }
 }

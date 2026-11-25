@@ -6,7 +6,7 @@ import { parseHTML } from 'linkedom';
 const PAGES = ['index.html', 'train.html', 'review.html'];
 const doc = (f) => parseHTML(readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).document;
 const links = (f) =>
-  [...doc(f).querySelectorAll('.site-nav a')].map((a) => ({
+  [...doc(f).querySelectorAll('.app-steps a')].map((a) => ({
     key: a.dataset.nav,
     href: a.getAttribute('href'),
     current: a.getAttribute('aria-current') === 'page',
@@ -46,13 +46,18 @@ test('each page marks exactly its own item as current', () => {
   assert.deepEqual(current('review.html'), ['review']);
 });
 
-test('support button slot sits in the header between the brand and navigation on every page', () => {
+test('support button slot sits in the shared site header on every page', () => {
   for (const f of PAGES) {
     const d = doc(f);
     assert.equal(d.querySelectorAll('#supportSlot').length, 1, f);
     const slot = d.getElementById('supportSlot');
-    assert.equal(slot.parentElement.tagName, 'HEADER', f);
-    assert.equal(slot.nextElementSibling?.className, 'site-nav', f);
-    assert.ok(slot.previousElementSibling, `${f}: brand group precedes the slot`);
+    assert.equal(slot.closest('header')?.id, 'siteHeader', f);
+    assert.ok(slot.closest('.header-actions'), `${f}: slot sits in the header actions`);
+    assert.ok(d.querySelector('header .site-brand'), `${f}: shared brand is present`);
+    assert.equal(
+      d.querySelectorAll('header .site-nav a').length,
+      2,
+      `${f}: Apps and Community links`
+    );
   }
 });

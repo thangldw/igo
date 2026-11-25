@@ -31,7 +31,7 @@ export function syncNav() {
   const title = document.querySelector('.page-title');
   if (title) title.textContent = app.mode === 'game' ? 'Chơi với máy' : 'Học cách chơi';
   for (const link of /** @type {NodeListOf<HTMLElement>} */ (
-    document.querySelectorAll('.site-nav a[data-nav]')
+    document.querySelectorAll('.app-steps a[data-nav]')
   )) {
     const on = link.dataset.nav === (app.mode === 'game' ? 'play' : 'learn');
     if (link.dataset.nav === 'learn' || link.dataset.nav === 'play')

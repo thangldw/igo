@@ -57,7 +57,7 @@ test('the build generates a service worker that precaches every shipped file', (
       new RegExp(`href="\\./?style\\.css\\?v=${version}"|href="style\\.css\\?v=${version}"`),
       `${page} local css is versioned`
     );
-    assert.ok(html.includes('?v=20261103igo'), `${page} keeps shared root assets untouched`);
+    assert.ok(html.includes('/css/tokens.css?v='), `${page} keeps shared root assets untouched`);
     assert.ok(
       !/(?:href|src)="(?!\/|https?:)[^"?]*\.(?:css|js)"/.test(html),
       `${page} has an unversioned local asset`
