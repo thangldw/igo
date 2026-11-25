@@ -565,3 +565,10 @@ body[data-mode='game'] #board-size {
     position: static;
   }
 }
+
+/* Vs. computer: the lesson rail is empty here, so give its width to the board.
+   Otherwise the board column is ~400px and the zoom slider only scrolls it. */
+.learn-main:has(#game-controls:not([hidden])) {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
