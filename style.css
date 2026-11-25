@@ -60,7 +60,8 @@ a:focus-visible {
   outline: 3px solid var(--color-accent, #965025);
   outline-offset: 3px;
 }
-header {
+/* Page-level header and footer come from the shared site shell; this is the app's own row. */
+.app-bar {
   height: 92px;
   margin: 0 5%;
   display: flex;
@@ -593,20 +594,20 @@ h3 {
 }
 
 /* Navigation shared by all three learning areas. */
-.site-header {
+.app-bar {
   height: auto;
   min-height: 90px;
   gap: 25px;
   padding: 15px 0;
   flex-wrap: wrap;
 }
-.site-nav {
+.app-steps {
   display: flex;
   gap: 6px;
   margin: 0;
   overflow: visible;
 }
-.site-nav a {
+.app-steps a {
   padding: 12px 16px;
   border-radius: 8px;
   color: var(--color-text, #23291f);
@@ -614,12 +615,12 @@ h3 {
   font-size: 14px;
   white-space: nowrap;
 }
-.site-nav a[aria-current='page'] {
+.app-steps a[aria-current='page'] {
   background: var(--color-text, #23291f);
   color: #fff;
   font-weight: 600;
 }
-.site-nav a:hover {
+.app-steps a:hover {
   background: var(--color-surface-subtle, #e9ede3);
   color: var(--color-text, #23291f);
 }
@@ -727,24 +728,24 @@ h3 {
   }
 }
 @media (max-width: 700px) {
-  .site-header {
+  .app-bar {
     gap: 10px;
     padding: 12px 0;
     align-items: center;
   }
-  .site-header .brand {
+  .app-bar .brand {
     font-size: 32px;
   }
-  .site-header .brand span {
+  .app-bar .brand span {
     font-size: 14px;
   }
-  .site-nav {
+  .app-steps {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
   }
-  .site-nav a {
+  .app-steps a {
     padding: 12px 5px;
     text-align: center;
     font-size: 12px;
@@ -763,7 +764,7 @@ h3 {
     font-size: 12px;
     padding: 12px;
   }
-  .site-header + main {
+  .app-bar + main {
     margin-top: 22px;
   }
   #lessons,
@@ -802,7 +803,7 @@ h3 {
 .term-help[hidden] {
   display: none;
 }
-.site-nav a[aria-current='page']:hover {
+.app-steps a[aria-current='page']:hover {
   background: var(--color-text-body, #535e4b);
   color: white;
 }
@@ -811,7 +812,7 @@ h3 {
   margin-top: 3px;
 }
 
-.site-header {
+.app-bar {
   position: sticky;
   top: 0;
   z-index: 10;
@@ -937,15 +938,15 @@ h1 {
   white-space: pre-line;
 }
 
-.site-header .app-owner-title {
+.app-bar .app-owner-title {
   font-size: 26px;
   gap: 8px;
 }
-.site-header .app-owner-title span {
+.app-bar .app-owner-title span {
   font-size: 13px;
 }
 @media (max-width: 700px) {
-  .site-header .app-owner-title {
+  .app-bar .app-owner-title {
     font-size: 24px;
   }
 }
@@ -955,11 +956,11 @@ h1 {
   background: var(--color-canvas, #ffffff);
   color: var(--color-text, #23291f);
 }
-.site-header {
+.app-bar {
   min-height: 72px;
   background: var(--color-canvas, #ffffff);
 }
-.site-nav a {
+.app-steps a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -970,12 +971,12 @@ h1 {
   border-bottom: 2px solid transparent;
   color: var(--color-text-body, #535e4b);
 }
-.site-nav a:hover {
+.app-steps a:hover {
   background: var(--color-surface-subtle, #e9ede3);
   color: var(--color-text, #23291f);
 }
-.site-nav a[aria-current='page'],
-.site-nav a[aria-current='page']:hover {
+.app-steps a[aria-current='page'],
+.app-steps a[aria-current='page']:hover {
   background: transparent;
   color: var(--color-text, #23291f);
   border-bottom-color: var(--color-accent, #965025);
@@ -991,7 +992,7 @@ h1 {
   font-weight: 600;
   line-height: 1;
 }
-.site-nav a[aria-current='page'] .step-num {
+.app-steps a[aria-current='page'] .step-num {
   border-color: var(--color-accent, #965025);
   color: var(--color-accent, #965025);
 }
@@ -1086,7 +1087,7 @@ main {
   .workspace h2#title {
     font-size: 21px;
   }
-  .site-nav a {
+  .app-steps a {
     padding: 0 4px;
     font-size: 12px;
     gap: 6px;

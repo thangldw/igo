@@ -26,7 +26,7 @@ setInterval(() => clock.tick(app.mode === 'game', app.ended), 1000);
 $('clock-limit').onchange = () => clock.reset();
 
 document
-  .querySelector('.site-nav a[data-nav="play"]')
+  .querySelector('.app-steps a[data-nav="play"]')
   ?.addEventListener('click', (/** @type {MouseEvent} */ event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
     event.preventDefault();
@@ -34,7 +34,7 @@ document
   });
 
 document
-  .querySelector('.site-nav a[data-nav="learn"]')
+  .querySelector('.app-steps a[data-nav="learn"]')
   ?.addEventListener('click', (/** @type {MouseEvent} */ event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.button || app.mode !== 'game')
       return;
